@@ -49,34 +49,10 @@ The use of IDL for FHD has also made it difficult to utilise FHD results in othe
 5. Gridding
 6. Generating the output continuum FITS images and HEALPIX files required for spectral imaging with $\epsilon$ppsilon
 
-PyFHD has also been developed with longevity in mind, ensuring existing an d future EoR astronomers have a great foundation to test new EoR theories, support additional instruments both existing (LWA, LOFAR, HERA, etc.) and upcoming (SKA, MWA Phase III). 
+PyFHD has also been developed with longevity in mind, ensuring existing and future EoR astronomers have a great foundation to test new EoR theories, support additional instruments both existing (LWA, LOFAR, HERA, etc.) and upcoming (SKA, MWA Phase III). 
 
 # Testing of the Translation
 
-
-
-# Citations
-
-<!-- Citations to entries in paper.bib should be in
-[rMarkdown](http://rmarkdown.rstudio.com/authoring_bibliographies_and_citations.html)
-format.
-
-If you want to cite a software repository URL (e.g. something on GitHub without a preferred
-citation) then you can do it with the example BibTeX entry below for @fidgit.
-
-For a quick reference, the following citation commands can be used:
-- `@author:2001`  ->  "Author et al. (2001)"
-- `[@author:2001]` -> "(Author et al., 2001)"
-- `[@author1:2001; @author2:2001]` -> "(Author1 et al., 2001; Author2 et al., 2002)"
-
-# Figures
-
-Figures can be included like this:
-![Caption for example figure.\label{fig:example}](figure.png)
-and referenced from text using \autoref{fig:example}.
-
-Figure sizes can be customized by adding an optional second parameter:
-![Caption for example figure.](figure.png){ width=20% } -->
 
 # Acknowledgements
 
