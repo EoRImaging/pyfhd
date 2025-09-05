@@ -207,6 +207,7 @@ def healpix_snapshot_cube_generate(
             healpix_pol_dict = {
                 "obs": split["obs"],
                 "hpx_inds": hpx_inds,
+                "nside": nside,
                 "n_avg": pyfhd_config["n_avg"],
                 "beam_squared_cube": beam_squared_cube,
                 "weights_cube": weights_cube,
