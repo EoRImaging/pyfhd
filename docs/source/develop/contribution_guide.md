@@ -124,7 +124,7 @@ The very first question you should ask yourself before making a new function is,
 
 Take the `histogram` function for example, are you wondering why we did a histogram function? 
 
-After all, `IDL's` histogram function can be done using a combination of `np.histogram` and the reverse indices can technically be done using many indexing functions available in NumPy as well. Well it turns out the NumPy functions like `np.histogram` suffer from a fatal flaw, they're awfully slow with large arrays, and this isn't necessarily their fault either, NumPy (rightly for their particular case) prioritised compatibility over raw speed. Other than speed, a function needed to be made to create the reverse indices part of `IDL's` histogram anyway as there is no `SciPy` or `NumPy` equivalent. As such it was decided to rewrite the histogram from scratch with speed as the priority given that `histogram` in `PyFHD` get's called hundreds, maybe hundreds of times.
+After all, `IDL's` histogram function can be done using a combination of `np.histogram` and the reverse indices can technically be done using many indexing functions available in NumPy as well. Well it turns out the NumPy functions like `np.histogram` suffer from a fatal flaw, they're awfully slow with large arrays, and this isn't necessarily their fault either, NumPy (rightly for their particular case) prioritised compatibility over raw speed. Other than speed, a function needed to be made to create the reverse indices part of `IDL's` histogram anyway as there is no `SciPy` or `NumPy` equivalent. As such it was decided to rewrite the histogram from scratch with speed as the priority given that `histogram` in `PyFHD` get's called hundreds, maybe thousands of times.
 
 To summarise, only make a new function if it hasn't been made before, or the ones that do exist do not meet your requirements. The requirements initally should not include anything in regards to the speed of the function unless you know before hand that the function is going to be called a lot or in a loop. 
 
@@ -570,6 +570,9 @@ In order to run these tests you need to do the following:
     Put the zip file in the following directory inside the repository (the directory given is relative to the root of the repository): `PyFHD/resources/test_data`
 
 2. Unzip the zip file in the previously mentioned `PyFHD/resources/test_data` directory.
+After unzipping, there will be a new folder named `pyfhd_test_data`. Move all
+the contents out of that folder up into the `PyFHD/resources/test_data` folder
+and delete the now empty `pyfhd_test_data` folder.
 
 3. In a terminal, at the root of the repository, run the following command:
 
