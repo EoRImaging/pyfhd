@@ -1,7 +1,6 @@
 name: pyfhd
 channels:
   - conda-forge
-  - defaults
 dependencies:
   - python
   - astropy
