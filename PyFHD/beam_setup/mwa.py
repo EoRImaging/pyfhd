@@ -57,10 +57,12 @@ def dipole_mutual_coupling(
         for di1 in range(n_dipole):
             for di2 in range(n_dipole):
                 z_mat_interp[:, pol_i, di1, di2] = np.interp(
-                    freq_arr_z_mat, freq_arr, z_mat_arr[:, pol_i, di1, di2]
+                    freq_arr, freq_arr_z_mat, z_mat_arr[:, pol_i, di1, di2]
                 )
 
-    zlna_arr = np.interp(z_lna_dict["z"], z_lna_dict["frequency"], freq_arr)
+    zlna_real = np.interp(freq_arr, z_lna_dict["frequency"], z_lna_dict["z"].real)
+    zlna_imag = np.interp(freq_arr, z_lna_dict["frequency"], z_lna_dict["z"].imag)
+    zlna_arr = zlna_real + 1j * zlna_imag
 
     for fi in range(freq_arr.size):
         z_lna = zlna_arr[fi] * np.identity(n_dipole)

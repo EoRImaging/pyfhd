@@ -117,7 +117,7 @@ def init_beam(obs: dict, pyfhd_config: dict, logger: Logger) -> dict:
         "beam_model_version": pyfhd_config["beam_model_version"],
         "freq": freq_center,
         "nfreq_bin": nfreq_bin,
-        "n_ant_elements": 0,
+        "n_ant_elements": n_dipoles,
         # Anything that was pointer arrays in IDL will be None until assigned in Python
         "jones": None,
         "coupling": coupling,
@@ -204,11 +204,17 @@ def init_beam(obs: dict, pyfhd_config: dict, logger: Logger) -> dict:
         location.height.value,
         jdate_use,
     )
-    zenith_angle_arr = np.full([psf["image_dim"], psf["image_dim"]], 90)
-    zenith_angle_arr[valid_i] = 90 - alt_arr.value
-    # Initialize the azimuth angle array in degrees
-    azimuth_arr = np.zeros([psf["image_dim"], psf["image_dim"]])
-    azimuth_arr[valid_i] = az_arr.value
+
+    # Only keep the pixels that are above the horizon to save memory
+    # Convert to radians for pyuvdata functions
+    zenith_angle_arr = np.deg2rad(90 - alt_arr)
+    azimuth_arr = np.deg2rad(az_arr)
+
+    # Store pixel indices above the horizon
+    antenna["pix_use"] = np.ravel_multi_index(
+        valid_i, (psf["image_dim"], psf["image_dim"])
+    )
+
     # Save some memory by deleting the unused arrays
     del ra_arr, dec_arr, alt_arr, az_arr
 
@@ -229,12 +235,14 @@ def init_beam(obs: dict, pyfhd_config: dict, logger: Logger) -> dict:
         # Do an analytic beam as a placeholder
         beam = ShortDipoleBeam()
 
+    print(zenith_angle_arr.shape)
+
     # Get the jones matrix for the antenna
     antenna["jones"] = general_jones_matrix(
         beam,
-        za_array=zenith_angle_arr,
-        az_array=azimuth_arr,
-        freq_array=frequency_array,
+        za_array=zenith_angle_arr.flatten(),
+        az_array=azimuth_arr.flatten(),
+        freq_array=freq_center,
         telescope_location=location,
     )
 
@@ -388,6 +396,29 @@ def general_jones_matrix(
     else:
         interpol_fn = None
 
+    print(noe_az_array.size, za_array.size, freq_array.size)
+
+    # chunk_size = 10000  # or whatever fits in memory
+    # n_pix = noe_az_array.size
+    # responses = []
+    # for start in range(0, n_pix, chunk_size):
+    #     end = min(start + chunk_size, n_pix)
+    #     resp = beam.compute_response(
+    #         az_array=az_array[start:end],
+    #         za_array=za_array[start:end],
+    #         freq_array=freq_array,
+    #         interpolation_function=interpol_fn,
+    #         spline_opts=spline_opts,
+    #         check_azza_domain=check_azza_domain,
+    #     )
+    #     responses.append(resp)
+    # # Concatenate results if needed
+    # full_response = np.concatenate(responses, axis=-1)
+
+    # return full_response
+
+    print(za_array)
+
     return beam.compute_response(
         az_array=noe_az_array,
         za_array=za_array,
@@ -442,13 +473,9 @@ def general_antenna_response(
     )
 
     # Calculate projections only at locations of non-zero pixels
-    proj_east_use = np.sin(za_arr[antenna["pix_use"]]) * np.sin(
-        az_arr[antenna["pix_use"]]
-    )
-    proj_north_use = np.sin(za_arr[antenna["pix_use"]]) * np.cos(
-        az_arr[antenna["pix_use"]]
-    )
-    proj_z_use = np.cos(za_arr[antenna["pix_use"]])
+    proj_east_use = np.sin(za_arr) * np.sin(az_arr)
+    proj_north_use = np.sin(za_arr) * np.cos(az_arr)
+    proj_z_use = np.cos(za_arr)
 
     # FHD assumes you might be dealing with more than one antenna, hence the groupings it used.
     # PyFHD currently only supports one antenna, so we can ignore the groupings.
@@ -466,15 +493,16 @@ def general_antenna_response(
                 1j
                 * 2
                 * np.pi
-                * antenna["delays"]
+                * antenna["delays"][pol_i, :]
                 * antenna["freq"][freq_i]
                 * antenna["gain"][pol_i, freq_i]
             )
             # TODO: Check if it's actually outer, although it does look like voltage_delay is likely 1D
-            measured_current = np.outer(
-                voltage_delay, antenna["coupling"][pol_i, freq_i]
-            )
-            zenith_norm = np.outer(
+            # measured_current = np.outer(
+            #     voltage_delay, antenna["coupling"][pol_i, freq_i]
+            # )
+            measured_current = np.dot(voltage_delay, antenna["coupling"][pol_i, freq_i])
+            zenith_norm = np.dot(
                 np.ones(antenna["n_ant_elements"]),
                 antenna["coupling"][pol_i, freq_i],
             )

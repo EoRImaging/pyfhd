@@ -68,7 +68,7 @@ def create_psf(obs: dict, pyfhd_config: dict, logger: Logger) -> dict | File:
             dtype=np.complex128,
         )
         xvals_i, yvals_i = np.meshgrid(
-            np.arange(psf["resolution"]), np.arange(psf["resolution"]), indexing="ij"
+            np.arange(psf["dim"]), np.arange(psf["dim"]), indexing="ij"
         )
         xvals_i *= psf["resolution"]
         yvals_i *= psf["resolution"]
@@ -116,8 +116,8 @@ def create_psf(obs: dict, pyfhd_config: dict, logger: Logger) -> dict | File:
         freq_center = antenna["freq"][0]
         primary_beam_area = np.zeros([obs["n_pol"], obs["n_freq"]], dtype=np.float64)
         primary_beam_sq_area = np.zeros([obs["n_pol"], obs["n_freq"]], dtype=np.float64)
-        ant_a_list = obs["baseline_info"]["tile_A"][0 : obs["n_baselines"]]
-        ant_b_list = obs["baseline_info"]["tile_B"][0 : obs["n_baselines"]]
+        ant_a_list = obs["baseline_info"]["tile_a"][0 : obs["n_baselines"]]
+        ant_b_list = obs["baseline_info"]["tile_b"][0 : obs["n_baselines"]]
         baseline_mod = np.max(
             [
                 2
@@ -149,9 +149,12 @@ def create_psf(obs: dict, pyfhd_config: dict, logger: Logger) -> dict | File:
             hgroup2, _, gri2 = histogram(group2, min=0)
             # Histogram matrix between all separate groups of different beams
             group_matrix = np.outer(hgroup2, hgroup1)
+            # TODO: actually put in group loop and functionality
+
             for freq_i in range(n_freq_bin):
                 beam_int = 0
                 beam_int_2 = 0
+                n_grp_use = 0
                 baseline_group_n = group_matrix[0, 0]
                 # Get antenna indices which use this group's unique beam (probably all of them...)
                 ant_1_arr = gri1[gri1[0] : gri1[1]]
@@ -159,18 +162,19 @@ def create_psf(obs: dict, pyfhd_config: dict, logger: Logger) -> dict | File:
                 # Get the number of baselines in each group
                 ant_1_n = hgroup1[0]
                 ant_2_n = hgroup2[0]
-                bi_use = np.flatten(
-                    rebin(ant_1_arr + 1, (ant_1_n, ant_2_n)) * baseline_mod
-                    + rebin(ant_2_arr.T + 1, (ant_2_n, ant_1_n))
-                )
-                bi_use2 = np.flatten(
-                    rebin(ant_1_arr + 1, (ant_1_n, ant_2_n))
-                    + rebin(ant_2_arr.T + 1, (ant_2_n, ant_1_n)) * baseline_mod
-                )
-                bi_use = np.concatenate([bi_use, bi_use2])
+                bi_use = (
+                    rebin(ant_1_arr + 1, (ant_1_n, ant_2_n)).astype(int) * baseline_mod
+                    + rebin(ant_2_arr.T + 1, (ant_2_n, ant_1_n)).astype(int)
+                ).flatten()
+                bi_use2 = (
+                    rebin(ant_1_arr + 1, (ant_1_n, ant_2_n)).astype(int)
+                    + rebin(ant_2_arr.T + 1, (ant_2_n, ant_1_n)).astype(int)
+                    * baseline_mod
+                ).flatten()
+                bi_use = np.concatenate([bi_use, bi_use2]).astype(int)
                 if np.max(bi_use) > bi_max:
                     bi_use = bi_use[np.where(bi_use <= bi_max)]
-                bi_use_i = np.nonzero(bi_hist0[bi_use])
+                bi_use_i = np.nonzero(bi_hist0[bi_use])[0]
                 if bi_use_i.size > 0:
                     bi_use = bi_use[bi_use_i]
                 baseline_group_n = bi_use.size
@@ -201,34 +205,38 @@ def create_psf(obs: dict, pyfhd_config: dict, logger: Logger) -> dict | File:
                 )
                 n_grp_use += baseline_group_n
                 psf_single = np.zeros(
-                    [psf["resolution"] + 1, psf["resolution"] + 1],
-                    psf["dim"] ** 2,
+                    (psf["resolution"] + 1, psf["resolution"] + 1, psf["dim"] ** 2),
                     dtype=np.complex128,
                 )
 
                 for i in range(psf["resolution"]):
                     for j in range(psf["resolution"]):
-                        psf_single[psf["resolution"] - i, psf["resolution"] - j] = (
-                            psf_base_superres[xvals_i + i, yvals_i + j]
-                        )
+                        psf_single[
+                            psf["resolution"] - i - 1, psf["resolution"] - j - 1
+                        ] = psf_base_superres[xvals_i + i, yvals_i + j]
                 # TODO: check the rolling (shifting) and potential reshaping done here (should already be in)
                 for i in range(psf["resolution"]):
-                    psf_single[psf["resolution"] - i, psf["resolution"]] = np.roll(
-                        psf_base_superres[xvals_i + i, yvals_i + psf["resolution"]],
+                    psf_single[psf["resolution"] - i - 1, psf["resolution"]] = np.roll(
+                        psf_base_superres[
+                            xvals_i + i, yvals_i + psf["resolution"] - 1
+                        ].reshape(psf["dim"], psf["dim"]),
                         1,
                         0,
                     ).flatten()
                 for j in range(psf["resolution"]):
-                    psf_single[psf["resolution"], psf["resolution"] - j] = np.roll(
-                        psf_base_superres[xvals_i + psf["resolution"], yvals_i + j],
+                    psf_single[psf["resolution"], psf["resolution"] - j - 1] = np.roll(
+                        psf_base_superres[
+                            xvals_i + psf["resolution"] - 1, yvals_i + j
+                        ].reshape(psf["dim"], psf["dim"]),
                         1,
                         1,
                     ).flatten()
                 psf_single[psf["resolution"], psf["resolution"]] = np.roll(
                     np.roll(
                         psf_base_superres[
-                            xvals_i + psf["resolution"], yvals_i + psf["resolution"]
-                        ],
+                            xvals_i + psf["resolution"] - 1,
+                            yvals_i + psf["resolution"] - 1,
+                        ].reshape(psf["dim"], psf["dim"]),
                         1,
                         1,
                     ),
