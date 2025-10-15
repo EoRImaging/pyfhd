@@ -350,13 +350,13 @@ def beam_image_hyperresolved(
         + np.abs(antenna["jones"][1, ant_pol_2]) ** 2
     )
     # Amplitude of the baseline response is the product of the "two" antenna responses
-    power_zenith_beam = np.sqrt(amp_1 * amp_2)
+    power_zenith_beam = np.sqrt(amp_1 * amp_2).flatten()
 
     # Create one full-scale array
-    image_power_beam = np.zeros([psf["dim"], psf["dim"]], dtype=np.complex128)
+    image_power_beam = np.zeros([psf["image_dim"], psf["image_dim"]], dtype=np.complex128)
 
     # Co-opt the array to calculate the power at zenith
-    image_power_beam[antenna["pix_use"]] = power_zenith_beam
+    image_power_beam.flat[antenna["pix_use"]] = power_zenith_beam
     # TODO: Work out the interpolation of the zenith power, it uses cubic interpolation
     # But the IDL Interpolate function in IDL uses an interpolation paramter of -0.5, where
     # scipy, numpy with their B-Splines seem to use a parameter of 0 by default with no way
@@ -368,10 +368,19 @@ def beam_image_hyperresolved(
     # Initial trying out of using pyuvdata, not close at all. This is interpolating
     # the zenith power using the x and y pixel coordinates, to use pyuvdata likely need to do
     # pixel to ra/dec then to za/az
-    power_zenith = np.interp(zen_int_x, zen_int_y, image_power_beam)
+
+    # Use order=1 for bilinear interpolation (matches IDL parameter -0.5)
+    # mode='nearest' handles out-of-bounds by using nearest edge values
+    # Interpolate real part because power is defined as real-valued
+    power_zenith = map_coordinates(
+        image_power_beam.real, 
+        [[zen_int_x], [zen_int_y]], 
+        order=1,
+        mode='nearest'
+    )[0]
 
     # Normalize the image power beam to the zenith
-    image_power_beam[antenna["pix_use"]] = (
+    image_power_beam.flat[antenna["pix_use"]] = (
         power_zenith_beam * beam_ant_1 * beam_ant_2
     ) / power_zenith
 
@@ -437,9 +446,8 @@ def beam_power(
         zen_int_x,
         zen_int_y,
         psf,
-        pyfhd_config,
     )
-    if pyfhd_config["kernel_window"]:
+    if pyfhd_config.get("kernel_window", False):
         image_power_beam *= antenna["pix_window"]
     psf_base_single = np.fft.fftshift(np.fft.ifftn(np.fft.fftshift(image_power_beam)))
     # TODO: Same cubic problem as in beam_image_hyperresolved here
@@ -450,19 +458,17 @@ def beam_power(
     )
 
     # Build a mask to create a well-defined finite beam
-    uv_mask_superres = np.zeros(
-        [[psf_base_superres.shape[0], psf_base_superres.shape[1]]], dtype=np.float64
-    )
+    uv_mask_superres = np.zeros(psf_base_superres.shape, dtype=np.float64)
     psf_mask_threshold_use = (
         np.max(np.abs(psf_base_superres)) / pyfhd_config["beam_mask_threshold"]
     )
     beam_i = region_grow(
         np.abs(psf_base_superres),
-        psf["superres_dim"] * (1 + psf["superres_dim"]) / 2,
+        int(psf["superres_dim"] * (1 + psf["superres_dim"]) / 2),
         low=psf_mask_threshold_use,
         high=np.max(np.abs(psf_base_superres)),
     )
-    uv_mask_superres[beam_i] = 1
+    uv_mask_superres.flat[beam_i] = 1
 
     # FFT normalization correction in case this changes the total number of pixels
     psf_base_superres *= psf["intermediate_res"] ** 2
