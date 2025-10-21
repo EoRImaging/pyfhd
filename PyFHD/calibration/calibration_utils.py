@@ -49,7 +49,7 @@ def vis_extract_autocorr(
     if autocorr_i.size > 0:
         auto_tile_i = obs["baseline_info"]["tile_a"][autocorr_i] - 1
         # As auto_tile_i is used for indexing we need to make it an integer array
-        auto_tile_i = auto_tile_i.astype(np.integer)
+        auto_tile_i = auto_tile_i.astype(int)
         auto_tile_i_single = np.unique(auto_tile_i)
         # expect it as a list of 2D arrays, so there might be trouble
         if not pyfhd_config["cal_time_average"]:

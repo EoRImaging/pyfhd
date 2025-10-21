@@ -320,6 +320,6 @@ def create_psf(obs: dict, pyfhd_config: dict, logger: Logger) -> dict | File:
         sys.exit(1)
     raise ValueError(
         f"Unknown beam file type {pyfhd_config['beam_file_path'].suffix}. "
-        "Please use a .sav, .h5, .hdf5"
+        "Please use a .sav, .h5, .hdf5 "
         "If you meant for PyFHD to do the beam forming, please set the beam_file_path to None (~ in YAML)."
     )
