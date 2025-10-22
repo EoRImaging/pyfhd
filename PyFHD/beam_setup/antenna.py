@@ -6,10 +6,8 @@ from astropy.constants import c
 from astropy.coordinates import SkyCoord, EarthLocation
 from astropy import units
 from scipy.interpolate import interp1d
-from PyFHD.beam_setup.mwa import dipole_mutual_coupling
 from PyFHD.pyfhd_tools.unit_conv import pixel_to_radec, radec_to_altaz
 from pyuvdata import ShortDipoleBeam, BeamInterface, UVBeam
-from pyuvdata.telescopes import known_telescope_location
 from pyuvdata.analytic_beam import AnalyticBeam
 from typing import Literal
 from astropy.time import Time
@@ -91,18 +89,10 @@ def init_beam(obs: dict, pyfhd_config: dict, logger: Logger) -> dict:
         coords = np.array([xc_arr, yc_arr, zc_arr])
         # Get the delays
         delays = obs["delays"] * 4.35e-10
-        if pyfhd_config["dipole_mutual_coupling_factor"]:
-            coupling = dipole_mutual_coupling(freq_center)
-        else:
-            coupling = np.tile(
-                np.identity(n_dipoles), (n_ant_pol, freq_center.size, 1, 1)
-            )
-
     else:
         n_dipoles = 1
         coords = np.zeros((3, n_dipoles))
         delays = np.zeros(n_dipoles)
-        coupling = np.tile(np.identity(n_dipoles), (n_ant_pol, freq_center.size, 1, 1))
 
     # Create basic antenna dictionary
     antenna = {
@@ -120,11 +110,11 @@ def init_beam(obs: dict, pyfhd_config: dict, logger: Logger) -> dict:
         "n_ant_elements": n_dipoles,
         # Anything that was pointer arrays in IDL will be None until assigned in Python
         "jones": None,
-        "coupling": coupling,
         "gain": np.ones([n_ant_pol, freq_center.size, n_dipoles], dtype=np.float64),
         "coords": coords,
         "delays": delays,
-        "response": None,
+        "iresponse": None,
+        "projection": None,
         # PyFHD supports one instrument at a time, so we setup the group so they're all in the same group.
         "group_id": np.zeros([n_ant_pol, obs["n_tile"]], dtype=np.int8),
         "pix_window": None,
@@ -238,21 +228,17 @@ def init_beam(obs: dict, pyfhd_config: dict, logger: Logger) -> dict:
     print(zenith_angle_arr.shape)
 
     # Get the jones matrix for the antenna
-    antenna["jones"] = general_jones_matrix(
+    # shape is: (number of vector directions (usually 2), number of feeds (usually 2),
+    # number of frequencies, number of directions on the sky)
+    antenna["iresponse"], antenna["projection"] = general_jones_matrix(
         beam,
         za_array=zenith_angle_arr.flatten(),
         az_array=azimuth_arr.flatten(),
         freq_array=freq_center,
         telescope_location=location,
     )
-
-    # Get the antenna response
-    antenna["response"] = general_antenna_response(
-        obs,
-        antenna,
-        za_arr=zenith_angle_arr,
-        az_arr=azimuth_arr,
-    )
+    # remove the initial shallow dimension in iresponse
+    antenna["iresponse"] = antenna["iresponse"][0]
 
     return antenna, psf, beam
 
@@ -284,7 +270,7 @@ def general_jones_matrix(
     Parameters
     ----------
     beam_obj : UVBeam or AnalyticBeam or BeamInterface
-        A pyuvdata beam, can be a UVBeam, and AnalyticBeam subclass, or a
+        A pyuvdata beam, can be a UVBeam, an AnalyticBeam subclass, or a
         BeamInterface object.
     alt_array : np.ndarray[float]
         Array of altitudes (also called elevations) in radians. Must be a 1D array.
@@ -352,9 +338,6 @@ def general_jones_matrix(
             f"It was {az_convention}."
         )
 
-    # FHD requires an Efield beam, so set it here to be explicit
-    beam = BeamInterface(beam_obj, beam_type="efield")
-
     if ra_dec_in:
         if ra_array.shape != dec_array.shape:
             raise ValueError("ra_array and dec_array must have the same shape")
@@ -390,130 +373,28 @@ def general_jones_matrix(
     where_neg_az = np.nonzero(noe_az_array < 0)
     noe_az_array[where_neg_az] = noe_az_array[where_neg_az] + np.pi * 2.0
 
-    # use the faster interpolation method if appropriate
-    if beam._isuvbeam and beam.beam.pixel_coordinate_system == "az_za":
-        interpol_fn = "az_za_map_coordinates"
+    if isinstance(beam_obj, UVBeam):
+        f_obj, k_obj = beam_obj.decompose_feed_iresponse_projection()
+        f_beam = BeamInterface(f_obj)
+        k_beam = BeamInterface(k_obj)
     else:
-        interpol_fn = None
+        f_beam = BeamInterface(beam_obj, beam_type="feed_iresponse")
+        k_beam = BeamInterface(beam_obj, beam_type="feed_projection")
 
-    print(noe_az_array.size, za_array.size, freq_array.size)
-
-    # chunk_size = 10000  # or whatever fits in memory
-    # n_pix = noe_az_array.size
-    # responses = []
-    # for start in range(0, n_pix, chunk_size):
-    #     end = min(start + chunk_size, n_pix)
-    #     resp = beam.compute_response(
-    #         az_array=az_array[start:end],
-    #         za_array=za_array[start:end],
-    #         freq_array=freq_array,
-    #         interpolation_function=interpol_fn,
-    #         spline_opts=spline_opts,
-    #         check_azza_domain=check_azza_domain,
-    #     )
-    #     responses.append(resp)
-    # # Concatenate results if needed
-    # full_response = np.concatenate(responses, axis=-1)
-
-    # return full_response
-
-    print(za_array)
-
-    return beam.compute_response(
+    f_vals = f_beam.compute_response(
         az_array=noe_az_array,
         za_array=za_array,
         freq_array=freq_array,
-        interpolation_function=interpol_fn,
         spline_opts=spline_opts,
         check_azza_domain=check_azza_domain,
     )
 
-
-def general_antenna_response(
-    obs: dict,
-    antenna: dict,
-    za_arr: NDArray[np.floating],
-    az_arr: NDArray[np.floating],
-) -> NDArray[np.complexfloating]:
-    """
-    Calculate the response of a set of antennas for a given observation and antenna configuration,
-    including the electrical delays and coupling.
-
-    Parameters
-    ----------
-    obs : dict
-        Observation metadata dictionary
-    antenna : dict
-        Antenna metadata dictionary
-    za_arr : NDArray[np.floating]
-        Zenith angle array in radians
-    az_arr : NDArray[np.floating]
-        Azimuth angle array in radians
-
-    Returns
-    -------
-    response
-        The unpolarised response of a set of antennas
-    """
-    light_speed = c.value
-
-    """
-        Given that in FHD the antenna response is a pointer array of shape (antenna["n_pol", obs["n_tile"])
-        where each pointer is an array of pointers of shape (antenna["n_freq_bin"]). Each pointer in the array
-        of shape (antenna["n_freq_bin"]) points to a complex array of shape (antenna["pix_use"].size,).
-
-        Furthermore, when the antenna response is calculated, it looks like this is done on a per frequency bin
-        basis and each tile will point to the same antenna response for that frequency bin. This means we can ignore
-        the tile dimension and just calculate the antenna response for each frequency bin and polarization to save
-        memory in Python.
-    """
-    response = np.zeros(
-        [antenna["n_pol"], antenna["nfreq_bin"], antenna["pix_use"].size],
-        dtype=np.complex128,
+    k_vals = k_beam.compute_response(
+        az_array=noe_az_array,
+        za_array=za_array,
+        freq_array=freq_array,
+        spline_opts=spline_opts,
+        check_azza_domain=check_azza_domain,
     )
 
-    # Calculate projections only at locations of non-zero pixels
-    proj_east_use = np.sin(za_arr) * np.sin(az_arr)
-    proj_north_use = np.sin(za_arr) * np.cos(az_arr)
-    proj_z_use = np.cos(za_arr)
-
-    # FHD assumes you might be dealing with more than one antenna, hence the groupings it used.
-    # PyFHD currently only supports one antenna, so we can ignore the groupings.
-    for pol_i in range(antenna["n_pol"]):
-        # Phase of each dipole for the source (relative to the beamformer settings)
-        D_d = (
-            np.outer(antenna["coords"][0], proj_east_use)
-            + np.outer(antenna["coords"][1], proj_north_use)
-            + np.outer(antenna["coords"][2], proj_z_use)
-        )
-
-        for freq_i in range(antenna["nfreq_bin"]):
-            Kconv = 2 * np.pi * antenna["freq"][freq_i] / light_speed
-            voltage_delay = np.exp(
-                1j
-                * 2
-                * np.pi
-                * antenna["delays"][pol_i, :]
-                * antenna["freq"][freq_i]
-                * antenna["gain"][pol_i, freq_i]
-            )
-            # TODO: Check if it's actually outer, although it does look like voltage_delay is likely 1D
-            # measured_current = np.outer(
-            #     voltage_delay, antenna["coupling"][pol_i, freq_i]
-            # )
-            measured_current = np.dot(voltage_delay, antenna["coupling"][pol_i, freq_i])
-            zenith_norm = np.dot(
-                np.ones(antenna["n_ant_elements"]),
-                antenna["coupling"][pol_i, freq_i],
-            )
-            measured_current /= zenith_norm
-
-            # TODO: This loop can probably be vectorized
-            for ii in range(antenna["n_ant_elements"]):
-                # TODO: check the way D_d needs to be indexed
-                antenna_gain_arr = np.exp(-1j * Kconv * D_d[ii, :])
-                response[pol_i, freq_i] += (
-                    antenna_gain_arr * measured_current[ii] / antenna["n_ant_elements"]
-                )
-
-    return response
+    return f_vals, k_vals

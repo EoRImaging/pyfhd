@@ -567,12 +567,6 @@ def pyfhd_parser():
         help="Set to true if the beams were made with corrective phases given the baseline location, which then enables the gridding to be done per baseline",
     )
     beam.add_argument(
-        "--dipole-mutual-coupling-factor",
-        default=False,
-        action=OrderedBooleanOptionalAction,
-        help="Allows a modification to the beam as a result of mutual coupling between dipoles calculated in mwa_dipole_mutual_coupling (See Sutinjo 2015 for more details).",
-    )
-    beam.add_argument(
         "--beam-offset-time",
         type=float,
         default=56,
@@ -1288,17 +1282,6 @@ def pyfhd_setup(options: argparse.Namespace) -> Tuple[dict, logging.Logger]:
 
     if pyfhd_config["beam_file_path"] is None:
         logger.info("No beam file was set, PyFHD will calculate the beam.")
-
-    if (
-        pyfhd_config["instrument"] == "mwa"
-        and pyfhd_config["beam_file_path"] is None
-        and not pyfhd_config["dipole_mutual_coupling_factor"]
-    ):
-        logger.warning(
-            "Since the instrument is MWA and we're calculating the beam, it's recommended to set the dipole mutual coupling factor to True."
-        )
-        pyfhd_config["dipole_mutual_coupling_factor"] = True
-        warnings += 1
 
     # cal_bp_transfer when enabled should point to a file with a saved bandpass (Error)
     errors += _check_file_exists(pyfhd_config, "cal_bp_transfer")

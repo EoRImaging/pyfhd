@@ -47,10 +47,8 @@ def create_psf(obs: dict, pyfhd_config: dict, logger: Logger) -> dict | File:
     """
 
     if pyfhd_config["beam_file_path"] is None:
-        # Form the beam from scratch using pyuvdata for the Jones Matrix
-        # and translations from FHD for the antenna response.
         logger.info(
-            "PyFHD will do the beam forming from scratch using pyuvdata and the antenna response from FHD."
+            "PyFHD is using pyuvdata to set up the beam. "
             "Please note, gaussian decomp for MWA is not implemented yet."
         )
         antenna, psf, beam = init_beam(obs, pyfhd_config, logger)

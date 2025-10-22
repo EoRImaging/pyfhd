@@ -31,7 +31,6 @@ lazy-load-beam: false
 recalculate-beam : true
 beam-clip-floor : true
 interpolate-kernel : true
-dipole-mutual-coupling-factor : true
 beam-nfreq-avg : 16
 psf-dim: 54
 psf-resolution : 100

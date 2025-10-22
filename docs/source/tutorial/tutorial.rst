@@ -871,7 +871,6 @@ the beam is inside the ``beams`` directory (not that we need it for this run, as
     recalculate-beam : true
     beam-clip-floor : true
     interpolate-kernel : true
-    dipole-mutual-coupling-factor : true
     beam-nfreq-avg : 16
     psf-dim: 54
     psf-resolution : 100
@@ -1691,13 +1690,14 @@ The most important options are the ``save-healpix-fits`` and the ``snapshot-heal
 
 Beam Setup
 ++++++++++
-The beam setup in ``PyFHD`` has been translated from `FHD`_ and is a combination of using `pyuvdata`_ and translation from `FHD`_, it is by no means tested and is definitely a work in progress.
-More specifically, the ``beam_setup`` uses `pyuvdata`_ to create the ``Jones`` matrix for the beam, and then ``FHD`` translation is used to create the main response and the representation of the beam
-in UV space. For the moment, PyFHD only supports using one beam per observation and does not currently support different beams for different antennas. Furthermore, mode advanced features like gaussian decomp and
-many of the debugging options are not implemented, as such there are plenty of opportunities to add to the ``beam_setup``, both in small and large pieces of code.
+The beam setup in ``PyFHD`` uses the ``UVBeam`` object from `pyuvdata`_ to get the ``Jones`` matrix and it's decomposition for the beam, and then ``FHD`` translation is used to create the representation of the beam
+in UV space. For the moment, PyFHD only supports using one beam per observation and does not currently support different beams for different antennas. Furthermore, more advanced features like gaussian decomp and
+many of the debugging options are not implemented, so there are plenty of opportunities to add to the ``beam_setup``, both in small and large pieces of code.
 
-You can see test out the beam_setup by setting the ``beam-file-path`` to ``None`` (~ in the yaml configuration file) and setting the ``recalculate-beam`` option to ``True``. You'll likely run into
-memory limitations with your machine during testing. The ``beam_setup`` branch has been purposely left there ready for you to directly contribute code to it.
+You can test out the beam_setup by saving the MWA beam file (``mwa_full_embedded_element_pattern.h5``, downloaded from ``http://ws.mwatelescope.org/static/mwa_full_embedded_element_pattern.h5``)
+to the ``PyFHD/PyFHD/resources/instrument_config/`` folder and setting the ``beam-file-path`` to ``~`` in the yaml configuration file (translates to ``None`` in python) and setting the
+``recalculate-beam`` option to ``True``. You may run into memory limitations with your machine during testing, you can decrease memory use by setting ``beam-nfreq-avg`` to larger values
+(as high as the number of frequencies in your input file).
 
 Deconvolution
 ++++++++++++++
