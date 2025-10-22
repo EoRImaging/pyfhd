@@ -1557,6 +1557,10 @@ def vis_baseline_hist(
                 wh_noflag = np.where(np.abs(model_vals) > 0)[0]
                 if wh_noflag.size > 0:
                     inds = inds[wh_noflag]
+                    # inds changed so we need to update model_vals
+                    # otherwise it has a different shape than vis_cal_use below
+                    # causing errors
+                    model_vals = (vis_model_arr[pol_i]).flatten()[inds]
                 else:
                     continue
                 # if Keyword_Set(calibration_visibilities_subtract) THEN BEGIN
