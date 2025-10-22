@@ -144,6 +144,45 @@ def main():
             )
             pyfhd_config["checkpoint_dir"].mkdir(exist_ok=True)
 
+            obs_checkpoint_file = Path(
+                pyfhd_config["checkpoint_dir"],
+                f"{checkpoint_name}_obs_checkpoint.h5",
+            )
+            if (
+                pyfhd_config["obs_checkpoint"] is not None
+                and not obs_checkpoint_file.exists()
+            ):
+                logger.warning(
+                    "obs_checkpoint is set but obs checkpoint file does not exist. Recalculating obs."
+                )
+                pyfhd_config["obs_checkpoint"] = None
+
+            cal_checkpoint_file = Path(
+                pyfhd_config["checkpoint_dir"],
+                f"{checkpoint_name}_calibrate_checkpoint.h5",
+            )
+            if (
+                pyfhd_config["calibrate_checkpoint"] is not None
+                and not cal_checkpoint_file.exists()
+            ):
+                logger.warning(
+                    "calibrate_checkpoint is set but cal checkpoint file does not exist. Recalculating cal."
+                )
+                pyfhd_config["calibrate_checkpoint"] = None
+
+            grid_checkpoint_file = Path(
+                pyfhd_config["checkpoint_dir"],
+                f"{checkpoint_name}_gridding_checkpoint.h5",
+            )
+            if (
+                pyfhd_config["gridding_checkpoint"] is not None
+                and not grid_checkpoint_file.exists()
+            ):
+                logger.warning(
+                    "gridding_checkpoint is set but grid checkpoint file does not exist. Recalculating grid."
+                )
+                pyfhd_config["gridding_checkpoint"] = None
+
         if (
             pyfhd_config["obs_checkpoint"] is None
             and pyfhd_config["calibrate_checkpoint"] is None
@@ -217,10 +256,7 @@ def main():
                     "vis_weights": vis_weights,
                 }
                 save(
-                    Path(
-                        pyfhd_config["checkpoint_dir"],
-                        f"{checkpoint_name}_obs_checkpoint.h5",
-                    ),
+                    obs_checkpoint_file,
                     checkpoint,
                     "obs_checkpoint",
                     logger=logger,
@@ -231,11 +267,8 @@ def main():
                 )
         else:
             # Load the checkpoint and initialize the required variables
-            if (
-                pyfhd_config["obs_checkpoint"]
-                and Path(pyfhd_config["obs_checkpoint"]).exists()
-            ):
-                obs_checkpoint = load(pyfhd_config["obs_checkpoint"], logger=logger)
+            if pyfhd_config["obs_checkpoint"]:
+                obs_checkpoint = load(obs_checkpoint_file, logger=logger)
                 obs = obs_checkpoint["obs"]
                 params = obs_checkpoint["params"]
                 vis_arr = obs_checkpoint["vis_arr"]
@@ -251,7 +284,7 @@ def main():
             pyfhd_config["calibrate_checkpoint"] is not None
             and Path(pyfhd_config["calibrate_checkpoint"]).exists()
         ):
-            cal_checkpoint = load(pyfhd_config["calibrate_checkpoint"], logger=logger)
+            cal_checkpoint = load(cal_checkpoint_file, logger=logger)
             obs = cal_checkpoint["obs"]
             params = cal_checkpoint["params"]
             vis_arr = cal_checkpoint["vis_arr"]
@@ -394,10 +427,7 @@ def main():
                         "cal": cal,
                     }
                     save(
-                        Path(
-                            pyfhd_config["checkpoint_dir"],
-                            f"{checkpoint_name}_calibrate_checkpoint.h5",
-                        ),
+                        cal_checkpoint_file,
                         checkpoint,
                         "calibrate_checkpoint",
                         logger=logger,
@@ -557,10 +587,7 @@ def main():
                 if vis_model_arr is not None:
                     checkpoint["model_uv"] = model_uv
                 save(
-                    Path(
-                        pyfhd_config["checkpoint_dir"],
-                        f"{checkpoint_name}_gridding_checkpoint.h5",
-                    ),
+                    grid_checkpoint_file,
                     checkpoint,
                     "gridding_checkpoint",
                     logger=logger,
@@ -573,9 +600,7 @@ def main():
             _print_time_diff(grid_start, grid_end, "Visibilities gridded", logger)
         else:
             if pyfhd_config["gridding_checkpoint"]:
-                grid_checkpoint = load(
-                    pyfhd_config["gridding_checkpoint"], logger=logger
-                )
+                grid_checkpoint = load(grid_checkpoint_file, logger=logger)
                 image_uv = grid_checkpoint["image_uv"]
                 weights_uv = grid_checkpoint["weights_uv"]
                 variance_uv = grid_checkpoint["variance_uv"]
