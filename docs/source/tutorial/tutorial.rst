@@ -1391,7 +1391,7 @@ are not complete (for example the model doesn't also create the params file), bu
     dim = H5D_READ(dim)
     fbin_i = H5D_OPEN(file_id, "fbin_i")
     fbin_i = H5D_READ(fbin_i)
-    fnorm = H5D_OPEN(file_id, "fnorm")
+    fnorm = H5D_OPEN(file_id, "freq_norm")
     fnorm = H5D_READ(fnorm)
     freq = H5D_OPEN(file_id, "freq")
     freq = H5D_READ(freq)
