@@ -494,7 +494,7 @@ def main():
             pyfhd_successful = True
             sys.exit(0)
 
-        if (
+        if "image_info" not in psf or (
             psf["image_info"]["image_power_beam_arr"] is not None
             and psf["image_info"]["image_power_beam_arr"].shape == 1
         ):
