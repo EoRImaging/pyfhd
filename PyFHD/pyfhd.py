@@ -282,7 +282,7 @@ def main():
         # to get the observation metadata and visibility parameters
         if (
             pyfhd_config["calibrate_checkpoint"] is not None
-            and Path(pyfhd_config["calibrate_checkpoint"]).exists()
+            and cal_checkpoint_file.exists()
         ):
             cal_checkpoint = load(cal_checkpoint_file, logger=logger)
             obs = cal_checkpoint["obs"]
@@ -305,7 +305,10 @@ def main():
         )
 
         # Check if the calibrate checkpoint has been used, if not run the calibration steps
-        if pyfhd_config["calibrate_checkpoint"] is None:
+        if (
+            pyfhd_config["calibrate_checkpoint"] is None
+            or not cal_checkpoint_file.exists()
+        ):
             if pyfhd_config["deproject_w_term"] is not None:
                 w_term_start = time.time()
                 vis_arr = simple_deproject_w_term(
@@ -501,7 +504,8 @@ def main():
 
         if (
             pyfhd_config["recalculate_grid"]
-            and pyfhd_config["gridding_checkpoint"] is None
+            or pyfhd_config["gridding_checkpoint"] is None
+            or not grid_checkpoint_file.exists()
         ):
             grid_start = time.time()
             image_uv = np.empty(
@@ -565,6 +569,8 @@ def main():
                 if vis_model_arr is not None:
                     model_uv = crosspol_reformat(model_uv)
             if pyfhd_config["gridding_plots"]:
+                # TODO: move this after the checkpointing so an error in plotting
+                # doesn't require rerunning gridding.
                 logger.info(
                     f"Plotting the continuum gridding outputs into {pyfhd_config['output_dir']/'plots'/'gridding'}"
                 )
