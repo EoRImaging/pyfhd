@@ -176,7 +176,7 @@ def quick_image(
         count_missing = len(wh_missing[0])
         if count_missing > 0:
             image[wh_missing] = np.nan
-            missing_color = 0
+        missing_color = 0
     else:
         count_missing = 0
         wh_missing = None
