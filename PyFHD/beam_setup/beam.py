@@ -103,12 +103,12 @@ def create_psf(obs: dict, pyfhd_config: dict, logger: Logger) -> dict | File:
         xvals_uv_superres = (
             xvals_uv_superres * res_super
             - np.floor(psf["dim"] / 2) * psf["intermediate_res"]
-            + np.floor(psf["dim"] / 2)
+            + np.floor(psf["image_dim"] / 2)
         )
         yvals_uv_superres = (
             yvals_uv_superres * res_super
             - np.floor(psf["dim"] / 2) * psf["intermediate_res"]
-            + np.floor(psf["dim"] / 2)
+            + np.floor(psf["image_dim"] / 2)
         )
 
         freq_center = antenna["freq"][0]
