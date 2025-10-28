@@ -9,11 +9,11 @@
 Tutorial
 =========
 
-First make sure you have installed ``PyFHD`` following the instructions in the :doc:`Installation Guide <../installation/installation>`.
+First, make sure you have installed ``PyFHD`` by following the instructions in the :doc:`Installation Guide <../installation/installation>`.
 
 Let's start with getting you off the ground and running using the sample data built into ``PyFHD``. 
-The example data is a small subset of the observation ``1088285600`` with a beam that uses only one frequency, 
-and a skymodel created using `WODEN`_. To run ``PyFHD`` we will use the command line interface (CLI) that has been
+The sample data is a small subset of the observation ``1088285600`` with a beam that uses only one frequency, 
+and a skymodel created using `WODEN`_. To run ``PyFHD``, we will use the command-line interface (CLI) that has been
 built to run ``PyFHD``.
 
 .. _sample-data:
@@ -21,24 +21,24 @@ built to run ``PyFHD``.
 Sample Data
 -----------
 
-To run the example data, you'll need to get the sample data first, to do this run:
+To run the sample data, you'll need to get it first. To do this, run:
 
 .. code-block:: bash
 
   pyfhd --get-sample-data 1088285600
 
-Which will copy the sample data built into the PyFHD package to your current working directory, inside a directory and sub-directory called ``input/1088285600_example``.
+This will copy the sample data built into the PyFHD package to your current working directory, inside a directory and sub-directory called ``input/1088285600_example``.
 
 Running the sample data
 -----------------------
 
-From there in that directory, you should be able to run the following command to run the example data:
+From inside this directory, you should be able to run the following command to run the sample data:
 
 .. code-block:: bash
 
   pyfhd -c ./input/1088285600_example/1088285600_example.yaml 1088285600
 
-The command on most machines takes 1-2 minutes to run, and the output is stored in the ``output`` directory. 
+On most machines, the command takes 1-2 minutes to run. The output is stored in the ``output`` directory. 
 
 This will run the entire PyFHD pipeline in this order: 
 
@@ -48,7 +48,7 @@ This will run the entire PyFHD pipeline in this order:
 
 3. Creating the observation metadata dictionary (and other metadata dictionaries)
 
-4. Import the beam
+4. Importing the beam
 
 5. Importing the skymodel
 
@@ -64,7 +64,7 @@ This will run the entire PyFHD pipeline in this order:
 
 11. Finishing the run and cleaning up
 
-If the command runs successfully you should get a log to your terminal (stdout) that looks something like this:
+If the command runs successfully, you should get a log to your terminal (stdout) that looks something like this:
 
 .. raw:: html
 
@@ -487,33 +487,35 @@ Take note of the line:
 More details about the output of the PyFHD pipeline and the required inputs is clarified in the next section. 
 
 .. important::
+
   The configuration used for the sample is very different to a full MWA run due to limited use of frequencies and times used in the sample data
-  to keep it small. For a better template to base your configuration on go to :ref:`_pyfhd-config-file`.
+  to keep it small. For a better template to base your configuration on, go to :ref:`_pyfhd-config-file`.
 
 The Required Inputs and the outputs of ``PyFHD``
 ----------------------------------------------------------
 
 ``PyFHD`` only requires an observation ID to run.
-``PyFHD`` will get a default ``pyfhd.yaml`` configuration file from it's resources directory inside the package, so when specifying only
+``PyFHD`` will get a default ``pyfhd.yaml`` configuration file from its resources directory inside the package, so when specifying only
 the observation ID, it will use the default configuration file. The default configuration is not suitable for every observation, so it's
 likely you'll need to adjust the default configuration file to suit your needs. Some validation is performed before and during runtime of 
-``PyFHD`` to check for incompatibilities though it is not exhaustive.
+``PyFHD`` to check for incompatibilities, though it is not exhaustive.
 
 .. _pyfhd-config-file:
 
 .. note::
+
   If you wish to use the default configuration file to do your own configurations, from inside the repository, you can find the configuration file
   in the resources directory of PyFHD, ``PyFHD/PyFHD/resources/config/pyfhd.yaml``. You can also find the default configuration file at this link here:
 
   `pyfhd.yaml <https://raw.githubusercontent.com/EoRImaging/PyFHD/refs/heads/main/PyFHD/resources/config/pyfhd.yaml>`_
 
-Some files can be discovered automatically through the ``input-path`` option of ``PyFHD`` so read through the usage help text to work 
+Some files can be discovered automatically through the ``input-path`` option of ``PyFHD``, so read through the usage help text to work 
 out how you wish to configure your input. ``PyFHD`` is rather flexible on how you do your input
 as many of the files you may require can be in completely separate directories.
 
 The output of ``PyFHD`` is automatically generated and stores everything in one directory with the name ``pyfhd_YYYY_MM_DD_HH_mm_ss`` if you don't use the ``--description`` option.
-In the case of using the ``--description`` option then the output directory generated will be ``pyfhd_your_description_here``. The example run we used above uses the ``--description`` as ``'1088285600_example'``
-option so the output directory generated will be ``pyfhd_1088285600_example``. The path where the output directory will be generated is ``--output-path`` (by default ``./output``), assuming you're looking at the example run above,
+In the case of using the ``--description`` option, then the output directory generated will be ``pyfhd_your_description_here``. The example run we used above uses the ``--description`` option as ``'1088285600_example'``, 
+so the output directory generated will be ``pyfhd_1088285600_example``. The path where the output directory will be generated is ``--output-path`` (by default ``./output``). Assuming you're looking at the example run above,
 the output directory structure will look like this:
 
 .. code-block:: bash
@@ -604,29 +606,31 @@ the output directory structure will look like this:
           ├── 1088285600_raw_vis_arr.h5
           └── 1088285600_raw_vis_weights.h5
 
-The difference between the final and non-final yaml is that the final yaml is generated at the end of the run so you can observe any changes made to ``pyfhd_config``, the config is also saved as a HDF5 file at the end of the run.
-Changes may happen due to conflicts in the options of your configuration file, if they are minor that's when the configuration will change and you should see the change mentioned in the log file.
+The difference between the final and non-final yaml is that the final yaml is generated at the end of the run so that you can observe any changes made to ``pyfhd_config``. The config is also saved as a HDF5 file at the end of the run.
+Changes may happen due to conflicts in the options of your configuration file. If they are minor, then that's when the configuration will change, and you should see the change mentioned in the log file.
+
 Most of the directories should be self explanatory, but there are two I wish to explain in more detail.
 
-First the ``plots`` directory, for the plots directory, the intent is to store all the plots generated by ``PyFHD`` in there,
-with a directory for plots generated for each part of the pipeline. For example, if you wish to add diagnostic plots for ``gridding`` as a PyFHD developer, then the policy is to create a ``gridding`` directory in ``plots`` directory
-and store your plots generated from ``gridding`` there. If the plots aren't generated in ``gridding`` but are related to ``gridding`` then those plots should also go into the ``gridding`` subdirectory.
+First, the ``plots`` directory. The intent for this directory is to store all the plots generated by ``PyFHD`` inside,
+with a directory for plots generated for each part of the pipeline. For example, if you wish to add diagnostic plots for ``gridding`` as a PyFHD developer, then the policy is to create a ``gridding`` directory in the ``plots`` directory
+and store your plots generated from ``gridding`` there. If the plots aren't generated in ``gridding``, but are related to ``gridding``, then those plots should also go into the ``gridding`` subdirectory.
 
-The second directory I want to explain is the ``checkpoints`` directory, please read on to the next section for this explaantion.
+The second directory I want to explain is the ``checkpoints`` directory.
 
 Checkpointing
 -------------
-The checkpointing system in ``PyFHD`` is designed to save the state of the pipeline after important, potentially long running steps.
-The checkpoints are store in the ``checkpoints`` directory and they are saved at th fopllowing points:
+The checkpointing system in ``PyFHD`` is designed to save the state of the pipeline after important, potentially long-running steps.
+The checkpoints are stored in the ``checkpoints`` directory and are saved at th following points:
 
 - ``obs_checkpoint`` - ``obs`` dict creation, reading of visibilities and weights, creation of the ``params`` dict
-- ``calibrate_checkpoint`` - End of calibration, creation of the ``cal`` dict which holds the calculated gains, metadata etc, the skymodel after being imported and the weights which have been updated after calibration.
+- ``calibrate_checkpoint`` - End of calibration, creation of the ``cal`` dict which holds the calculated gains, metadata etc, the skymodel after being imported, and the weights which have been updated after calibration.
 - ``gridding_checkpoint`` - End of gridding, creation of the ``gridding`` dict which holds the gridded visibilities and associated weights, variances, models, etc
 
 In the case that you wish to skip a step in the pipeline, you can use the ``--calibrate-checkpoint`` or ``--grid-checkpoint`` options to skip the calibration or gridding steps respectively. 
 
 .. attention::
-  The ``--obs-checkpoint`` and ``--calibrate-checkpoint`` will check for each other's existence and if both are used ``--calibrate-checkpoint`` will be prioritised and ``obs-checkpoint`` will be ignored.
+
+  The ``--obs-checkpoint`` and ``--calibrate-checkpoint`` will check for each other's existence, and if both are used, then ``--calibrate-checkpoint`` will be prioritised and ``obs-checkpoint`` will be ignored.
 
 In the below example we will run ``PyFHD`` with the ``--calibrate-checkpoint`` option, which will skip the calibration and visibility step and go straight to gridding. 
 
@@ -634,25 +638,25 @@ In the below example we will run ``PyFHD`` with the ``--calibrate-checkpoint`` o
 
   pyfhd -c ./input/1088285600_example/1088285600_example.yaml --calibrate-checkpoint ./output/pyfhd_1088285600_example/checkpoints/1088285600_example_calibrate_checkpoint.h5 1088285600 
 
-Within the logs of the ``PyFHD`` you should see the following message::
+Within the logs of ``PyFHD`` you should see the following message::
 
 .. code-block:: text
   yyyy-mm-dd HH:MM:SS - INFO:
         Checkpoint Loaded: Calibrated and Flagged visibility parameters, array and weights, the flagged observation metadata dictionary and the calibration dictionary loaded from output/pyfhd_1088285600_example/calibrate_checkpoint.h5
 
-Do note if you wish to use the ``gridding-checkpoint`` then you also need ``calibrate-checkpoint``.
+Do note that if you wish to use the ``gridding-checkpoint``, then you also need ``calibrate-checkpoint``.
 
 
 Configuration
 -------------
-We have shown that you can adjust the configuration of ``PyFHD`` using command like arguments like ``--calibrate-checkpoint`` and ``-c`` / ``--config``, however we have mentioned that we used `ConfigArgParse <https://pypi.org/project/ConfigArgParse/>`_
-to allow the use of ``YAML`` files. Inside the repository we have 2 examples of configuration files, one is in the root of the repository and is the template yaml file, ``pyfhd.yaml``, use this to create your own configuration file. Alternatively, you can
+We have shown that you can adjust the configuration of ``PyFHD`` using command-line arguments like ``--calibrate-checkpoint`` and ``-c`` / ``--config``, however we have mentioned that we used `ConfigArgParse <https://pypi.org/project/ConfigArgParse/>`_
+to allow the use of ``YAML`` files. Inside the repository we have 2 examples of configuration files. One is in the root of the repository and is the template yaml file, ``pyfhd.yaml``; use this to create your own configuration file. Alternatively, you can
 use the example configuration file ``1088285600_example.yaml`` in the ``input/1088285600_example`` directory to build your configuration file. 
-All of these options replace the `dictionary.md <https://github.com/EoRImaging/FHD/blob/master/dictionary.md>`_ file that used in `FHD`_, most of the options come from `FHD`_, however some of the options are new specific to ``PyFHD`` and
-some have been renamed from `FHD`_ and in the case of being renamed, the old name is referenced inside the help text of the option.
+All of these options replace the `dictionary.md <https://github.com/EoRImaging/FHD/blob/master/dictionary.md>`_ file that is used in `FHD`_. Most of the options come from `FHD`_, however, some of the options are new and specific to ``PyFHD``, and
+some have been renamed from `FHD`_. In the case of being renamed, the old name is referenced inside the help text of the option.
 
-Most of the options are numbers, lists of numbers, strings or list of strings, however some of the options are booleans. These booleans will have at minimum two arguments that target the one option, one is the option itself,
-for example, ``--silent`` which when used will set the ``silent`` option to ``True``, and ``--no-silent`` which when used will set the ``silent`` option to ``False``. All boolean options have the ``no-`` prefix available to you,
+Most of the options are numbers, lists of numbers, strings, or list of strings, however, some of the options are booleans. These booleans will have at minimum two arguments that target the one option. One is the option itself,
+for example, ``--silent``, which when used will set the ``silent`` option to ``True``, and ``--no-silent`` which when used will set the ``silent`` option to ``False``. All boolean options have the ``no-`` prefix available to you,
 in case you wish to temporarily negate the options set in the configuration file via the command line. 
 
 .. tip::
@@ -667,8 +671,8 @@ in case you wish to temporarily negate the options set in the configuration file
           ⬇️
          YAML
   
-  The command line argument will override the YAML file, and the code will override the command line argument in certain situations.
-  In situations where the code overrides the command line (or YAML), it's generally if a warning is triggered or some error is found, although
+  The command-line argument will override the YAML file, and the code will override the command-line argument in certain situations.
+  In situations where the code overrides the command-line argument (or YAML), it's generally if a warning is triggered or some error is found, although
   we try to avoid these when we can. If no warning is logged when the code overrides the YAML or command line options, either add
   the warning to the code yourself and do a Pull request or open an issue on the repository.
 
@@ -694,8 +698,8 @@ Find them Here: :doc:`Usage <../documentation/documentation>`
 ``PyFHD.pyfhd_tools.pyfhd_setup.pyfhd_parser()``
 +++++++++++++++++++++++++++++++++++++++++++++++++
 
-You can also find the options in the ``pyfhd_setup.py`` file, this is the file that is used to generate the command line interface and the configuration file.
-Specifically look for the ``pyfhd_parser()`` function. 
+You can also find the options in the ``pyfhd_setup.py`` file, which is the file that is used to generate the command-line interface and the configuration file.
+Specifically, look for the ``pyfhd_parser()`` function. 
 You can see the source here: `pyfhd_parser <../_modules/PyFHD/pyfhd_tools/pyfhd_setup.html#pyfhd_parser>`_
 
 Downloading MWA Data
@@ -711,7 +715,7 @@ In this download we are using an observation with Observation ID (which is the G
 
 .. tip::
 
-  If you change these values for time resolution, frequency resolution and/or edge width double check your skymodel is using the same parameters.
+  If you change these values for time resolution, frequency resolution, and/or edge width double, check that your skymodel is using the same parameters.
 
 We also need a metafits tile, which we can access via the 'Visibility Download Job' tab. Input the Obs ID, and be sure to click the 'PPD, Metafits, and Flags' option like below (otherwise you download the raw data as well, which we don't need):
 
@@ -726,7 +730,7 @@ You can check the status of your download by clicking 'My Jobs' in the top left.
 Getting the tutorial data
 -------------------------
 
-For the data we use for the full MWA observations you can download the required files from here:
+For the data we use for the full MWA observations, you can download the required files from here:
 
 `PyFHD Tutorial Data <https://tinyurl.com/pyfhd-tutorial-data>`_
 
@@ -736,7 +740,7 @@ Each directory is an observation, and inside each directory it will contain the 
 - ``<obs_id>.metafits`` - The MWA metafits file for the observation
 - ``puma_LoBES_2s_80kHz_hbeam_<obs_id>.uvfits`` - The skymodel generated by `WODEN`_ for the observation
 
-Separately, there will be a beam file ``decomp_beam_pointing0.h5`` which is the beam file for an observation at pointing 0
+Separately, there will be a beam file ``decomp_beam_pointing0.h5``, which is the beam file for an observation at pointing 0
 for MWA. The beam file is used for gridding, and isn't required for calibration.
 
 Calibration
@@ -744,7 +748,7 @@ Calibration
 
 Calibration is fully available in ``PyFHD`` and can be enabled using the ``--calibrate-visibilities`` option being set to true. Most of the options for calibration are found under the 
 `Calibration <../documentation/documentation.html#PyFHD.pyfhd_tools.pyfhd_setup-pyfhd_parser-calibration>`_ group in the argument parser. 
-The first example we'll do is the a calibration of the sample data using only the command line interface to show the options that changed
+The first example we'll do is the calibration of the sample data using only the command-line interface to show the options that changed
 in comparison to the template in the root of the repository (which will be used by default here).
 
 Running calibration on the sample data
@@ -777,7 +781,7 @@ Running calibration on the sample data
     --image-plots \
     1088285600
 
-Here you some some solutions from the calibration of the sample data:
+Here you have some solutions from the calibration of the sample data:
 
 .. image:: 1088285600_cal_amp.png
   :width: 800px
@@ -788,8 +792,8 @@ Here you some some solutions from the calibration of the sample data:
 Running calibration on a full MWA observation
 +++++++++++++++++++++++++++++++++++++++++++++
 
-For this observation I put everything inside the ``/place/for/input`` directory under ``uvfits``, ``models`` and ``beams`` sub-directories.
-The input visibility data is inside the ``uvfits`` directory, the model generated by WODEN is inside the ``models`` directory and
+For this observation, I put everything inside the ``/place/for/input`` directory under the ``uvfits``, ``models``, and ``beams`` sub-directories.
+The input visibility data is inside the ``uvfits`` directory, the model generated by WODEN is inside the ``models`` directory, and
 the beam is inside the ``beams`` directory (not that we need it for this run, as we use ``--cal-stop`` to stop ``PyFHD`` after calibration).
 
 .. code-block:: bash
@@ -825,7 +829,7 @@ the beam is inside the ``beams`` directory (not that we need it for this run, as
 
 .. tip::
 
-  The full configuration file to set all the options in the above command can be seen below
+  The full configuration file to set all the options in the above command can be seen below:
 
   .. raw:: html
 
@@ -1002,7 +1006,7 @@ the beam is inside the ``beams`` directory (not that we need it for this run, as
 
 .. note:: On a system with 20 cores (AMD Ryzen 5900X) this command took around 31 minutes to run.
 
-If you look in the ``/path/to/output/pyfhd_1091128160/plots/calibration`` you will find plots including the calibration amplitude and phases:
+If you look in ``/path/to/output/pyfhd_1091128160/plots/calibration``, you will find plots including the calibration amplitude and phases:
 
 .. image:: 1091128160_cal_amp_pyfhd.png
   :width: 600px
@@ -1101,15 +1105,15 @@ Gridding
 
 .. note::
   
-  Performing gridding in PyFHD, requires you to import a beam, the beams that are currently supported are those generated by ``FHD``, however, ``PyFHD`` has nothing currently to do the beam forming (although work has been done on this checkout `Beam Setup <Beam Setup_>`). Reading in a sav file is done using ``scipy.io.readsav`` and the beam is converted to a numpy complex array, however for large beams this can take a long time and can use a lot of memory,
+  Performing gridding in PyFHD requires you to import a beam. The beams that are currently supported are those generated by ``FHD``, however, ``PyFHD`` is not currently able to do the beam forming (although work has been done on this; check out `Beam Setup <Beam Setup_>`). Reading in a ``sav`` file is done using ``scipy.io.readsav``, and the beam is converted to a numpy complex array, however, for large beams this can take a long time and can use a lot of memory,
   so it should only be done once. ``PyFHD`` will save convert any beam ``sav`` file into a ``HDF5`` file, in the same location as the ``sav`` file. 
 
-Running the gridding step in ``PyFHD`` is relatively simple as its enabled by default, and the small number of options available to you are found in the `Gridding <../documentation/documentation.html#PyFHD.pyfhd_tools.pyfhd_setup-pyfhd_parser-gridding>`_ section of the argument parser.
+Running the gridding step in ``PyFHD`` is relatively simple as it is enabled by default, and the small number of options available to you are found in the `Gridding <../documentation/documentation.html#PyFHD.pyfhd_tools.pyfhd_setup-pyfhd_parser-gridding>`_ section of the argument parser.
 
 Running Gridding with the sample data
 +++++++++++++++++++++++++++++++++++++
 
-We'll use the calibrate-checkpoint example earlier to run it
+We'll use the calibrate-checkpoint example earlier to run it:
 
 .. code-block:: bash
 
@@ -1146,11 +1150,11 @@ Below we have the example plots of the gridded continuum data for the two polari
 Running Gridding with a full MWA observation
 ++++++++++++++++++++++++++++++++++++++++++++
 
-In this observation we will run calibration and then use the results for gridding, you'll notice some more advanced options
+In this observation we will run calibration and then use the results for gridding. You'll notice some more advanced options
 being used here. Such options like ``--digital-gain-jump-polyfit`` should only be used if you know that it's needed (although
-``PyFHD`` will warn you if you try to use it on the wrong data). Also take notice that the beam is being loaded here, through
-the use of the ``--beam-file-path`` option, this is required for gridding to work. If you wish to learn more about the ``--lazy-load-beam``
-option refer to :ref:`lazy-loading` section below.
+``PyFHD`` will warn you if you try to use it on the wrong data). Also take notice that the beam is being loaded here through
+the use of the ``--beam-file-path`` option; this is required for gridding to work. If you wish to learn more about the ``--lazy-load-beam``
+option, refer to the :ref:`lazy-loading` section below.
 
 .. code-block:: bash
 
@@ -1188,7 +1192,7 @@ option refer to :ref:`lazy-loading` section below.
       --gridding-plots
       
 
-Below we have the example plots of the gridded continuum data for the two polarizations, XX and YY, for the full MWA data.
+Below, we have the example plots of the gridded continuum data for the two polarizations, XX and YY, for the full MWA data.
 
 .. image:: 1088281328_grid_apparent_image_XX.png
   :width: 600px
@@ -1214,23 +1218,23 @@ We can also plot the variance of the gridded visibilities.
 
 Other Telescopes
 ----------------
-``PyFHD`` was translated and tested with MWA data, but in theory should need minor adjusting to support additional telescopes. 
+``PyFHD`` was translated and tested with MWA data, but in theory it should need minor adjusting to support additional telescopes. 
 
 .. important::
 
-  Getting data for testing additional telescopes is under way, if you wish for PyFHD to support a new telescope we need the following for testing:
+  Getting data for testing additional telescopes is under way. If you wish for PyFHD to support a new telescope, we need the following for testing:
 
   - UVFITS file
-  - Any associated metadata files you use - MWA uses metafits, but other telescopes may use different formats if any at all
-  - A beam file - IDL SAVE (sav) files, HDF5 (h5) files, if the beam can be done with `pyuvdata`_, please give an example of how to create the beam response
-  - A skymodel file - ideally UVFITS, but we can potentially support other file types as well depending on the complexity
+  - Any associated metadata files you use - MWA uses metafits, but other telescopes may use different formats, if any at all
+  - A beam file - IDL SAVE (sav) files, HDF5 (h5) files, if the beam can be done with `pyuvdata`_ then please give an example of how to create the beam response
+  - A skymodel file - ideally UVFITS, but we can potentially support other file types as well, depending on the complexity
 
 Saving and Loading files
 ------------------------------------------------
 ``PyFHD`` uses ``HDF5`` files to store data in general.
-``PyFHD`` uses ``h5py`` to read and write the files, the main functions that you can see how ``PyFHD``
+``PyFHD`` uses ``h5py`` to read and write the files. The main functions in which you can see how ``PyFHD``
 saves and loads HDF5 files are in the ``pyfhd_io`` module, found here: `pyfhd_io <../_modules/PyFHD/io/pyfhd_io.html>`_. 
-More specifically look for the ``save`` and ``load`` functions.
+More specifically, look for the ``save`` and ``load`` functions.
 
 Examples of both can be seen below:
 
@@ -1258,8 +1262,8 @@ Examples of both can be seen below:
   print(loaded_example["example"]) # [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
   print(loaded_example["example_group"]["example_in_group"]) # [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
-If you wish to see the contents of the HDF5 file, there are ways outside of PyFHD to do this, you could use extensions for your IDE like 
-`H5 Web <https://marketplace.visualstudio.com/items?itemName=h5web.vscode-h5web>`_ or you can use CLI tools like `h5dump <https://support.hdfgroup.org/documentation/hdf5/latest/_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump>`_.
+If you wish to see the contents of the HDF5 file, there are ways outside of PyFHD to do this. You could use extensions for your IDE like 
+`H5 Web <https://marketplace.visualstudio.com/items?itemName=h5web.vscode-h5web>`_, or you can use CLI tools like `h5dump <https://support.hdfgroup.org/documentation/hdf5/latest/_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump>`_.
 
 An example of the beam HDF5 file for the sample data seen inside VSCode using H5 Web is shown below:
 
@@ -1297,17 +1301,17 @@ This is useful primarily for any beam files that are large, as they can take a l
   
   If you are using lazy loading, then you need to be careful when using the data, as it is not loaded into memory until you access it. 
   This means that if you try to use the data in a way that requires it to be loaded into memory, you will need to wait for data to transfer
-  from disk to memory, this can cause parts of the pipeline to be slow. Optimizations need to be done to better deal with the transfer of disk to memeory, 
+  from disk to memory, which can cause parts of the pipeline to be slow. Optimizations need to be done to better deal with the transfer of disk to memory and
   to better chunk the data into memory for processing. If you're happy to take that task on yourself, do a Pull Request!
 
 Loading PyFHD Outputs into FHD
 ++++++++++++++++++++++++++++++
-``PyFHD`` outputs can be loaded into ``FHD`` if you need it, PyFHD outputs are typically ``HDF5`` files, IDL is capable of reading in HDF5 files using functions like
+``PyFHD`` outputs can be loaded into ``FHD``. PyFHD outputs are typically ``HDF5`` files. IDL is capable of reading in HDF5 files using functions like
 `H5F_OPEN <https://www.nv5geospatialsoftware.com/docs/H5F_OPEN.html>`_, `H5D_OPEN <https://www.nv5geospatialsoftware.com/docs/H5D_OPEN.html>`_ and `H5D_READ <https://www.nv5geospatialsoftware.com/docs/H5D_READ.html>`_ 
-(There are also the same functions for groups, replace ``F`` or ``D`` with ``G``). Loading the ``PyFHD`` into `FHD`_ does require some data manipulation to get it in the same format that `FHD`_ expects, for example,
-the beam array is stored as pointer arrays in `FHD`_ on a per baseline basis, where the every baseline points to the to the first baseline. These sort of pointer array structures are used in many places across `FHD`_,
+(There are also the same functions for groups: replace ``F`` or ``D`` with ``G``). Loading the ``PyFHD`` into `FHD`_ does require some data manipulation to get it in the same format that `FHD`_ expects, for example,
+the beam array is stored as pointer arrays in `FHD`_ on a per baseline basis, where every baseline points to the first baseline. These sort of pointer array structures are used in many places across `FHD`_,
 so to help you in the future, I'll supply two examples of how to load the sample data beam and models into IDL and convert them to the sav files which have the arrays in the format that `FHD`_ expects. These examples
-are not complete (for example the model doesn't also create the params file), but they should give you a good idea of how to load the data into IDL and convert it to the format that `FHD`_ expects.
+are not complete (for example, the model doesn't also create the params file), but they should give you a good idea of how to load the data into IDL and convert it to the format that `FHD`_ expects.
 
 .. raw:: html
 
@@ -1564,8 +1568,8 @@ are not complete (for example the model doesn't also create the params file), bu
 Docker
 ------
 ``PyFHD`` has a docker image available to use available on `Docker Hub <https://hub.docker.com/r/skywa7ch3r/pyfhd>`_.
-There will be multiple images available, there will be an image for each version that should get pushed on every release of ``PyFHD``,
-there will also be a ``latest`` tag that will be the latest version of ``PyFHD`` based on commits from the main branch (though this may not be stable and subject to change).
+There will be multiple images available. There will be an image for each version that should get pushed on every release of ``PyFHD``,
+and there will also be a ``latest`` tag that will be the latest version of ``PyFHD`` based on commits from the main branch (though this may not be stable and subject to change).
 
 To run the docker image of PyFHD, you can use the following commands:
 
@@ -1587,8 +1591,8 @@ To run the docker image of PyFHD, you can use the following commands:
     --description 108825600_docker_example \
     1088285600
 
-The folllwing example will run with the full MWA observation, you will need to make sure the yaml configuration file points to directories that are mounted to the docker container.
-The YAML configuration also should point to directories inside the container as well, by default ``PyFHD`` is configured to look for things inside the ``input`` and ``output`` directories inside the container.
+The following example will run with the full MWA observation. You will need to make sure the yaml configuration file points to directories that are mounted to the docker container.
+The YAML configuration also should point to directories inside the container as well. By default, ``PyFHD`` is configured to look for things inside the ``input`` and ``output`` directories inside the container.
 
 .. code-block:: bash
 
@@ -1626,8 +1630,8 @@ Creating an Apptainer image for using ``PyFHD`` where using docker isn't possibl
     --description 108825600_docker_example \
     1088285600
 
-The following example will run with the full MWA observation, you will need to make sure the yaml configuration file points to directories that are mounted to the docker container.
-The YAML configuration also should point to directories inside the container as well, by default ``PyFHD`` is configured to look for things inside the ``input`` and ``output`` directories inside the container.
+The following example will run with the full MWA observation. You will need to make sure the yaml configuration file points to directories that are mounted to the docker container.
+The YAML configuration also should point to directories inside the container as well. By default, ``PyFHD`` is configured to look for things inside the ``input`` and ``output`` directories inside the container.
 
 .. code-block:: bash
 
@@ -1649,15 +1653,16 @@ Problems that need to be solved
   
   This entire section is a call to action!
 
-  If you believe you can address these problems, and or do the features, then give it a go, please read the :doc:`Contribution Guide <../develop/contribution_guide>` and do a pull request!
+  If you believe you can address these problems and/or develop the features, then give it a go! Please read the :doc:`Contribution Guide <../develop/contribution_guide>` and do a pull request!
 
   We await your contributions!
 
 HEALPIX
 +++++++
+.. This paragraph is really confusing; it needs editing from someone who knows what it's trying to say, the English doesn't make sense to the point I'm not sure how to edit it.
 The HEALPIX outputs from ``PyFHD`` are stored in the ``healpix`` directory. The translated parts of ``healpix_snapshot_cube_generate.pro`` from ``FHD`` have precision errors and potential bugs and they have caused differences
 in the resulting ``obs_id_hpx_even/odd_XX/YY.h5`` files the translation that exist in ``FHD``. So the ``obs_id_hpx_even/odd_XX/YY.h5`` files generated from ``PyFHD`` as the ``obs_id_even/odd_cubeXX/YY.sav`` files that exist in ``FHD``.
-However I'm not sure if they should be given that the differentces could just precision in which case there might be a problem at all. Furthermore the size of the files that get generated and the format, is not easy to create in 
+However, I'm not sure if they should be, given that the differences could just precision, in which case there might not be a problem at all. Furthermore, the size of the files that get generated, along with the format, is not easy to create in 
 Python and takes a long time to create with regards to the rest of the ``PyFHD`` pipeline (and the resulting files are also large in when compared to other outputs). Recent tests also show issues with the fits files produced for 
 HEALPIX as well.
 With that said, by default healpix files are generated, the entirety of ``PyFHD`` runs in full. If you want to ensure that HEALPIX files are generated then adjust a config of your choice with the following options:
@@ -1688,25 +1693,25 @@ The most important options are the ``save-healpix-fits`` and the ``snapshot-heal
 
 Beam Setup
 ++++++++++
-The beam setup in ``PyFHD`` has been translated from `FHD`_ and is a combination of using `pyuvdata`_ and translation from `FHD`_, it is by no means tested and is definitely a work in progress.
-More specifically, the ``beam_setup`` uses `pyuvdata`_ to create the ``Jones`` matrix for the beam, and then ``FHD`` translation is used to create the main response and the representation of the beam
-in UV space. For the moment, PyFHD only supports using one beam per observation and does not currently support different beams for different antennas. Furthermore, mode advanced features like gaussian decomp and
-many of the debugging options are not implemented, as such there are plenty of opportunities to add to the ``beam_setup``, both in small and large pieces of code.
+The beam setup in ``PyFHD`` has been translated from `FHD`_ and is a combination of using `pyuvdata`_ and translation from `FHD`_. It is by no means tested and is definitely a work in progress.
+More specifically, the ``beam_setup`` uses `pyuvdata`_ to create the ``Jones`` matrix for the beam, and then the ``FHD`` translation is used to create the main response and the representation of the beam
+in UV space. For the moment, PyFHD only supports using one beam per observation and does not currently support different beams for different antennas. Furthermore, more advanced features like gaussian decomp and
+many of the debugging options are not implemented. As such, there are plenty of opportunities to add to the ``beam_setup``, both in small and large pieces of code.
 
-You can see test out the beam_setup by setting the ``beam-file-path`` to ``None`` (~ in the yaml configuration file) and setting the ``recalculate-beam`` option to ``True``. You'll likely run into
+You can test out the beam_setup by setting the ``beam-file-path`` to ``None`` (~ in the yaml configuration file) and setting the ``recalculate-beam`` option to ``True``. You'll likely run into
 memory limitations with your machine during testing. The ``beam_setup`` branch has been purposely left there ready for you to directly contribute code to it.
 
 Deconvolution
 ++++++++++++++
-Deconvolution is not currently implemented in ``PyFHD``, with that said, inside the gridding directory is ``visibility_degrid.py``, which has been translated from `FHD`_ and has not been tested at all.
-That should give you a good start if you wish to implement deconvolution in ``PyFHD``. As a bonus, the deconvolution code in `FHD`_ has many dependencies that are used in the model generation, so if for whatever
-reason you want the skymodel generation from `FHD`_ you might get most of that model generation code for free, if someone also does deconvolution in ``PyFHD``, you'll likely be only a week or two away from having model generation also.
+Deconvolution is not currently implemented in ``PyFHD``. With that said, inside the gridding directory is ``visibility_degrid.py``, which has been translated from `FHD`_ and has not been tested at all.
+That should give you a good start if you wish to implement deconvolution in ``PyFHD``. As a bonus, the deconvolution code in `FHD`_ has many dependencies that are used in the model generation, so if, for whatever
+reason. you want the skymodel generation from `FHD`_, you might get most of that model generation code for free. If someone also does deconvolution in ``PyFHD``, you'll likely be only a week or two away from having model generation also.
 Although, there's a good chance tools like `WODEN`_ will likely be faster and better at producing skymodels, so use those first before you try to implement model generation in ``PyFHD``.
 
 4 Polarizations
 +++++++++++++++
-The ability for PyFHD to handle 4 polarizations is not well tested, and may not be fully implemented in places, another great opportunity to contribute.
+The ability for PyFHD to handle 4 polarizations is not well tested, and may not be fully implemented in places. Another great opportunity to contribute.
 
 Simulation
 ++++++++++
-`FHD`_ has ability to do simulations, many of these simulation features haven't been translated to ``PyFHD``, this would be a large piece of work.
+`FHD`_ has ability to do simulations. Many of these simulation features haven't been translated to ``PyFHD``; this would be a large piece of work.
