@@ -219,13 +219,20 @@ def init_beam(obs: dict, pyfhd_config: dict, logger: Logger) -> dict:
                 "Please download it from http://ws.mwatelescope.org/static/mwa_full_embedded_element_pattern.h5 into the."
                 f"directory {mwa_beam_file.parent}"
             )
-        beam = UVBeam.from_file(mwa_beam_file, delays=obs["delays"])
+        # only read in the range of beam frequencies we need. add a buffer
+        # to ensure that we have enough outside our range for interpolation
+        freq_buffer = 2e6
+        freq_range = [
+            np.min(obs["baseline_info"]["freq"]) - freq_buffer,
+            np.max(obs["baseline_info"]["freq"]) + freq_buffer,
+        ]
+        beam = UVBeam.from_file(
+            mwa_beam_file, delays=obs["delays"], freq_range=freq_range
+        )
     # If you wish to add a different insturment, do it by adding a new elif here
     else:
         # Do an analytic beam as a placeholder
         beam = ShortDipoleBeam()
-
-    print(zenith_angle_arr.shape)
 
     # Get the jones matrix for the antenna
     # shape is: (number of vector directions (usually 2), number of feeds (usually 2),
