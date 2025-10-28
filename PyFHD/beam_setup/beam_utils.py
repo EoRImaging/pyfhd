@@ -481,7 +481,7 @@ def beam_power(
     if pyfhd_config["beam_clip_floor"]:
         i_use = np.where(np.abs(psf_base_superres))
         psf_amp = np.abs(psf_base_superres)
-        psf_phase = np.arctan(psf_base_superres.imag / psf_base_superres.real)
+        psf_phase = np.angle(psf_base_superres)
         psf_floor = psf_mask_threshold_use * (psf["intermediate_res"] ** 2)
         psf_amp[i_use] -= psf_floor
         psf_base_superres = psf_amp * np.cos(psf_phase) + 1j * psf_amp * np.sin(
