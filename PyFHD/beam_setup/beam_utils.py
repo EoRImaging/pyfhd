@@ -244,7 +244,7 @@ def beam_image(
                 beam_base_uv1 = np.zeros([dimension, elements], np.complex128)
                 beam_base_uv1[xl : xh + 1, yl : yh + 1] = beam_single
                 beam_base_single = np.fft.fftshift(
-                    np.fft.ifftn(np.fft.fftshift(beam_base_uv1))
+                    np.fft.fftn(np.fft.fftshift(beam_base_uv1))
                 )
                 beam_base += (
                     nf_bin * (beam_base_single * np.conjugate(beam_base_single)).real
@@ -288,10 +288,9 @@ def beam_image(
         if beam_gaussian_params is None:
             beam_base_uv1 = np.zeros([dimension, elements], dtype=np.complex128)
             beam_base_uv1[xl : xh + 1, yl : yh + 1] = beam_base_uv
-            beam_base = np.fft.fftshift(np.fft.ifftn(np.fft.fftshift(beam_base_uv1)))
+            beam_base = np.fft.fftshift(np.fft.fftn(np.fft.fftshift(beam_base_uv1)))
         else:
             beam_base = beam_base_uv
-
     beam_base /= n_bin_use
     return beam_base.real
 
