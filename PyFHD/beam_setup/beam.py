@@ -151,7 +151,7 @@ def create_psf(obs: dict, pyfhd_config: dict, logger: Logger) -> dict | File:
 
             for freq_i in range(n_freq_bin):
                 beam_int = 0
-                beam_int_2 = 0
+                beam2_int = 0
                 n_grp_use = 0
                 baseline_group_n = group_matrix[0, 0]
                 # Get antenna indices which use this group's unique beam (probably all of them...)
@@ -197,9 +197,9 @@ def create_psf(obs: dict, pyfhd_config: dict, logger: Logger) -> dict | File:
                     baseline_group_n
                     + np.sum(psf_base_superres) / psf["resolution"] ** 2
                 )
-                beam_int_2 += (
+                beam2_int += (
                     baseline_group_n
-                    + np.sum(np.abs(psf_base_superres)) / psf["resolution"] ** 2
+                    + np.sum(np.abs(psf_base_superres) ** 2) / psf["resolution"] ** 2
                 )
                 n_grp_use += baseline_group_n
                 psf_single = np.zeros(
@@ -245,11 +245,11 @@ def create_psf(obs: dict, pyfhd_config: dict, logger: Logger) -> dict | File:
                 beam_arr[pol_i, freq_i, :, :, :] = psf_single
 
                 # Calculate the primary beam area and squared area
-                beam_int_2 *= weight_invert(n_grp_use) / obs["kpix"] ** 2
+                beam2_int *= weight_invert(n_grp_use) / obs["kpix"] ** 2
                 beam_int *= weight_invert(n_grp_use) / obs["kpix"] ** 2
                 fi_use = np.where(obs["baseline_info"]["fbin_i"] == freq_i)
                 primary_beam_area[pol_i, fi_use] = beam_int
-                primary_beam_sq_area[pol_i, fi_use] = beam_int_2
+                primary_beam_sq_area[pol_i, fi_use] = beam2_int
 
         psf["beam_ptr"] = beam_arr
         obs["primary_beam_area"] = primary_beam_area
