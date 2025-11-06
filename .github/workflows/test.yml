@@ -26,12 +26,17 @@ jobs:
       - name: Install the project
         run: uv sync --frozen --all-extras --dev
 
+      - name: Environment Info
+        run: |
+          uv pip list
+
       - name: Cache test data
         id: cache-test-data
         uses: actions/cache@v4
         with:
           path: PyFHD/resources/test_data/pyfhd_test_data.zip
           key: test-data-${{ hashFiles('**/pyfhd_test_data.zip') }}
+          restore-keys: test-data-
 
       - name: Download the test data from Zenodo
         if: steps.cache-test-data.outputs.cache-hit != 'true'
@@ -43,7 +48,20 @@ jobs:
           unzip PyFHD/resources/test_data/pyfhd_test_data.zip -d PyFHD/resources/test_data
     
       - name: Run tests
-        run: uv run coverage run --branch --source=PyFHD -m pytest -m github_actions --html=pyfhd_report.html --self-contained-html
+        run: |
+          uv run coverage run --branch --source=PyFHD -m pytest -m github_actions --html=pyfhd_report.html --self-contained-html
+          uv run coverage xml  -o ./coverage.xml
+
+      - name: check coverage report
+        run: |
+          ls
+          cat coverage.xml
+
+      - uses: codecov/codecov-action@v5
+        if: success()
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }} #required
+          files: ./coverage.xml #optional
 
       - name: Get coverage HTML report
         run: uv run coverage html --directory=coverage_html_report --title="PyFHD GitHub Actions Coverage Report"
@@ -85,12 +103,17 @@ jobs:
       - name: Install the project
         run: uv sync --upgrade --all-extras --dev
 
+      - name: Environment Info
+        run: |
+          uv pip list
+
       - name: Cache test data
         id: cache-test-data
         uses: actions/cache@v4
         with:
           path: PyFHD/resources/test_data/pyfhd_test_data.zip
           key: test-data-${{ hashFiles('**/pyfhd_test_data.zip') }}
+          restore-keys: test-data-
 
       - name: Download the test data from Zenodo
         if: steps.cache-test-data.outputs.cache-hit != 'true'
@@ -102,7 +125,20 @@ jobs:
           unzip PyFHD/resources/test_data/pyfhd_test_data.zip -d PyFHD/resources/test_data
     
       - name: Run tests
-        run: uv run coverage run --branch --source=PyFHD -m pytest -m github_actions --html=pyfhd_report.html --self-contained-html
+        run: |
+          uv run coverage run --branch --source=PyFHD -m pytest -m github_actions --html=pyfhd_report.html --self-contained-html
+          uv run coverage xml  -o ./coverage.xml
+
+      - name: check coverage report
+        run: |
+          ls
+          cat coverage.xml
+
+      - uses: codecov/codecov-action@v5
+        if: success()
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }} #required
+          files: ./coverage.xml #optional
 
       - name: Get coverage HTML report
         run: uv run coverage html --directory=coverage_html_report --title="PyFHD GitHub Actions Coverage Report"
