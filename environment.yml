@@ -3,21 +3,21 @@ channels:
   - conda-forge
   - defaults
 dependencies:
-  - python
-  - astropy
-  - configargparse
-  - matplotlib
-  - numba
-  - numpy
-  - pytest
-  - scipy
-  - setuptools
-  - sphinx
-  - colorama
-  - importlib_resources
-  - h5py
-  - pre-commit
+  - astropy>=6.1.7
   - black
+  - colorama>=0.4.6
+  - configargparse>=1.7
+  - h5py>=3.13.0
+  - importlib_resources>=6.5.2
+  - matplotlib>=3.10.3
+  - numba>=0.61.2
+  - numpy>=2.2.5
+  - pyuvdata>=3.2.1
+  - pytest>=8.3.5
+  - scipy>=1.15.3
+  - setuptools
+  - sphinx>=8.1.3
+  - pre-commit
   - pip
   - pyinstrument
   - pip:
@@ -28,5 +28,5 @@ dependencies:
     - pytest-html
     - pytest-html-merger
     - myst-parser
-    - healpy
+    - healpy>=1.18.1
     
