@@ -13,7 +13,7 @@ jobs:
       fail-fast: false
       matrix:
         python-version: ["3.11", "3.12", "3.13"]
-        os: [ubuntu-latest, macos-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest] #, windows-latest] add back after healpy replaced
         uv-options: ["--frozen"]
         include:
           - uv-options: "--upgrade"
