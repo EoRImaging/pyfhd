@@ -31,10 +31,38 @@ def quick_image(
     Parameters
     ----------
     data : NDArray[np.integer | np.floating | np.complexfloating]
-        A 2D array of data to be displayed as an image.
-        The data can be of type int, float, or complex.
+        A 2D array of data to be displayed as an image. The data can be of type int, float, or complex.
     data_range : NDArray[np.integer | np.floating], optional
-        The range of values to display.
+        The range of values to display. If None, the min and max of the data are used.
+    xvals : NDArray[np.floating], optional
+        The x-axis values corresponding to the columns of the data array.
+    yvals : NDArray[np.floating], optional
+        The y-axis values corresponding to the rows of the data array.
+    xtitle : str, optional
+        The label for the x-axis.
+    ytitle : str, optional
+        The label for the y-axis.
+    title : str, optional
+        The title of the image.
+    cb_title : str, optional
+        The title of the colourbar.
+    savefile : str | Path, optional
+        The path to save the image file. If None, the image is displayed on screen.
+    missing_value : float | int, optional
+        The value in the data array that represents missing data. If None, no missing data handling is performed.
+    log : bool, optional
+        Whether to apply logarithmic scaling to the data. Default is True.
+    png : bool, optional
+        Whether to save the image as a PNG file. Default is False.
+    pdf : bool, optional
+        Whether to save the image as a PDF file. Default is False.
+    eps : bool, optional
+        Whether to save the image as an EPS file. Default is False.
+
+    Returns
+    -------
+    None
+        The function saves the image to a file or displays it on screen.
     """
 
     # Handle missing values
