@@ -130,15 +130,31 @@ def quick_image(
         if savefile is None:
             savefile = "quick_image"
 
-        # Add extension if needed
-        if png and not savefile.endswith('.png'):
-            savefile += '.png'
-        elif pdf and not savefile.endswith('.pdf'):
-            savefile += '.pdf'
-        elif eps and not savefile.endswith('.eps'):
-            savefile += '.eps'
-        elif not any([savefile.endswith(ext) for ext in ['.png', '.pdf', '.eps']]):
-            savefile += '.png' # Default to PNG
+        # Append the appropriate file extension
+        if isinstance(savefile, Path):
+            if png:
+                savefile = savefile.with_suffix(".png")
+            elif pdf:
+                savefile = savefile.with_suffix(".pdf")
+            elif eps:
+                savefile = savefile.with_suffix(".eps")
+        elif isinstance(savefile, str):
+            if png:
+                savefile += ".png"
+            elif pdf:
+                savefile += ".pdf"
+            elif eps:
+                savefile += ".eps"
+
+        # # Add extension if needed
+        # if png and not savefile.endswith('.png'):
+        #     savefile += '.png'
+        # elif pdf and not savefile.endswith('.pdf'):
+        #     savefile += '.pdf'
+        # elif eps and not savefile.endswith('.eps'):
+        #     savefile += '.eps'
+        # elif not any([savefile.endswith(ext) for ext in ['.png', '.pdf', '.eps']]):
+        #     savefile += '.png' # Default to PNG
 
         plt.savefig(savefile, dpi=300, bbox_inches='tight')
         plt.close(fig)
