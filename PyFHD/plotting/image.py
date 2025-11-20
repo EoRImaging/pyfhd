@@ -174,16 +174,6 @@ def quick_image(
             elif eps:
                 savefile += ".eps"
 
-        # # Add extension if needed
-        # if png and not savefile.endswith('.png'):
-        #     savefile += '.png'
-        # elif pdf and not savefile.endswith('.pdf'):
-        #     savefile += '.pdf'
-        # elif eps and not savefile.endswith('.eps'):
-        #     savefile += '.eps'
-        # elif not any([savefile.endswith(ext) for ext in ['.png', '.pdf', '.eps']]):
-        #     savefile += '.png' # Default to PNG
-
         plt.savefig(savefile, dpi=300, bbox_inches='tight')
         plt.close(fig)
     else:
