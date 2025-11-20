@@ -9,7 +9,7 @@ authors = [
     { name = "Jack Line (JLBLine)", email = "jack.line@curtin.edu.au"},
     { name = "Nichole Barry (nicholebarry)", email = "nichole.barry@unsw.edu.au"}
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Science/Research",
