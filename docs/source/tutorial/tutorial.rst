@@ -66,6 +66,7 @@ This will run the entire PyFHD pipeline in this order:
 
 If the command runs successfully, you should get a log to your terminal (stdout) that looks something like this:
 
+.. TODO: Is this entire thing necessary? It is very long.
 .. raw:: html
 
   <details>
@@ -486,10 +487,15 @@ Take note of the line:
 
 More details about the output of the PyFHD pipeline and the required inputs is clarified in the next section. 
 
+
+.. TODO: Where is the :ref:`_pyfhd-config-file` supposed to link to? Currently it is broken. Perhaps to 'Configuration' section? Is the note necessary?
 .. important::
 
   The configuration used for the sample is very different to a full MWA run due to limited use of frequencies and times used in the sample data
   to keep it small. For a better template to base your configuration on, go to :ref:`_pyfhd-config-file`.
+
+
+.. TODO: Move section out of tutorial file?
 
 The Required Inputs and the outputs of ``PyFHD``
 ----------------------------------------------------------
@@ -617,6 +623,9 @@ and store your plots generated from ``gridding`` there. If the plots aren't gene
 
 The second directory I want to explain is the ``checkpoints`` directory.
 
+
+.. TODO: Move section out of tutorial file?
+
 Checkpointing
 -------------
 The checkpointing system in ``PyFHD`` is designed to save the state of the pipeline after important, potentially long-running steps.
@@ -638,14 +647,17 @@ In the below example we will run ``PyFHD`` with the ``--calibrate-checkpoint`` o
 
   pyfhd -c ./input/1088285600_example/1088285600_example.yaml --calibrate-checkpoint ./output/pyfhd_1088285600_example/checkpoints/1088285600_example_calibrate_checkpoint.h5 1088285600 
 
-Within the logs of ``PyFHD`` you should see the following message::
+Within the logs of ``PyFHD`` you should see the following message:
 
 .. code-block:: text
+
   yyyy-mm-dd HH:MM:SS - INFO:
         Checkpoint Loaded: Calibrated and Flagged visibility parameters, array and weights, the flagged observation metadata dictionary and the calibration dictionary loaded from output/pyfhd_1088285600_example/calibrate_checkpoint.h5
 
 Do note that if you wish to use the ``gridding-checkpoint``, then you also need ``calibrate-checkpoint``.
 
+
+.. TODO: Move section out of tutorial file?
 
 Configuration
 -------------
@@ -702,6 +714,9 @@ You can also find the options in the ``pyfhd_setup.py`` file, which is the file 
 Specifically, look for the ``pyfhd_parser()`` function. 
 You can see the source here: `pyfhd_parser <../_modules/PyFHD/pyfhd_tools/pyfhd_setup.html#pyfhd_parser>`_
 
+
+.. TODO: Move section out of tutorial file?
+
 Downloading MWA Data
 ---------------------
 Data can be obtained via the `MWA ASVO`_ service (head to the webpage to get an account setup). There are multiple ways to download data (please refer to the `MWA ASVO`_ to learn more); here we will use the Web Dashboard as an example.
@@ -727,6 +742,9 @@ You can check the status of your download by clicking 'My Jobs' in the top left.
 .. image:: jobs_ready.png
   :width: 800px
 
+
+.. TODO: Move section out of tutorial file?
+
 Getting the tutorial data
 -------------------------
 
@@ -742,6 +760,9 @@ Each directory is an observation, and inside each directory it will contain the 
 
 Separately, there will be a beam file ``decomp_beam_pointing0.h5``, which is the beam file for an observation at pointing 0
 for MWA. The beam file is used for gridding, and isn't required for calibration.
+
+
+.. TODO: Move section out of tutorial file?
 
 Calibration
 -----------
@@ -1100,6 +1121,9 @@ We have solutions!
 .. .. image:: 1088281328_cal_phase_advanced.png
 ..   :width: 600px
 
+
+.. TODO: Move section out of tutorial file?
+
 Gridding 
 ---------
 
@@ -1216,6 +1240,9 @@ We can also plot the variance of the gridded visibilities.
 .. image:: 1088281328_grid_variance_YY.png
   :width: 600px
 
+
+.. TODO: Move section out of tutorial file?
+
 Other Telescopes
 ----------------
 ``PyFHD`` was translated and tested with MWA data, but in theory it should need minor adjusting to support additional telescopes. 
@@ -1228,6 +1255,9 @@ Other Telescopes
   - Any associated metadata files you use - MWA uses metafits, but other telescopes may use different formats, if any at all
   - A beam file - IDL SAVE (sav) files, HDF5 (h5) files, if the beam can be done with `pyuvdata`_ then please give an example of how to create the beam response
   - A skymodel file - ideally UVFITS, but we can potentially support other file types as well, depending on the complexity
+
+
+.. TODO: Move section out of tutorial file?
 
 Saving and Loading files
 ------------------------------------------------
@@ -1565,6 +1595,9 @@ are not complete (for example, the model doesn't also create the params file), b
   </p>
   </details>
 
+
+.. TODO: Move section out of tutorial file?
+
 Docker
 ------
 ``PyFHD`` has a docker image available to use available on `Docker Hub <https://hub.docker.com/r/skywa7ch3r/pyfhd>`_.
@@ -1608,6 +1641,9 @@ The YAML configuration also should point to directories inside the container as 
     --description 1091128160_docker_example \
     1091128160
 
+
+.. TODO: Move section out of tutorial file?
+
 Apptainer (formerly Singularity)
 --------------------------------
 
@@ -1646,6 +1682,8 @@ The YAML configuration also should point to directories inside the container as 
     --description 1091128160_docker_example \
     1091128160
 
+.. TODO: Move section out of tutorial file?
+
 Problems that need to be solved
 -------------------------------
 
@@ -1660,6 +1698,7 @@ Problems that need to be solved
 HEALPIX
 +++++++
 .. This paragraph is really confusing; it needs editing from someone who knows what it's trying to say, the English doesn't make sense to the point I'm not sure how to edit it.
+
 The HEALPIX outputs from ``PyFHD`` are stored in the ``healpix`` directory. The translated parts of ``healpix_snapshot_cube_generate.pro`` from ``FHD`` have precision errors and potential bugs and they have caused differences
 in the resulting ``obs_id_hpx_even/odd_XX/YY.h5`` files the translation that exist in ``FHD``. So the ``obs_id_hpx_even/odd_XX/YY.h5`` files generated from ``PyFHD`` as the ``obs_id_even/odd_cubeXX/YY.sav`` files that exist in ``FHD``.
 However, I'm not sure if they should be, given that the differences could just precision, in which case there might not be a problem at all. Furthermore, the size of the files that get generated, along with the format, is not easy to create in 
