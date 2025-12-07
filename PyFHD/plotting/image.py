@@ -96,18 +96,18 @@ def quick_image(
         if sigma_clip_level is not None:
             log_data = np.log10(positive_data)
             mean, median, std = sigma_clipped_stats(log_data, sigma=sigma_clip_level, maxiters=5)
-        # Calculate bounds
-        lower_bound = mean - sigma_clip_level * std
-        upper_bound = mean + sigma_clip_level * std
-        data_range = [10 ** lower_bound, 10 ** upper_bound]
-        # Calculate percentage of data clipped
-        num_clipped = np.sum((log_data < lower_bound) | (log_data > upper_bound))
-        percent_clipped = 100 * num_clipped / len(log_data)
-        print(f"Sigma clipping of level {sigma_clip_level} applied: {data_range[0]:.2e} to {data_range[1]:.2e}")
-        print(f"Percentage of data clipped: {percent_clipped:.2f}%")
-    else:
-        data_range = [np.min(positive_data), np.max(positive_data)]
-        print(f"Using full data range: {data_range[0]:.2e} to {data_range[1]:.2e}")
+            # Calculate bounds
+            lower_bound = mean - sigma_clip_level * std
+            upper_bound = mean + sigma_clip_level * std
+            data_range = [10 ** lower_bound, 10 ** upper_bound]
+            # Calculate percentage of data clipped
+            num_clipped = np.sum((log_data < lower_bound) | (log_data > upper_bound))
+            percent_clipped = 100 * num_clipped / len(log_data)
+            print(f"Sigma clipping of level {sigma_clip_level} applied: {data_range[0]:.2e} to {data_range[1]:.2e}")
+            print(f"Percentage of data clipped: {percent_clipped:.2f}%")
+        else:
+            data_range = [np.min(positive_data), np.max(positive_data)]
+            print(f"Using full data range: {data_range[0]:.2e} to {data_range[1]:.2e}")
 
 
     # Apply log scaling to data range
