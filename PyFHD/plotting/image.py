@@ -5,6 +5,7 @@ from pathlib import Path
 from astropy.wcs import WCS
 from astropy.io import fits
 from astropy import units as u
+from astropy.stats import sigma_clipped_stats
 from logging import Logger
 import os
 
@@ -12,6 +13,7 @@ import os
 def quick_image(
         data,
         data_range=None,
+        sigma_clip_level=3,
         xvals=None,
         yvals=None,
         xtitle=None,
@@ -34,6 +36,8 @@ def quick_image(
         A 2D array of data to be displayed as an image. The data can be of type int, float, or complex.
     data_range : NDArray[np.integer | np.floating], optional
         The range of values to display. If None, the min and max of the data are used.
+    sigma_clip_level : float, optional
+        The sigma level for sigma clipping when determining data range. Default is 3.
     xvals : NDArray[np.floating], optional
         The x-axis values corresponding to the columns of the data array.
     yvals : NDArray[np.floating], optional
@@ -89,7 +93,22 @@ def quick_image(
         if len(positive_data) == 0:
             raise ValueError("Data must contain positive values for logarithmic scaling.")
             return
+        if sigma_clip_level is not None:
+            log_data = np.log10(positive_data)
+            mean, median, std = sigma_clipped_stats(log_data, sigma=sigma_clip_level, maxiters=5)
+        # Calculate bounds
+        lower_bound = mean - sigma_clip_level * std
+        upper_bound = mean + sigma_clip_level * std
+        data_range = [10 ** lower_bound, 10 ** upper_bound]
+        # Calculate percentage of data clipped
+        num_clipped = np.sum((log_data < lower_bound) | (log_data > upper_bound))
+        percent_clipped = 100 * num_clipped / len(log_data)
+        print(f"Sigma clipping of level {sigma_clip_level} applied: {data_range[0]:.2e} to {data_range[1]:.2e}")
+        print(f"Percentage of data clipped: {percent_clipped:.2f}%")
+    else:
         data_range = [np.min(positive_data), np.max(positive_data)]
+        print(f"Using full data range: {data_range[0]:.2e} to {data_range[1]:.2e}")
+
 
     # Apply log scaling to data range
     log_min = np.log10(data_range[0])
