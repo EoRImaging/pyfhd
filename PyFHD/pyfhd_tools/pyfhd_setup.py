@@ -961,7 +961,7 @@ def _check_file_exists(config: dict, key: str) -> int:
     """
     if config[key]:
         # If it doesn't exist, add error message
-        if not Path(config[key]).exists():
+        if not Path(config[key]).expanduser().resolve().exists():
             logging.error(
                 "{} has been enabled with a path that doesn't exist, check the path.".format(
                     key
@@ -1142,6 +1142,9 @@ def pyfhd_logger(pyfhd_config: dict) -> Tuple[logging.Logger, Path]:
     if pyfhd_config["get_sample_data"]:
         output_dir = Path(pyfhd_config["output_path"])
     else:
+        pyfhd_config["output_path"] = (
+            Path(pyfhd_config["output_path"]).expanduser().resolve()
+        )
         output_dir = Path(pyfhd_config["output_path"], dir_name)
     if Path.is_dir(output_dir):
         output_dir_exists = True
@@ -1217,6 +1220,7 @@ def pyfhd_setup(options: argparse.Namespace) -> Tuple[dict, logging.Logger]:
     pyfhd_config["output_dir"] = output_dir
     pyfhd_config["top_level_dir"] = str(output_dir).split("/")[-1]
     # Check input_path exists and obs_id uvfits and metafits files exist (Error)
+    pyfhd_config["input_path"] = Path(pyfhd_config["input_path"]).expanduser().resolve()
     if not pyfhd_config["input_path"].exists():
         logger.error(
             "{} doesn't exist, please check your input path".format(options.input_path)
@@ -1272,14 +1276,15 @@ def pyfhd_setup(options: argparse.Namespace) -> Tuple[dict, logging.Logger]:
         pyfhd_config["interpolate_kernel"] = False
 
     # If the user has set a beam file, check it exists (Error)
-    if (
-        pyfhd_config["beam_file_path"] is not None
-        and not Path(pyfhd_config["beam_file_path"]).exists()
-    ):
-        logger.error(
-            f"Beam file {pyfhd_config['beam_file_path']} does not exist, please check your input path"
+    if pyfhd_config["beam_file_path"] is not None:
+        pyfhd_config["beam_file_path"] = (
+            Path(pyfhd_config["beam_file_path"]).expanduser().resolve()
         )
-        errors += 1
+        if not Path(pyfhd_config["beam_file_path"]).exists():
+            logger.error(
+                f"Beam file {pyfhd_config['beam_file_path']} does not exist, please check your input path"
+            )
+            errors += 1
 
     if pyfhd_config["beam_file_path"] is None:
         logger.info("No beam file was set, PyFHD will calculate the beam.")
@@ -1384,6 +1389,9 @@ def pyfhd_setup(options: argparse.Namespace) -> Tuple[dict, logging.Logger]:
     # if importing model visiblities from a uvfits file, check that file
     # exists
     if pyfhd_config["model_file_path"]:
+        pyfhd_config["model_file_path"] = (
+            Path(pyfhd_config["model_file_path"]).expanduser().resolve()
+        )
         errors += _check_file_exists(pyfhd_config, "model_file_path")
 
     if pyfhd_config["model_file_path"] == "sav":

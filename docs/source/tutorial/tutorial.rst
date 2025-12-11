@@ -507,6 +507,9 @@ likely you'll need to adjust the default configuration file to suit your needs. 
 
   `pyfhd.yaml <https://raw.githubusercontent.com/EoRImaging/PyFHD/refs/heads/main/PyFHD/resources/config/pyfhd.yaml>`_
 
+  Note that to provide a ``None`` input in the yaml you must use ``~`` or ``null``
+  as those are translated to ``None`` when yamls are read into python.
+
 Some files can be discovered automatically through the ``input-path`` option of ``PyFHD`` so read through the usage help text to work 
 out how you wish to configure your input. ``PyFHD`` is rather flexible on how you do your input
 as many of the files you may require can be in completely separate directories.
@@ -1388,7 +1391,7 @@ are not complete (for example the model doesn't also create the params file), bu
     dim = H5D_READ(dim)
     fbin_i = H5D_OPEN(file_id, "fbin_i")
     fbin_i = H5D_READ(fbin_i)
-    fnorm = H5D_OPEN(file_id, "fnorm")
+    fnorm = H5D_OPEN(file_id, "freq_norm")
     fnorm = H5D_READ(fnorm)
     freq = H5D_OPEN(file_id, "freq")
     freq = H5D_READ(freq)

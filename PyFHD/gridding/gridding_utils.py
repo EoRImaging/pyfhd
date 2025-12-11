@@ -300,7 +300,7 @@ def dirty_image_generate(
     logger: Logger,
     uniform_filter_uv: NDArray[np.float64] | None = None,
     mask: NDArray[np.integer] | None = None,
-    baseline_threshold: int | float = 0,
+    baseline_threshold: int | float | None = None,
     normalization: float | NDArray[np.float64] | None = None,
     resize: int | None = None,
     width_smooth: int | float | None = None,
@@ -330,7 +330,7 @@ def dirty_image_generate(
     mask : NDArray[np.integer] | None, optional
         A 2D {u,v} mask to apply before image creation, by default None
     baseline_threshold : int | float, optional
-        The maximum baseline length to include in units of pixels, by default 0
+        The maximum baseline length to include in units of pixels, default None
     normalization : float | NDArray[np.float64] | None, optional
         A value by which to normalize the image by, by default None
     resize : int | None, optional

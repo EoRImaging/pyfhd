@@ -105,18 +105,36 @@ def import_vis_model_from_sav(
     params_model : dict
         The parameters for said model used for flagging
     """
+    fhd_subdirs = {
+        "params": "metadata",
+        "vis": "vis_data",
+    }
+
     try:
         path = Path(
             pyfhd_config["model_file_path"], f"{pyfhd_config['obs_id']}_params.sav"
         )
+        if not path.exists():
+            path = Path(
+                pyfhd_config["model_file_path"],
+                fhd_subdirs["params"],
+                f"{pyfhd_config['obs_id']}_params.sav",
+            )
         params_model = readsav(path)
         params_model = recarray_to_dict(params_model.params)
         # Read in the first polarization from pol_names
         pol_i = 0
+        vis_path_parts = [pyfhd_config["model_file_path"]]
         path = Path(
-            pyfhd_config["model_file_path"],
+            *vis_path_parts,
             f"{pyfhd_config['obs_id']}_vis_model_{obs['pol_names'][pol_i]}.sav",
         )
+        if not path.exists():
+            vis_path_parts = [pyfhd_config["model_file_path"], fhd_subdirs["vis"]]
+            path = Path(
+                *vis_path_parts,
+                f"{pyfhd_config['obs_id']}_vis_model_{obs['pol_names'][pol_i]}.sav",
+            )
         curr_vis_model = readsav(path)
         if isinstance(curr_vis_model, dict):
             curr_vis_model = curr_vis_model["vis_model_ptr"]
@@ -132,7 +150,7 @@ def import_vis_model_from_sav(
         vis_model_arr[pol_i] = curr_vis_model
         for pol_i in range(1, obs["n_pol"]):
             path = Path(
-                pyfhd_config["model_file_path"],
+                *vis_path_parts,
                 f"{pyfhd_config['obs_id']}_vis_model_{obs['pol_names'][pol_i]}.sav",
             )
             curr_vis_model = readsav(path)
