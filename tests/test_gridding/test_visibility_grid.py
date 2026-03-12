@@ -167,12 +167,12 @@ def test_visibility_grid(
     # Format the indexing arrays if needed
     if h5_before["fi_use"] is not None and h5_before["fi_use"].size == 1:
         new_arr = np.zeros(1, dtype=np.int64)
-        new_arr[0] = h5_before["fi_use"]
+        new_arr[0] = h5_before["fi_use"][0]
         h5_before["fi_use"] = new_arr
 
     if h5_before["bi_use"] is not None and h5_before["bi_use"].size == 1:
         new_arr = np.zeros(1, dtype=np.int64)
-        new_arr[0] = h5_before["bi_use"]
+        new_arr[0] = h5_before["bi_use"][0]
         h5_before["bi_use"] = new_arr
 
     obs = recarray_to_dict(h5_before["obs"])
