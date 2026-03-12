@@ -71,7 +71,6 @@ def extract_header(
     pyfhd_header["real_index"] = 0
     pyfhd_header["imaginary_index"] = 1
     pyfhd_header["weights_index"] = 2
-    pyfhd_header["n_tile"] = 128
     pyfhd_header["naxis"] = params_header["naxis"]
     pyfhd_header["n_params"] = params_header["pcount"]
     pyfhd_header["n_baselines"] = params_header["gcount"]
@@ -122,12 +121,17 @@ def extract_header(
     try:
         location = EarthLocation.of_site(pyfhd_config["instrument"])
     except astropy.coordinates.errors.UnknownSiteException:
-        # If the site isn't known then select MWA, which no longer uses inbuilt corrdinates from the FHD repo.
-        logger.info(
-            f"Failed to load in the {pyfhd_config['instrument']} instrument location from astropy. If lon/lat/alt are not in the UVFITS things will fail."
-        )
-        # Can also do MWA or Murchison Widefield Array
-        location = EarthLocation("mwa")
+        # try using pyuvdata
+        try:
+            from pyuvdata.telescopes import known_telescope_location
+
+            location = known_telescope_location(pyfhd_config["instrument"])
+        except (ImportError, ValueError):
+            logger.info(
+                f"Failed to load in the {pyfhd_config['instrument']} instrument "
+                "location from astropy or pyuvdata. If lon/lat/alt are not in "
+                "the UVFITS things will fail."
+            )
 
     # These are all non-standard uvfits keywords. This information is stored in
     # the antenna table. See pyuvdata for the right way to do this.
@@ -288,7 +292,7 @@ def create_params(
             if tile_B_test > 1:
                 if baseline_min % 2 == 1:
                     antenna_mod_index /= 2 ** np.floor(np.log(tile_B_test) / np.log(2))
-            # Tile numbers start from 1
+            # antenna numbers start from 1
             params["antenna1"] = np.floor(params["baseline_arr"] / antenna_mod_index)
             params["antenna2"] = np.fix(params["baseline_arr"] % antenna_mod_index)
 

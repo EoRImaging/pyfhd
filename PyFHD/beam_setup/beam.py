@@ -46,7 +46,11 @@ def create_psf(obs: dict, pyfhd_config: dict, logger: Logger) -> dict | File:
         or a h5py File object if lazy loading is enabled.
     """
 
-    if pyfhd_config["beam_file_path"] is None:
+    if (
+        pyfhd_config["uvbeam_file_path"] is not None
+        or pyfhd_config["analytic_beam_yaml"] is not None
+        or pyfhd_config["beam_file_path"] is None
+    ):
         logger.info(
             "PyFHD is using pyuvdata to set up the beam. "
             "Please note, gaussian decomp for MWA is not implemented yet."
@@ -111,7 +115,6 @@ def create_psf(obs: dict, pyfhd_config: dict, logger: Logger) -> dict | File:
             + np.floor(psf["image_dim"] / 2)
         )
 
-        freq_center = antenna["freq"][0]
         primary_beam_area = np.zeros([obs["n_pol"], obs["n_freq"]], dtype=np.float64)
         primary_beam_sq_area = np.zeros([obs["n_pol"], obs["n_freq"]], dtype=np.float64)
         ant_a_list = obs["baseline_info"]["tile_a"][0 : obs["n_baselines"]]

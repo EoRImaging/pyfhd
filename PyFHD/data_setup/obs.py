@@ -52,7 +52,7 @@ def create_obs(
     obs["n_pol"] = (
         pyfhd_config["n_pol"] if pyfhd_config["n_pol"] else pyfhd_header["n_pol"]
     )
-    obs["n_tile"] = pyfhd_header["n_tile"]
+    obs["n_tile"] = int(np.union1d(params["antenna1"], params["antenna2"]).size)
     obs["n_freq"] = pyfhd_header["n_freq"]
     obs["n_freq_flag"] = 0
     obs["instrument"] = pyfhd_config["instrument"]
@@ -64,10 +64,10 @@ def create_obs(
     bin_width = np.empty(obs["n_time"])
     if obs["n_time"] > 1:
         bin_width[0 : obs["n_time"]] = b0i + 1
+        b0i_range = np.arange(1, obs["n_time"])
+        bin_width[b0i_range] = b0i[b0i_range] - b0i[b0i_range - 1]
     else:
-        bin_width = time.size
-    b0i_range = np.arange(1, obs["n_time"])
-    bin_width[b0i_range] = b0i[b0i_range] - b0i[b0i_range - 1]
+        bin_width[0] = time.size
     baseline_info["bin_offset"] = np.zeros(obs["n_time"], dtype=np.int64)
     if obs["n_time"] > 1:
         baseline_info["bin_offset"][1:] = np.cumsum(bin_width[: obs["n_time"] - 1])
@@ -101,6 +101,7 @@ def create_obs(
     if antenna_flag:
         # 256 tile upper limit is hard-coded in CASA format
         # these tile numbers have been verified to be correct
+        # TODO: not clear that this works for more than 256 ants. e.g. LWA
         baseline_min = np.min(params["baseline_arr"])
         exponent = np.log(np.min(baseline_min)) / np.log(2)
         antenna_mod_index = 2 ** np.floor(exponent)

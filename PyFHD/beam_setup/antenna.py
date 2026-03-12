@@ -1,16 +1,19 @@
 import importlib_resources
-import numpy as np
-from numpy.typing import NDArray
 from logging import Logger
+from typing import Literal
+
+import astropy
+import numpy as np
 from astropy.constants import c
 from astropy.coordinates import SkyCoord, EarthLocation
 from astropy import units
-from scipy.interpolate import interp1d
-from PyFHD.pyfhd_tools.unit_conv import pixel_to_radec, radec_to_altaz
-from pyuvdata import ShortDipoleBeam, BeamInterface, UVBeam
-from pyuvdata.analytic_beam import AnalyticBeam
-from typing import Literal
 from astropy.time import Time
+from numpy.typing import NDArray
+from pyuvdata import BeamInterface, UVBeam
+from pyuvdata.analytic_beam import AnalyticBeam
+from scipy.interpolate import interp1d
+
+from PyFHD.pyfhd_tools.unit_conv import pixel_to_radec, radec_to_altaz
 
 
 def init_beam(obs: dict, pyfhd_config: dict, logger: Logger) -> dict:
@@ -164,7 +167,19 @@ def init_beam(obs: dict, pyfhd_config: dict, logger: Logger) -> dict:
     psf["pix_horizon"] = obs["dimension"] / psf["scale"]
     psf["superres_dim"] = psf["dim"] * psf["resolution"]
 
-    location = EarthLocation.of_site(obs["instrument"])
+    try:
+        location = EarthLocation.of_site(obs["instrument"])
+    except astropy.coordinates.errors.UnknownSiteException:
+        # try using pyuvdata
+        try:
+            from pyuvdata.telescopes import known_telescope_location
+
+            location = known_telescope_location(obs["instrument"])
+        except (ImportError, ValueError):
+            logger.info(
+                f"Failed to load in the {obs["instrument"]} instrument "
+                "location from astropy or pyuvdata. Cannot set up beam."
+            )
 
     # Get the zenith angle and azimuth angle arrays
     xvals_celestial, yvals_celestial = np.meshgrid(
@@ -229,31 +244,63 @@ def init_beam(obs: dict, pyfhd_config: dict, logger: Logger) -> dict:
     # Save some memory by deleting the unused arrays
     del alt_arr, az_arr, valid_i
 
-    if pyfhd_config["instrument"] == "mwa":
-        mwa_beam_file = importlib_resources.files(
-            "PyFHD.resources.instrument_config"
-        ).joinpath("mwa_full_embedded_element_pattern.h5")
-        if not mwa_beam_file.exists():
-            # Download the MWA beam file if it does not exist
-            raise FileNotFoundError(
-                f"MWA beam file {mwa_beam_file} does not exist. "
-                "Please download it from http://ws.mwatelescope.org/static/mwa_full_embedded_element_pattern.h5 into the."
-                f"directory {mwa_beam_file.parent}"
-            )
+    if pyfhd_config["analytic_beam_yaml"] is not None:
+        beam = pyfhd_config["analytic_beam_yaml"]
+    else:
         # only read in the range of beam frequencies we need. add a buffer
         # to ensure that we have enough outside our range for interpolation
-        freq_buffer = 2e6
-        freq_range = [
-            np.min(obs["baseline_info"]["freq"]) - freq_buffer,
-            np.max(obs["baseline_info"]["freq"]) + freq_buffer,
-        ]
-        beam = UVBeam.from_file(
-            mwa_beam_file, delays=obs["delays"], freq_range=freq_range
-        )
-    # If you wish to add a different insturment, do it by adding a new elif here
-    else:
-        # Do an analytic beam as a placeholder
-        beam = ShortDipoleBeam()
+        uvbeam_kwargs = {}
+        if pyfhd_config["instrument"] == "mwa":
+            if pyfhd_config["uvbeam_freq_buffer"] is None:
+                pyfhd_config["uvbeam_freq_buffer"] = 2e6
+            uvbeam_kwargs["delays"] = obs["delays"]
+
+        if pyfhd_config["uvbeam_freq_buffer"] is not None:
+            freq_range = [
+                np.min(obs["baseline_info"]["freq"])
+                - pyfhd_config["uvbeam_freq_buffer"],
+                np.max(obs["baseline_info"]["freq"])
+                + pyfhd_config["uvbeam_freq_buffer"],
+            ]
+            uvbeam_kwargs["freq_range"] = freq_range
+
+        # select above the horizon (this only does something for beamfits files)
+        # but it saves some memory in that case
+        uvbeam_kwargs["za_range"] = [0, 90.0]
+
+        if pyfhd_config["uvbeam_file_path"] is not None:
+            beam = UVBeam.from_file(pyfhd_config["uvbeam_file_path"], **uvbeam_kwargs)
+        elif pyfhd_config["instrument"] == "mwa":
+            # fall back to looking for the MWA beam in resources folder (older pattern)
+            mwa_beam_file = importlib_resources.files(
+                "PyFHD.resources.instrument_config"
+            ).joinpath("mwa_full_embedded_element_pattern.h5")
+            if not mwa_beam_file.exists():
+                # Download the MWA beam file if it does not exist
+                raise FileNotFoundError(
+                    f"MWA beam file {mwa_beam_file} does not exist. "
+                    "Please download it from http://ws.mwatelescope.org/static/mwa_full_embedded_element_pattern.h5 into the."
+                    f"directory {mwa_beam_file.parent}"
+                )
+            beam = UVBeam.from_file(mwa_beam_file, **uvbeam_kwargs)
+
+        # check for nans in beam. If they can be removed by a horizon cut do it.
+        if np.any(np.isnan(beam.data_array)):
+            if beam.pixel_coordinate_system != "healpix":
+                above_hor_inc = np.nonzero(beam.axis2_array > (np.pi / 2))[0]
+                above_hor_exc = np.nonzero(beam.axis2_array >= (np.pi / 2))[0]
+                if not np.any(np.isnan(beam.data_array[above_hor_inc])):
+                    logger.info("Cutting the beam below the horizon to remove NaNs.")
+                    beam.select(axis2_inds=above_hor_inc)
+                elif not np.any(np.isnan(beam.data_array[above_hor_exc])):
+                    logger.info(
+                        "Cutting the beam at and below the horizon to remove NaNs."
+                    )
+                    beam.select(axis2_inds=above_hor_exc)
+                else:
+                    raise ValueError(
+                        "UVBeam object has NaNs in the data array above the horizon."
+                    )
 
     # Get the jones matrix for the antenna
     # shape is: (number of vector directions (usually 2), number of feeds (usually 2),
