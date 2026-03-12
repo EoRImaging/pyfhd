@@ -14,6 +14,7 @@ def data_dir():
 
 @pytest.mark.github_actions
 def test_weight_invert_one():
+    "This checks weight invert for a float64 array that is 2048x2048."
     data_dir = importlib_resources.files("PyFHD.resources.test_data").joinpath(
         "pyfhd_tools", "weight_invert"
     )
@@ -28,6 +29,7 @@ def test_weight_invert_one():
 
 
 def test_weight_invert_two(data_dir):
+    "This checks weight invert for a complex128 array that is 2048x2048."
     threshold, weights, expected_result = get_data_items(
         data_dir,
         "visibility_grid_input_threshold_2.npy",
@@ -39,6 +41,7 @@ def test_weight_invert_two(data_dir):
 
 
 def test_weight_invert_three(data_dir):
+    "This checks weight invert for a complex128 array that is 2048x2048."
     threshold, weights, expected_result, abs = get_data_items(
         data_dir,
         "visibility_grid_input_threshold_3.npy",
@@ -51,6 +54,7 @@ def test_weight_invert_three(data_dir):
 
 
 def test_weight_invert_four(data_dir):
+    "This checks weight invert for a float64 array that is 2048x2048."
     weights, expected_result = get_data_items(
         data_dir,
         "visibility_grid_input_weights_4.npy",
@@ -61,6 +65,7 @@ def test_weight_invert_four(data_dir):
 
 
 def test_weight_invert_five(data_dir):
+    "This checks weight invert for an f4 array read from IDL sav files that is 2048x2048."
     weights, expected_result = get_data_sav(data_dir, "input_5.sav", "output_5.sav")
     result = weight_invert(weights)
     assert np.array_equal(result, expected_result)
