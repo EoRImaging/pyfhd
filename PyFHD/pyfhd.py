@@ -134,8 +134,12 @@ def main():
 
     pyfhd_successful = False
     try:
-        checkpoint_name = pyfhd_config["description"]
-        if pyfhd_config["description"] is None or pyfhd_config["description"] == "":
+        if (
+            pyfhd_config["description"] is not None
+            and pyfhd_config["description"] != ""
+        ):
+            checkpoint_name = pyfhd_config["description"] + "_" + pyfhd_config["obs_id"]
+        else:
             checkpoint_name = pyfhd_config["obs_id"]
 
         if pyfhd_config["save_checkpoints"]:
@@ -148,44 +152,45 @@ def main():
                 pyfhd_config["checkpoint_dir"],
                 f"{checkpoint_name}_obs_checkpoint.h5",
             )
-            if (
-                pyfhd_config["obs_checkpoint"] is not None
-                and not obs_checkpoint_file.exists()
-            ):
+            if pyfhd_config["obs_checkpoint"] and not obs_checkpoint_file.exists():
                 logger.warning(
                     "obs_checkpoint is set but obs checkpoint file does not exist. Recalculating obs."
                 )
-                pyfhd_config["obs_checkpoint"] = None
+                pyfhd_config["obs_checkpoint"] = False
 
             cal_checkpoint_file = Path(
                 pyfhd_config["checkpoint_dir"],
                 f"{checkpoint_name}_calibrate_checkpoint.h5",
             )
             if (
-                pyfhd_config["calibrate_checkpoint"] is not None
+                pyfhd_config["calibrate_checkpoint"]
                 and not cal_checkpoint_file.exists()
             ):
                 logger.warning(
                     "calibrate_checkpoint is set but cal checkpoint file does not exist. Recalculating cal."
                 )
-                pyfhd_config["calibrate_checkpoint"] = None
+                pyfhd_config["calibrate_checkpoint"] = False
 
             grid_checkpoint_file = Path(
                 pyfhd_config["checkpoint_dir"],
                 f"{checkpoint_name}_gridding_checkpoint.h5",
             )
             if (
-                pyfhd_config["gridding_checkpoint"] is not None
+                pyfhd_config["gridding_checkpoint"]
                 and not grid_checkpoint_file.exists()
             ):
                 logger.warning(
                     "gridding_checkpoint is set but grid checkpoint file does not exist. Recalculating grid."
                 )
-                pyfhd_config["gridding_checkpoint"] = None
+                pyfhd_config["gridding_checkpoint"] = False
+        else:
+            pyfhd_config["obs_checkpoint"] = False
+            pyfhd_config["calibrate_checkpoint"] = False
+            pyfhd_config["gridding_checkpoint"] = False
 
         if (
-            pyfhd_config["obs_checkpoint"] is None
-            and pyfhd_config["calibrate_checkpoint"] is None
+            not pyfhd_config["obs_checkpoint"]
+            and not pyfhd_config["calibrate_checkpoint"]
         ):
             header_start = time.time()
             # Get the header
@@ -280,10 +285,7 @@ def main():
 
         # If the calibration checkpoint exists, load it now before loading in the beam
         # to get the observation metadata and visibility parameters
-        if (
-            pyfhd_config["calibrate_checkpoint"] is not None
-            and cal_checkpoint_file.exists()
-        ):
+        if pyfhd_config["calibrate_checkpoint"]:
             cal_checkpoint = load(cal_checkpoint_file, logger=logger)
             obs = cal_checkpoint["obs"]
             params = cal_checkpoint["params"]
@@ -306,8 +308,8 @@ def main():
 
         # Check if the calibrate checkpoint has been used, if not run the calibration steps
         if (
-            pyfhd_config["calibrate_checkpoint"] is None
-            or not cal_checkpoint_file.exists()
+            not pyfhd_config["calibrate_checkpoint"]
+            and not pyfhd_config["gridding_checkpoint"]
         ):
             if pyfhd_config["deproject_w_term"] is not None:
                 w_term_start = time.time()
@@ -502,11 +504,7 @@ def main():
             # only one value
             pyfhd_config["beam_per_baseline"] = False
 
-        if (
-            pyfhd_config["recalculate_grid"]
-            or pyfhd_config["gridding_checkpoint"] is None
-            or not grid_checkpoint_file.exists()
-        ):
+        if pyfhd_config["recalculate_grid"] or not pyfhd_config["gridding_checkpoint"]:
             grid_start = time.time()
             image_uv = np.empty(
                 (obs["n_pol"], obs["elements"], obs["dimension"]), dtype=np.complex128
@@ -605,18 +603,17 @@ def main():
             grid_end = time.time()
             _print_time_diff(grid_start, grid_end, "Visibilities gridded", logger)
         else:
-            if pyfhd_config["gridding_checkpoint"]:
-                grid_checkpoint = load(grid_checkpoint_file, logger=logger)
-                image_uv = grid_checkpoint["image_uv"]
-                weights_uv = grid_checkpoint["weights_uv"]
-                variance_uv = grid_checkpoint["variance_uv"]
-                uniform_filter_uv = grid_checkpoint["uniform_filter_uv"]
-                if "model_uv" in grid_checkpoint:
-                    model_uv = grid_checkpoint["model_uv"]
-                del grid_checkpoint
-                logger.info(
-                    f"Checkpoint Loaded: The Gridded UV Planes loaded from {Path(pyfhd_config['output_dir'], 'gridding_checkpoint.h5')}"
-                )
+            grid_checkpoint = load(grid_checkpoint_file, logger=logger)
+            image_uv = grid_checkpoint["image_uv"]
+            weights_uv = grid_checkpoint["weights_uv"]
+            variance_uv = grid_checkpoint["variance_uv"]
+            uniform_filter_uv = grid_checkpoint["uniform_filter_uv"]
+            if "model_uv" in grid_checkpoint:
+                model_uv = grid_checkpoint["model_uv"]
+            del grid_checkpoint
+            logger.info(
+                f"Checkpoint Loaded: The Gridded UV Planes loaded from {Path(pyfhd_config['output_dir'], 'gridding_checkpoint.h5')}"
+            )
 
         # Call quickview to save the all the variables if set in the config. Also create dirty images and save
         # FITS files with the dirty images on a per polarization basis

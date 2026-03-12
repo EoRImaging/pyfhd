@@ -233,20 +233,20 @@ def pyfhd_parser():
     )
     checkpoints.add_argument(
         "--obs-checkpoint",
-        default=None,
-        type=Path,
+        default=False,
+        action=OrderedBooleanOptionalAction,
         help="Load the checkpoint just after creating the observation metadata dictionary, should contain the observation metadata dictionary, uncalibrated visibility parameters, array and weights. If calibrate-checkpoint has been set, then obs-checkpoint will be ignored",
     )
     checkpoints.add_argument(
         "--calibrate-checkpoint",
-        default=None,
-        type=Path,
+        default=False,
+        action=OrderedBooleanOptionalAction,
         help="Load the checkpoint after calibration containing the observation metadata dictionary with flagged tiles and frequencies, the calibration dictionary containing the gains and the calibrated visibility parameters, model, array and weights.",
     )
     checkpoints.add_argument(
         "--gridding-checkpoint",
-        default=None,
-        type=Path,
+        default=False,
+        action=OrderedBooleanOptionalAction,
         help="Load the checkpoint after gridding containing the gridded uv planes for the image, weights, variance and filter, with an updated observation metadata dictionary. Should be used in conjunction with the calibrate-checkpoint option",
     )
 
