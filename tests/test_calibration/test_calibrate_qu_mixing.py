@@ -80,14 +80,12 @@ def test_qu_mixing(before_file, after_file):
     """Runs the test on `calibrate_qu_mixing` - reads in the data in `data_loc`,
     and then calls `calibrate_qu_mixing`, checking the outputs match expectations"""
     if before_file == None or after_file == None:
-        pytest.skip(
-            f""""This test has been skipped because the test was listed 
+        pytest.skip(f""""This test has been skipped because the test was listed 
                     in the skipped tests due to FHD not outputting them: {skip_tests}.
                     In this case it as due to the LA_LEAST_SQUARES differences
                     compared to np.linalg.lstsq which doesn't use double precision
                     by default which for some reason makes a difference for values
-                    close to 0 in single precision."""
-        )
+                    close to 0 in single precision.""")
 
     h5_before = load(before_file)
     expected_calc_phase = load(after_file)
