@@ -183,7 +183,8 @@ def init_beam(obs: dict, pyfhd_config: dict, logger: Logger) -> dict:
     )
     ra_arr, dec_arr = pixel_to_radec(xvals_celestial, yvals_celestial, obs["astr"])
     del xvals_celestial, yvals_celestial
-    valid_i = np.where(np.isfinite(ra_arr))
+    # Only keep the pixels that are above the horizon to save memory
+    valid_i = np.nonzero(np.isfinite(ra_arr))
     ra_arr = ra_arr[valid_i]
     dec_arr = dec_arr[valid_i]
     alt_arr, az_arr = radec_to_altaz(
@@ -194,8 +195,28 @@ def init_beam(obs: dict, pyfhd_config: dict, logger: Logger) -> dict:
         location.height.value,
         jdate_use,
     )
+    # astropy's WCS is being used to go from x/y grid values to RA/Dec
+    # then using SkyCoord to go from RA/Dec to alt/az
+    # the first step should drop pixels beyond the horizon, but occasionally a
+    # few pixels survive that step but have negative altitudes after the second
+    # step which breaks things downstream. drop those pixels.
+    # TODO: understand this apparent disagreement between WCS & SkyCoord...
+    good_alt = np.nonzero(alt_arr >= 0.0)[0]
 
-    # Only keep the pixels that are above the horizon to save memory
+    # valid_i is a tuple with per-dimension indices.
+    valid_i = list(valid_i)
+    for ind, elem in enumerate(valid_i):
+        valid_i[ind] = elem[good_alt]
+    valid_i = tuple(valid_i)
+
+    ra_arr = ra_arr[good_alt]
+    dec_arr = dec_arr[good_alt]
+    alt_arr = alt_arr[good_alt]
+    az_arr = az_arr[good_alt]
+
+    # Save some memory by deleting the unused arrays
+    del ra_arr, dec_arr
+
     # Convert to radians for pyuvdata functions
     zenith_angle_arr = np.deg2rad(90 - alt_arr)
     azimuth_arr = np.deg2rad(az_arr)
@@ -206,7 +227,7 @@ def init_beam(obs: dict, pyfhd_config: dict, logger: Logger) -> dict:
     )
 
     # Save some memory by deleting the unused arrays
-    del ra_arr, dec_arr, alt_arr, az_arr
+    del alt_arr, az_arr, valid_i
 
     if pyfhd_config["instrument"] == "mwa":
         mwa_beam_file = importlib_resources.files(
