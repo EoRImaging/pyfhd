@@ -167,19 +167,9 @@ def init_beam(obs: dict, pyfhd_config: dict, logger: Logger) -> dict:
     psf["pix_horizon"] = obs["dimension"] / psf["scale"]
     psf["superres_dim"] = psf["dim"] * psf["resolution"]
 
-    try:
-        location = EarthLocation.of_site(obs["instrument"])
-    except astropy.coordinates.errors.UnknownSiteException:
-        # try using pyuvdata
-        try:
-            from pyuvdata.telescopes import known_telescope_location
-
-            location = known_telescope_location(obs["instrument"])
-        except (ImportError, ValueError):
-            logger.info(
-                f"Failed to load in the {obs["instrument"]} instrument "
-                "location from astropy or pyuvdata. Cannot set up beam."
-            )
+    location = EarthLocation.from_geodetic(
+        lon=obs["lon"], lat=obs["lat"], height=obs["alt"]
+    )
 
     # Get the zenith angle and azimuth angle arrays
     xvals_celestial, yvals_celestial = np.meshgrid(

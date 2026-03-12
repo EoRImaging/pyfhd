@@ -56,6 +56,12 @@ def create_obs(
     obs["n_freq"] = pyfhd_header["n_freq"]
     obs["n_freq_flag"] = 0
     obs["instrument"] = pyfhd_config["instrument"]
+
+    # keep location info for beam setup
+    obs["lon"] = pyfhd_header["lon"]
+    obs["lat"] = pyfhd_header["lat"]
+    obs["alt"] = pyfhd_header["alt"]
+
     obs["obsname"] = pyfhd_config["obs_id"]
     # Deal with the times
     time = params["time"]

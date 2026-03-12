@@ -7,7 +7,6 @@ from astropy.io.fits.header import Header
 from pathlib import Path
 import logging
 from astropy.coordinates import EarthLocation
-import astropy
 from PyFHD.io.pyfhd_io import save
 
 
@@ -114,24 +113,14 @@ def extract_header(
             pyfhd_header["obsdec"] = params_header["dec"]
         else:
             pyfhd_header["obsdec"] = params_header[f"CRVAL{dec_axis}"]
-    # Put in locations of instrument from FITS file or from Astropy site data
-    # If you want to see the list of current site names using EarthLocation.get_site_names()
-    # If you want to use PyFHD with HERA in the future
-    # and make it compatible you might have to put in the lat/lon/alt yourself
-    try:
-        location = EarthLocation.of_site(pyfhd_config["instrument"])
-    except astropy.coordinates.errors.UnknownSiteException:
-        # try using pyuvdata
-        try:
-            from pyuvdata.telescopes import known_telescope_location
 
-            location = known_telescope_location(pyfhd_config["instrument"])
-        except (ImportError, ValueError):
-            logger.info(
-                f"Failed to load in the {pyfhd_config['instrument']} instrument "
-                "location from astropy or pyuvdata. If lon/lat/alt are not in "
-                "the UVFITS things will fail."
-            )
+    # The telescope location information in uvfits is stored in the antenna table
+    location = EarthLocation.from_geocentric(
+        x=antenna_header["arrayx"],
+        y=antenna_header["arrayx"],
+        z=antenna_header["arrayx"],
+        unit="m",
+    )
 
     # These are all non-standard uvfits keywords. This information is stored in
     # the antenna table. See pyuvdata for the right way to do this.
