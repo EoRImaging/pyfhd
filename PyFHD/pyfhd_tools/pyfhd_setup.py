@@ -607,11 +607,14 @@ def pyfhd_parser():
         type=str,
         choices=[
             "filter_uv_uniform",
-            "filter_uv_hanning",
-            "filter_uv_natural",
-            "filter_uv_radial",
-            "filter_uv_tapered_uniform",
-            "filter_uv_optimal",
+            # the following are not implemented yet. So the code just uses
+            # uniform but names the files to match the selection (so it lies)
+            # commenting these out as options to prevent confusion.
+            # "filter_uv_hanning",
+            # "filter_uv_natural",
+            # "filter_uv_radial",
+            # "filter_uv_tapered_uniform",
+            # "filter_uv_optimal",
         ],
         help="Weighting filter to be applied to resulting snapshot images and fits files. Replaces image_filter_fn from FHD",
     )
