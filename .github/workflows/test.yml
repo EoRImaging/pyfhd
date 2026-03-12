@@ -58,8 +58,8 @@ jobs:
     
       - name: Run tests
         run: |
-          uv run coverage run --branch --source=PyFHD -m pytest -m github_actions --html=pyfhd_report.html --self-contained-html
-          uv run coverage xml  -o ./coverage.xml
+          uv run ${{ matrix.uv-options }} coverage run --branch --source=PyFHD -m pytest -m github_actions --html=pyfhd_report.html --self-contained-html
+          uv run ${{ matrix.uv-options }} coverage xml  -o ./coverage.xml
 
       - name: check coverage report
         run: |
