@@ -156,7 +156,11 @@ def beam_image(
     """
 
     psf_dim = psf["dim"]
-    freq_norm = psf["freq_norm"]
+    if "freq_norm" in psf:
+        freq_norm = psf["freq_norm"]
+    elif "fnorm" in psf:
+        # handling for older files or imports from IDL FHD
+        freq_norm = psf["fnorm"]
     pix_horizon = psf["pix_horizon"]
     group_id = psf["id"][pol_i, 0, :]
     if "beam_gaussian_params" in psf:
