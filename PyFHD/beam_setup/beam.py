@@ -49,12 +49,8 @@ def create_psf(obs: dict, pyfhd_config: dict, logger: Logger) -> dict | File:
     if (
         pyfhd_config["uvbeam_file_path"] is not None
         or pyfhd_config["analytic_beam_yaml"] is not None
-        or pyfhd_config["beam_file_path"] is None
     ):
-        logger.info(
-            "PyFHD is using pyuvdata to set up the beam. "
-            "Please note, gaussian decomp for MWA is not implemented yet."
-        )
+        logger.info("PyFHD is using pyuvdata to set up the beam. ")
         antenna, psf, beam = init_beam(obs, pyfhd_config, logger)
         # TODO: we'll see if the +1 is necessary, IDL indexing thing
         n_freq_bin = np.max(obs["baseline_info"]["fbin_i"]) + 1
@@ -278,12 +274,12 @@ def create_psf(obs: dict, pyfhd_config: dict, logger: Logger) -> dict | File:
         )
 
         return psf
-    elif pyfhd_config["beam_file_path"].suffix == ".sav":
+    elif pyfhd_config["saved_beam_file_path"].suffix == ".sav":
         # Read in a sav file containing the psf structure as we expect from FHD
         logger.info(
             "Reading in a beam sav file probably will take a long time. You will require double the storage size of the sav file in RAM at least. Do some other work or maybe watch your favourite long movie, for example the extended edition of LOTR: Return of the King is 4 hours 10 minutes. Check back when the Battle of the Pelennor Fields has finished or roughly 3 hours in."
         )
-        beam = readsav(pyfhd_config["beam_file_path"], python_dict=True)
+        beam = readsav(pyfhd_config["saved_beam_file_path"], python_dict=True)
         psf = beam["psf"]
         # Delete the read in sav file, now that we got the psf, at this point we will have the psf size twice!
         del beam
@@ -304,31 +300,26 @@ def create_psf(obs: dict, pyfhd_config: dict, logger: Logger) -> dict | File:
         }
         # By default save the file in the same place as the original beam
         output_path = Path(
-            pyfhd_config["beam_file_path"].parent,
-            pyfhd_config["beam_file_path"].stem + ".h5",
+            pyfhd_config["saved_beam_file_path"].parent,
+            pyfhd_config["saved_beam_file_path"].stem + ".h5",
         )
         save(output_path, psf, "psf", logger=logger, to_chunk=to_chunk)
         # Since the psf is already in memory, return it
         return psf
     elif (
-        pyfhd_config["beam_file_path"].suffix == ".h5"
-        or pyfhd_config["beam_file_path"].suffix == ".hdf5"
+        pyfhd_config["saved_beam_file_path"].suffix == ".h5"
+        or pyfhd_config["saved_beam_file_path"].suffix == ".hdf5"
     ):
-        logger.info(f"Reading in the HDF5 file {pyfhd_config['beam_file_path']}")
+        logger.info(f"Reading in the HDF5 file {pyfhd_config['saved_beam_file_path']}")
         # If you selected to lazy load the beam, then psf will be a h5py File Object
         psf = load(
-            pyfhd_config["beam_file_path"],
+            pyfhd_config["saved_beam_file_path"],
             logger=logger,
             lazy_load=pyfhd_config["lazy_load_beam"],
         )
         return psf
-    elif pyfhd_config["beam_file_path"].suffix == ".fits":
-        # Read in a fits file, when you do I assume you probably will be translating
-        # FHD's beam setup while reading in a beam fits file.
-        logger.error("The ability to read in a beam fits hasn't been implemented yet")
-        sys.exit(1)
     raise ValueError(
-        f"Unknown beam file type {pyfhd_config['beam_file_path'].suffix}. "
+        f"Unknown beam file type {pyfhd_config['saved_beam_file_path'].suffix}. "
         "Please use a .sav, .h5, .hdf5 "
-        "If you meant for PyFHD to do the beam forming, please set the beam_file_path to None (~ in YAML)."
+        "If you meant for PyFHD to do the beam forming, please set the saved_beam_file_path to None (~ in YAML)."
     )

@@ -502,9 +502,9 @@ def pyfhd_parser():
     # Beam Setup Group
     beam.add_argument(
         "-b",
-        "--beam-file-path",
+        "--saved-beam-file-path",
         type=Path,
-        help="The path to the file containing a sav or fits file",
+        help="The path to an FHD written beam file (h5 or sav).",
     )
     beam.add_argument(
         "--uvbeam-file-path",
@@ -1314,24 +1314,24 @@ def pyfhd_setup(options: argparse.Namespace) -> Tuple[dict, logging.Logger]:
         pyfhd_config["interpolate_kernel"] = False
 
     # If the user has set a beam file, check it exists (Error)
-    if pyfhd_config["beam_file_path"] is not None:
+    if pyfhd_config["saved_beam_file_path"] is not None:
         if pyfhd_config["uvbeam_file_path"] is not None:
             logger.warning(
-                "Both beam_file_path and uvbeam_file_path are set. Using beam_file_path."
+                "Both saved_beam_file_path and uvbeam_file_path are set. Using saved_beam_file_path."
             )
             pyfhd_config["uvbeam_file_path"] = None
         if pyfhd_config["analytic_beam_yaml"] is not None:
             logger.warning(
-                "Both beam_file_path and analytic_beam_yaml are set. Using beam_file_path."
+                "Both saved_beam_file_path and analytic_beam_yaml are set. Using saved_beam_file_path."
             )
             pyfhd_config["analytic_beam_yaml"] = None
 
-        pyfhd_config["beam_file_path"] = (
-            Path(pyfhd_config["beam_file_path"]).expanduser().resolve()
+        pyfhd_config["saved_beam_file_path"] = (
+            Path(pyfhd_config["saved_beam_file_path"]).expanduser().resolve()
         )
-        if not Path(pyfhd_config["beam_file_path"]).exists():
+        if not Path(pyfhd_config["saved_beam_file_path"]).exists():
             logger.error(
-                f"Beam file {pyfhd_config['beam_file_path']} does not exist, please check your input path"
+                f"Beam file {pyfhd_config['saved_beam_file_path']} does not exist, please check your input path"
             )
             errors += 1
 
@@ -1339,7 +1339,7 @@ def pyfhd_setup(options: argparse.Namespace) -> Tuple[dict, logging.Logger]:
     if pyfhd_config["uvbeam_file_path"] is not None:
         if pyfhd_config["analytic_beam_yaml"] is not None:
             logger.warning(
-                "Both beam_file_path and analytic_beam_yaml are set. Using beam_file_path."
+                "Both uvbeam_file_path and analytic_beam_yaml are set. Using uvbeam_file_path."
             )
             pyfhd_config["analytic_beam_yaml"] = None
         pyfhd_config["uvbeam_file_path"] = (
@@ -1350,15 +1350,6 @@ def pyfhd_setup(options: argparse.Namespace) -> Tuple[dict, logging.Logger]:
                 f"UVBeam file {pyfhd_config['uvbeam_file_path']} does not exist, please check your input path"
             )
             errors += 1
-    elif (
-        pyfhd_config["analytic_beam_yaml"] is None
-        and pyfhd_config["beam_file_path"] is None
-        and pyfhd_config["instrument"] == "mwa"
-    ):
-        logger.info(
-            "No beam or uvbeam file was set, and instrument is MWA. PyFHD will "
-            "calculate the beam."
-        )
 
     if pyfhd_config["analytic_beam_yaml"] is not None:
         # do a little cleanup so it can be turned into an analytic beam
@@ -1377,6 +1368,13 @@ def pyfhd_setup(options: argparse.Namespace) -> Tuple[dict, logging.Logger]:
             raise ImportError(
                 "pyuvdata must be installed to use analytic beams"
             ) from ie
+
+    if (
+        pyfhd_config["saved_beam_file_path"] is None
+        and pyfhd_config["uvbeam_file_path"] is None
+        and pyfhd_config["analytic_beam_yaml"] is None
+    ):
+        logger.error("No beam file, uvbeam file or analytic beam was set.")
 
     # cal_bp_transfer when enabled should point to a file with a saved bandpass (Error)
     errors += _check_file_exists(pyfhd_config, "cal_bp_transfer")
