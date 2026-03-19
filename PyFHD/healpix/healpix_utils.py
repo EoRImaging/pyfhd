@@ -63,7 +63,7 @@ def healpix_cnv_generate(
     hpx_radius: float,
     pyfhd_config: dict,
     logger: Logger,
-    nside: float = None,
+    nside: int = None,
 ) -> dict:
     """
     Generate the HEALPix index/interpolation dictionary that is used to convert
@@ -87,7 +87,7 @@ def healpix_cnv_generate(
         PyFHD configuration settings
     logger : Logger
         PyFHD's Logger
-    nside : float
+    nside : int
         The HEALPix nside parameter, calculated based on the observation
         metadata if none provided. Defaults to None.
 
@@ -172,13 +172,19 @@ def healpix_cnv_generate(
         pix_sky = (
             4 * np.pi * ((180 / np.pi) ** 2) / np.prod(np.abs(obs["astr"]["cdelt"]))
         )
-        nside = 2 ** (np.ceil(np.log(np.sqrt(pix_sky / 12)) / np.log(2)))
+        nside = int(2 ** (np.ceil(np.log(np.sqrt(pix_sky / 12)) / np.log(2))))
+    else:
+        if not isinstance(nside, int):
+            if int(nside) == nside:
+                nside = int(nside)
+            else:
+                raise ValueError("nside must be an integer.")
 
     # If you wish to implement the keyword divide_pixel_area implement it here and
     # add it as an option inside pyfhd_config
 
     if hpx_inds is not None:
-        pix_coords = np.vstack(pix2vec(int(nside), hpx_inds)).T
+        pix_coords = np.vstack(pix2vec(nside, hpx_inds)).T
         pix_ra, pix_dec = vec2ang(pix_coords, lonlat=True)
         # This assume the refraction fix on FHD has been implemented
         xv_hpx, yv_hpx = radec_to_pixel(pix_ra, pix_dec, obs["astr"])
@@ -186,7 +192,7 @@ def healpix_cnv_generate(
         cen_coords = ang2vec(obs["obsra"], obs["obsdec"], lonlat=True)
         hpx_inds = query_disc(nside, cen_coords, hpx_radius)
         pix_coords = np.vstack(pix2vec(nside, hpx_inds)).T
-        pix_dec, pix_ra = vec2ang(pix_coords, lonlat=True)
+        pix_ra, pix_dec = vec2ang(pix_coords, lonlat=True)
         xv_hpx, yv_hpx = radec_to_pixel(pix_ra, pix_dec, obs["astr"])
         # slightly more restrictive boundary here ('LT' and 'GT' instead of 'LE' and 'GE')
         pix_i_use = np.where(
@@ -197,27 +203,35 @@ def healpix_cnv_generate(
         )
         xv_hpx = xv_hpx[pix_i_use]
         yv_hpx = yv_hpx[pix_i_use]
+        hpx_inds = hpx_inds[pix_i_use]
+        pix_ra = pix_ra[pix_i_use]
+        pix_dec = pix_dec[pix_i_use]
         if mask is not None:
-            hpx_mask00 = mask[np.floor(xv_hpx), np.floor(yv_hpx)]
-            hpx_mask01 = mask[np.floor(xv_hpx), np.ceil(yv_hpx)]
-            hpx_mask10 = mask[np.ceil(xv_hpx), np.floor(yv_hpx)]
-            hpx_mask11 = mask[np.ceil(xv_hpx), np.ceil(yv_hpx)]
+            hpx_mask00 = mask[
+                np.floor(xv_hpx).astype(int), np.floor(yv_hpx).astype(int)
+            ]
+            hpx_mask01 = mask[np.floor(xv_hpx).astype(int), np.ceil(yv_hpx).astype(int)]
+            hpx_mask10 = mask[np.ceil(xv_hpx).astype(int), np.floor(yv_hpx).astype(int)]
+            hpx_mask11 = mask[np.ceil(xv_hpx).astype(int), np.ceil(yv_hpx).astype(int)]
             hpx_mask = hpx_mask00 * hpx_mask01 * hpx_mask10 * hpx_mask11
             pix_i_use2 = np.nonzero(hpx_mask)
             xv_hpx = xv_hpx[pix_i_use2]
             yv_hpx = yv_hpx[pix_i_use2]
-            pix_i_use = pix_i_use[pix_i_use2]
-        hpx_inds = hpx_inds[pix_i_use]
+            hpx_inds = hpx_inds[pix_i_use2]
+            pix_ra = pix_ra[pix_i_use2]
+            pix_dec = pix_dec[pix_i_use2]
 
     # Test for pixels past the horizon. We don't need to be precise with this, so turn off precession, etc..
-    # Get the location from instrument name
-    location = EarthLocation.of_site(obs["instrument"])
+    # Get the location from obs structure
+    telescope_location = EarthLocation.from_geodetic(
+        lon=obs["lon"], lat=obs["lat"], height=obs["alt"]
+    )
     alt, _ = radec_to_altaz(
         pix_ra,
         pix_dec,
-        location.lat.value,
-        location.lon.value,
-        location.height.value,
+        telescope_location.lat.value,
+        telescope_location.lon.value,
+        telescope_location.height.value,
         obs["jd0"],
     )
     horizon_i = np.where(alt <= 0)

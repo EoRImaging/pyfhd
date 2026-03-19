@@ -140,7 +140,9 @@ def healpix_snapshot_cube_generate(
         n_iter = 1
         uvf_name = [""]
         obs_out["vis_noise"] = vis_noise_calc(obs_out, vis_arr, vis_weights)
-        bi_use = np.zeros(1, dtype=np.int64)
+        nb = vis_weights.shape[-1]
+        bi_use = (np.arange(nb, dtype=np.int64),)
+        vis_weights_use = vis_weights
 
     # Looks like this is set to False by default?
     residual_flag = obs_out["residual"]

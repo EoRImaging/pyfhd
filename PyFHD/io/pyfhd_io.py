@@ -286,6 +286,8 @@ def save_dataset(
             is_none = True
             # In the case we get something that is none, create empty dataset
             h5py_obj.create_dataset(key, dtype="b")
+        case str() | np.str_():
+            h5py_obj.create_dataset(key, data=np.bytes_(value))
         case _:
             try:
                 # Store the value in a single size dataset, used for ints, floats, strings etc
