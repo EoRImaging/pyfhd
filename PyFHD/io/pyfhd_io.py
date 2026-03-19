@@ -1,9 +1,11 @@
 import os
-import numpy as np
-import h5py
 from logging import Logger
 from pathlib import Path
 from typing import Any
+
+import h5py
+import numpy as np
+import yaml
 from numpy.typing import NDArray, DTypeLike
 from scipy.io import readsav
 
@@ -289,14 +291,18 @@ def save_dataset(
         case str() | np.str_():
             h5py_obj.create_dataset(key, data=np.bytes_(value))
         case _:
-            try:
-                # Store the value in a single size dataset, used for ints, floats, strings etc
-                h5py_obj.create_dataset(key, data=value)
-            except ValueError:
-                if logger is not None:
-                    logger.error(
-                        f"Failed to save {key}, the type of key was {type(value)}"
-                    )
+            if "analytic_beam" in key:
+                yaml_str = yaml.safe_dump(value)
+                h5py_obj.create_dataset(key, data=np.bytes_(yaml_str))
+            else:
+                try:
+                    # Store the value in a single size dataset, used for ints, floats, strings etc
+                    h5py_obj.create_dataset(key, data=value)
+                except ValueError:
+                    if logger is not None:
+                        logger.error(
+                            f"Failed to save {key}, the type of key was {type(value)}"
+                        )
     return is_none
 
 
