@@ -520,9 +520,11 @@ def pyfhd_parser():
         "If set, should be at least 2 * beam frequency resolution "
         "(if set too low, beam interpolation errors can occur).",
     )
+    # read it in as a string to decode later. Using type=yaml.safe_load doesn't
+    # work when there are multiple lines to specify the beam.
     beam.add_argument(
         "--analytic-beam-yaml",
-        type=yaml.safe_load,
+        type=str,
         help="The yaml specifier for a pyuvdata AnalyticBeam.",
     )
     beam.add_argument(
@@ -1053,7 +1055,23 @@ def write_collated_yaml_config(
                         #     outfile.write(f"{key} : {item}\n")
                         outfile.write(line)
                 else:
-                    outfile.write(f"{yaml_key} : '{pyfhd_config[key]}'\n")
+                    basic_write = False
+                    try:
+                        from pyuvdata.analytic_beam import AnalyticBeam
+
+                        if isinstance(pyfhd_config[key], AnalyticBeam):
+                            yaml_beam_repr = yaml.safe_dump(
+                                pyfhd_config[key], default_flow_style=False
+                            )
+                            yaml_beam_repr = "\n  ".join(yaml_beam_repr.split("\n"))
+                            outfile.write(f'{yaml_key} : "{yaml_beam_repr}"\n')
+                        else:
+                            basic_write = True
+                    except ImportError:
+                        basic_write = True
+
+                    if basic_write:
+                        outfile.write(f"{yaml_key} : '{pyfhd_config[key]}'\n")
 
 
 def pyfhd_logger(pyfhd_config: dict) -> Tuple[logging.Logger, Path]:
@@ -1341,6 +1359,24 @@ def pyfhd_setup(options: argparse.Namespace) -> Tuple[dict, logging.Logger]:
             "No beam or uvbeam file was set, and instrument is MWA. PyFHD will "
             "calculate the beam."
         )
+
+    if pyfhd_config["analytic_beam_yaml"] is not None:
+        # do a little cleanup so it can be turned into an analytic beam
+        temp = pyfhd_config["analytic_beam_yaml"]
+        temp = temp.replace(": - ", ":\n-")
+        temp = temp.replace("- ", "-")
+        temp = temp.replace(": ", ":")
+        temp = "\n".join(temp.split(" "))
+        temp = temp.replace(":", ": ")
+        temp = temp.replace("-", "- ")
+        try:
+            from pyuvdata.analytic_beam import AnalyticBeam  # noqa
+
+            pyfhd_config["analytic_beam_yaml"] = yaml.safe_load(temp)
+        except ImportError as ie:
+            raise ImportError(
+                "pyuvdata must be installed to use analytic beams"
+            ) from ie
 
     # cal_bp_transfer when enabled should point to a file with a saved bandpass (Error)
     errors += _check_file_exists(pyfhd_config, "cal_bp_transfer")
