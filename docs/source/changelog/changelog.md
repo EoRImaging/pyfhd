@@ -3,11 +3,46 @@
 ## Unreleased
 
 ### Breaking Changes!
+* UVBeam files must now be passed using the `uvbeam-file-path` option, which
+can take any path on the computer, rather than placing them in a folder in the
+repo and passing None to `beam_file-path`.
+* The `beam-file-path` configuration option has been renamed to `saved-beam-file-path`
+to avoid confusion with the new `uvbeam-file-path` option.
 
 ### New Features
+* UVBeams are fully and properly integrated. Beam decomposition is implemented
+in pyuvdata.UVBeam and just called directly.
+* New `uvbeam-file-path` and `uvbeam-freq-buffer` options in configuration.
+* Analytic beams (subclassed from pyuvdata.AnalyticBeam) are now supported. Use
+the new `analytic-beam-yaml` option to configure them.
 * Added handling for `~` in paths in config yamls.
 
 ### Bug Fixes
+* The telescope location is now extracted from the uvfits antenna table, rather
+than obtained from astropy's site list, preventing errors when the telescope
+is not listed in astropy's site list.
+* Fixed a bug in `beam_utils.beam_power` where the beam phase was calculated
+improperly, resulting in NaNs.
+* Fixed a bug in setting up the gridding kernel that resulted in the kernel not
+being centered on the uv space beam.
+* Fixed a bug where some pixels slightly below the horizon could be kept,
+resulting in beam interpolation errors.
+* Fixed a bug in beam setup where the FFT direction was wrong, resulting in
+incorrect beam normalization.
+* Fixed errors in the calculation of the beam squared area.
+* Fixed errors in converting antenna numbers to indices in `obs.create_obs`.
+* Fixed errors in calibration plotting with more than 128 antennas.
+* Fixed a bug when `split-ps-export` is set to False that resulted in gridding no data.
+* Fixed some bugs when `restrict-healpix-inds` is False that caused several errors.
+* Removed unimplemented image weighting options in `pyfhd_setup` that resulted in
+files claiming to have different image weighting than they actually had.
+* Fixed tile height calculation in the case where there is not a metafits file,
+e.g. for telescopes other than the MWA.
+* Fixed some indexing errors with newer versions of numpy in `vis_calibrate_subroutine`
+and `healpix_utils.healpix_cnv_generate`.
+* Fixed a problem in `pyfhd_io.save_dataset` where short antenna names caused
+h5py errors.
+* Fixed a bug in FITS file writing that caused deprecation warnings from astropy.
 * Fixed checkpointing to actually work.
 * Fixed a bug in the uvfits reader where it assumed the presence of "ra" and 
 "dec" header items which often present in MWA uvfits files but are non-standard.
