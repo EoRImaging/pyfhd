@@ -57,7 +57,7 @@ def create_obs(
     obs["n_pol"] = (
         pyfhd_config["n_pol"] if pyfhd_config["n_pol"] else pyfhd_header["n_pol"]
     )
-    obs["n_tile"] = int(np.union1d(params["antenna1"], params["antenna2"]).size)
+    obs["n_tile"] = pyfhd_header["n_tile"]
     obs["n_freq"] = pyfhd_header["n_freq"]
     obs["n_freq_flag"] = 0
     obs["instrument"] = pyfhd_config["instrument"]

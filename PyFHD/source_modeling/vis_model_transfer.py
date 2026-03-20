@@ -325,6 +325,7 @@ def flag_model_visibilities(
     # The highest time resolution data we'll be dealing with. If the offset is
     # less than half of this, could be error in calculations rather than an
     # actual time offset
+    # TODO: shouldn't this be derived from the time resolution of the data or model?
     min_integration = 0.5
 
     # Try to ascertain is the model is offset in time from the data

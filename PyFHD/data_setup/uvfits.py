@@ -70,6 +70,7 @@ def extract_header(
     pyfhd_header["real_index"] = 0
     pyfhd_header["imaginary_index"] = 1
     pyfhd_header["weights_index"] = 2
+    pyfhd_header["n_tile"] = antenna_header["naxis2"]
     pyfhd_header["naxis"] = params_header["naxis"]
     pyfhd_header["n_params"] = params_header["pcount"]
     pyfhd_header["n_baselines"] = params_header["gcount"]
