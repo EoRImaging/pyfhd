@@ -30,6 +30,7 @@ override-target-phasedec: ~
 # saved-beam-file-path: './input'
 # this is for a UVBeam readable file:
 uvbeam-file-path: './input'
+uvbeam-freq-buffer: 2e6
 # use this for an analytic beam (e.g. short dipole shown here)
 # analytic-beam-yaml : "!AnalyticBeam
 #   class: ShortDipoleBeam
