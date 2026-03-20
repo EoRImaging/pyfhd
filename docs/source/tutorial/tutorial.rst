@@ -762,7 +762,7 @@ Running calibration on the sample data
 
   pyfhd \
     --input-path "./input/1088285600_example/" \
-    --beam-file-path "./input/1088285600_example/gauss_beam_pointing0_167635008Hz.h5" \
+    --saved-beam-file-path "./input/1088285600_example/gauss_beam_pointing0_167635008Hz.h5" \
     --beam-offset-time 0 \
     --no-cable-bandpass-fit \
     --no-cal-reflection-hyperresolve \
@@ -823,7 +823,7 @@ the beam is inside the ``beams`` directory (not that we need it for this run, as
         --description 1091128160 \
         --model-file-type "uvfits" \
         --model-file-path "/path/to/input/models/1091128160/puma_LoBES_2s_80kHz_hbeam_1091128160.uvfits" \
-        --beam-file-path "/path/to/beams/decomp_beam_pointing0.h5" \
+        --saved-beam-file-path "/path/to/beams/decomp_beam_pointing0.h5" \
         --lazy-load-beam
 
 .. tip::
@@ -866,7 +866,7 @@ the beam is inside the ``beams`` directory (not that we need it for this run, as
     override-target-phasedec: ~
 
     # Beam Setup
-    beam-file-path: /path/to/beams/decomp_beam_pointing0.h5
+    saved-beam-file-path: /path/to/beams/decomp_beam_pointing0.h5
     lazy-load-beam: true
     recalculate-beam : true
     beam-clip-floor : true
@@ -1124,7 +1124,7 @@ This would be the same as runnning the command below:
   pyfhd \
     --input-path "./input/1088285600_example/" \
     --description "1088285600_gridding_example" \
-    --beam-file-path "./input/1088285600_example/gauss_beam_pointing0_167635008Hz.h5" \
+    --saved-beam-file-path "./input/1088285600_example/gauss_beam_pointing0_167635008Hz.h5" \
     --calibrate-checkpoint "./output/pyfhd_1088285600_example/checkpoints/1088285600_example_calibrate_checkpoint.h5" \
     --recalculate-grid \
     --image-filter 'filter_uv_uniform' \
@@ -1151,7 +1151,7 @@ Running Gridding with a full MWA observation
 In this observation we will run calibration and then use the results for gridding, you'll notice some more advanced options
 being used here. Such options like ``--digital-gain-jump-polyfit`` should only be used if you know that it's needed (although
 ``PyFHD`` will warn you if you try to use it on the wrong data). Also take notice that the beam is being loaded here, through
-the use of the ``--beam-file-path`` option, this is required for gridding to work. If you wish to learn more about the ``--lazy-load-beam``
+the use of the ``--saved-beam-file-path`` option, this is required for gridding to work. If you wish to learn more about the ``--lazy-load-beam``
 option refer to :ref:`lazy-loading` section below.
 
 .. code-block:: bash
@@ -1161,7 +1161,7 @@ option refer to :ref:`lazy-loading` section below.
       --input-path "/path/to/input/uvfits/1088281328" \
       --output-path "/path/to/output/" \
       --description 1088281328 \
-      --beam-file-path "path/to/beams/decomp_beam_pointing0.h5" \
+      --saved-beam-file-path "path/to/beams/decomp_beam_pointing0.h5" \
       --lazy-load-beam: true \
       --model-file-type "uvfits" \
       --model-file-path "./path/to/models/1088281328/puma_LoBES_2s_80kHz_hbeam_1088281328.uvfits" \
@@ -1690,14 +1690,45 @@ The most important options are the ``save-healpix-fits`` and the ``snapshot-heal
 
 Beam Setup
 ++++++++++
-The beam setup in ``PyFHD`` uses the ``UVBeam`` object from `pyuvdata`_ to get the ``Jones`` matrix and it's decomposition for the beam, and then ``FHD`` translation is used to create the representation of the beam
-in UV space. For the moment, PyFHD only supports using one beam per observation and does not currently support different beams for different antennas. Furthermore, more advanced features like gaussian decomp and
-many of the debugging options are not implemented, so there are plenty of opportunities to add to the ``beam_setup``, both in small and large pieces of code.
+There are several choices for how to set up a beam in ``PyFHD``, beams are required
+for gridding and de-gridding operations.
 
-You can test out the beam_setup by saving the MWA beam file (``mwa_full_embedded_element_pattern.h5``, downloaded from ``http://ws.mwatelescope.org/static/mwa_full_embedded_element_pattern.h5``)
-to the ``PyFHD/PyFHD/resources/instrument_config/`` folder and setting the ``beam-file-path`` to ``~`` in the yaml configuration file (translates to ``None`` in python) and setting the
-``recalculate-beam`` option to ``True``. You may run into memory limitations with your machine during testing, you can decrease memory use by setting ``beam-nfreq-avg`` to larger values
-(as high as the number of frequencies in your input file).
+The approach used in the sample data and the tutorial is to use a beam that is
+saved out of FHD (or pyFHD). To use this option, pass the beam file location
+using the ``saved-beam-file-path`` configuration option.
+
+The most common approach is to use the ``UVBeam`` object from `pyuvdata`_ to read
+in a beam ``Jones`` matrix and decompose it into the terms needed for FHD. Then
+``FHD`` translation is used to create the representation of the beam in UV space.
+To use this option, pass the beam file location using the ``uvbeam-file-path``
+configuration option. If you are using this option, you can also use the
+``uvbeam-freq-buffer`` to specify a buffer in Hz around the data frequency range
+to use when reading in the beam. It should be set to at least twice the frequency
+resolution of the beam (e.g. ``2e6`` is a reasonable value for the MWA beam,
+which has 1 MHz resolution). Setting the buffer too small can result in
+interpolation errors. If you do not set ``uvbeam-freq-buffer``, the full beam
+file will be read it, which can increase the memory usage.
+
+Finally you can use analytic beams that are sub-classes of the `pyuvdata`_
+``AnalyticBeam`` object (a number are built into pyuvdata but the infrastructure
+is extensible and writing your own analytic beam is straight forward).
+Note that analytic beams are currently sampled in image space and then Fourier
+Transformed to uv space in pyFHD. They are not used as analytic functions in uv space.
+To use this option, you must pass a yaml string enclosed in quotations to the
+``analytic-beam-yaml`` configuration option. Details on how to compose these
+yaml strings are in the `pyuvdata`_ documentation, but generally you must include
+the analytic beam class and any required parameters to initialize the beam.
+
+For the moment, PyFHD only supports using one beam per observation and does not
+currently support different beams for different antennas. Furthermore, more
+advanced features like gaussian decomp and many of the debugging options are not
+implemented, so there are plenty of opportunities to add to the ``beam_setup``,
+both in small and large pieces of code.
+
+You may run into memory limitations with your machine during testing, you can
+decrease memory use by setting ``beam-nfreq-avg`` to larger values
+(as high as the number of frequencies in your input file), at the cost of reduced
+accuracy in the frequency evolution of the beam.
 
 Deconvolution
 ++++++++++++++

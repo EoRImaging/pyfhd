@@ -241,8 +241,6 @@ def init_beam(obs: dict, pyfhd_config: dict, logger: Logger) -> dict:
         # to ensure that we have enough outside our range for interpolation
         uvbeam_kwargs = {}
         if pyfhd_config["instrument"] == "mwa":
-            if pyfhd_config["uvbeam_freq_buffer"] is None:
-                pyfhd_config["uvbeam_freq_buffer"] = 2e6
             uvbeam_kwargs["delays"] = obs["delays"]
 
         if pyfhd_config["uvbeam_freq_buffer"] is not None:

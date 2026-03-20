@@ -504,28 +504,40 @@ def pyfhd_parser():
         "-b",
         "--saved-beam-file-path",
         type=Path,
-        help="The path to an FHD written beam file (h5 or sav).",
+        help="The path to an FHD written beam file (h5 or sav). "
+        "Cannot be used with uvbeam-file-path or analytic-beam-yaml, "
+        "one of these three should be set to specify the beam.",
     )
     beam.add_argument(
         "--uvbeam-file-path",
         type=Path,
-        help="The path to a beam file readable by pyuvdata.UVBeam",
+        help="The path to a beam file readable by pyuvdata.UVBeam. Consider also "
+        "setting uvbeam-freq-buffer. "
+        "Cannot be used with `saved-beam-file-path` or `analytic-beam-yaml`, "
+        "one of these three should be set to specify the beam.",
     )
     beam.add_argument(
         "--uvbeam-freq-buffer",
         type=float,
         default=None,
-        help="Buffer around data frequency range to read in beam for in Hz. "
-        "Set to allow partial beam loading (when possible) to save memory. "
-        "If set, should be at least 2 * beam frequency resolution "
-        "(if set too low, beam interpolation errors can occur).",
+        help="Buffer around data frequency range to use when reading in the beam "
+        "in Hz. Set to allow partial beam loading (when possible) to save memory. "
+        "If not set (the default) the whole beam file will be read in. "
+        "If set, should be at least 2 * beam frequency resolution (if set too "
+        "low, beam interpolation errors can occur). "
+        "We suggest setting it to 2e6 (meaning 2 MHz) for the standard MWA beam "
+        "file, which has 1 MHz resolution.",
     )
     # read it in as a string to decode later. Using type=yaml.safe_load doesn't
     # work when there are multiple lines to specify the beam.
     beam.add_argument(
         "--analytic-beam-yaml",
         type=str,
-        help="The yaml specifier for a pyuvdata AnalyticBeam.",
+        help="The yaml specifier for a pyuvdata AnalyticBeam. See the pyuvdata "
+        "docs for details, must be enclosed in quotes around the entire (multiline)"
+        "specification. "
+        "Cannot be used with `saved-beam-file-path` or `uvbeam-file-path`, "
+        "one of these three should be set to specify the beam.",
     )
     beam.add_argument(
         "-ll",
