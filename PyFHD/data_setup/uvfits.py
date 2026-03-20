@@ -88,7 +88,9 @@ def extract_header(
     pyfhd_header["frequency_array"] = (
         np.arange(pyfhd_header["n_freq"]) - freq_ref_i
     ) * pyfhd_header["freq_res"] + pyfhd_header["freq_ref"]
-    # the following is guaranteed from the uvfits memo, logic stolen from pyuvdata
+    # the following is guaranteed from the uvfits memo (AIPS memo 117), logic
+    # stolen from pyuvdata. The uvfits memo is available in the pyuvdata repo
+    # under docs/resources and on the NRAO website.
     if params_header["naxis"] == 7:
         ra_axis = 6
         dec_axis = 7
