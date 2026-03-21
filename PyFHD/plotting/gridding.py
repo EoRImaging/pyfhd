@@ -88,6 +88,7 @@ def plot_gridding(
 
         quick_image(
             apparent_image[pol_i, :, :],
+            logger=logger,
             xvals=xvals,
             yvals=yvals,
             xtitle=xtitle,
@@ -101,6 +102,7 @@ def plot_gridding(
         )
         quick_image(
             variance_uv[pol_i, :, :],
+            logger=logger,
             xvals=xvals,
             yvals=yvals,
             xtitle=xtitle,
@@ -116,6 +118,7 @@ def plot_gridding(
         if model_uv is not None:
             quick_image(
                 apparent_model[pol_i, :, :],
+                logger=logger,
                 xvals=xvals,
                 yvals=yvals,
                 xtitle=xtitle,

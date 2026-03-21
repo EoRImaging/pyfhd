@@ -7,6 +7,7 @@ from logging import Logger
 
 def quick_image(
         data,
+        logger: Logger,
         data_range=None,
         sigma_clip_level=3,
         xvals=None,
@@ -107,7 +108,9 @@ def quick_image(
     if data_range is None:
         positive_data = data[data > 0]  # Creates array containing only positive values from data. This is necessary because we cannot take the log of non-positive values.
     if len(positive_data) == 0:  # If there are no positive values, we cannot apply logarithmic scaling, so we raise an error.
-        raise ValueError("Data must contain positive values for logarithmic scaling.")
+        logger.warning(
+            "Data must contain positive values for logarithmic scaling."
+        )
     
     if sigma_clip_level is not None:  # If sigma clipping is requested
         log_data = np.log10(positive_data)  # Take log of positive data to get distribution in log space
@@ -126,13 +129,19 @@ def quick_image(
         percent_clipped = 100 * num_clipped / len(log_data)  # Converts number of clipped points to a percentage of the total data.
         
         # Report display range and clipping percentage.
-        print(f"Sigma clipping of level {sigma_clip_level} applied: {data_range[0]:.2e} to {data_range[1]:.2e}")
-        print(f"Percentage of data clipped: {percent_clipped:.2f}%")
+        logger.info(
+            f"Sigma clipping of level {sigma_clip_level} applied: {data_range[0]:.2e} to {data_range[1]:.2e}"
+        )
+        logger.info(
+            f"Percentage of data clipped: {percent_clipped:.2f}%"
+        )
 
     # No sigma clipping requested, use trye minimum and maximum of the data to determine display range.
     else: 
         data_range = [np.min(positive_data), np.max(positive_data)]
-        print(f"Using full data range: {data_range[0]:.2e} to {data_range[1]:.2e}")
+        logger.info(
+            f"Using full data range: {data_range[0]:.2e} to {data_range[1]:.2e}"
+        )
 
 
     # --- Apply logarithmic scaling and map to colour range ---
