@@ -1,13 +1,8 @@
 import numpy as np
-from numpy.typing import NDArray
 import matplotlib.pyplot as plt
 from pathlib import Path
-from astropy.wcs import WCS
-from astropy.io import fits
-from astropy import units as u
 from astropy.stats import sigma_clipped_stats
 from logging import Logger
-import os
 
 
 def quick_image(
@@ -217,10 +212,10 @@ def quick_image(
 
 
     # --- Save the image to file or display on screen ---
-    _save_or_show(fig, savefile, png, pdf, eps)
+    _save_or_display(fig, savefile, png, pdf, eps)
 
 
-def _save_or_show(
+def _save_or_display(
     fig,
     savefile,
     png,
