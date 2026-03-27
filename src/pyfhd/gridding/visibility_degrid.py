@@ -178,7 +178,7 @@ def visibility_degrid(
 
     # Create the correct size visibility array
     vis_dimension = n_baselines * n_samples
-    visibility_array = np.zeros((vis_dimension, n_freq), dtype=np.cdouble)
+    visibility_array = np.zeros((n_freq, vis_dimension), dtype=np.cdouble)
 
     ind_ref = np.arange(max(bin_n))
 
@@ -195,17 +195,7 @@ def visibility_degrid(
 
     for bi in range(n_bin_use):
         vis_n = bin_n[bin_i[bi]]
-        """
-            Python is not inclusive of end of loop
-            while IDL is, as such n_bin_use - 1 does not do
-            the last index properly on Python, as such when we
-            have reached the last index we need to change the
-            indexation of ri to include from that point to the end.
-        """
-        if bi == n_bin_use - 1:
-            inds = ri[ri[bin_i[bi]] :]
-        else:
-            inds = ri[ri[bin_i[bi]] : ri[bin_i[bi + 1]]]
+        inds = ri[ri[bin_i[bi]] : ri[bin_i[bi] + 1]]
 
         # if constraining memory usage, then est number of loops needed
         if conserve_memory:
@@ -233,9 +223,9 @@ def visibility_degrid(
             # xmin and ymin should be all the same
             xmin_use = xmin.flat[inds[0]]
             ymin_use = ymin.flat[inds[0]]
-            freq_i = inds % n_freq_use
+            freq_i, bt_index = np.unravel_index(inds, (n_freq_use, vis_dimension))
+            _, baseline_inds = np.unravel_index(bt_index, (n_samples, n_baselines))
             fbin = freq_bin_i[freq_i]
-            baseline_inds = (inds / n_freq_use).astype(int) % n_baselines
 
             box_matrix = np.zeros((vis_n, psf_dim3), dtype=arr_type)
             box_arr = image_uv[
@@ -248,7 +238,6 @@ def visibility_degrid(
                 dx1dy0 = dx1dy0_arr.flat[inds]
                 dx1dy1 = dx1dy1_arr.flat[inds]
                 ind_remap_flag = False
-                bt_index = inds / n_freq_use
                 for ii in range(vis_n):
                     kernel = interpolate_kernel(
                         beam_arr[baseline_inds[ii], fbin[ii], polarization],
@@ -293,7 +282,6 @@ def visibility_degrid(
                     vis_n = n_xyf_bin
                 else:
                     ind_remap_flag = False
-                    bt_index = inds / n_freq_use
 
                 if beam_per_baseline:
                     box_matrix = grid_beam_per_baseline(
@@ -356,6 +344,7 @@ def visibility_degrid(
                 vis_box = np.dot(box_arr, np.transpose(box_matrix))
             if ind_remap_flag:
                 vis_box = vis_box[ind_remap]
+
             visibility_array.flat[inds] = vis_box
 
     if beam_per_baseline:
@@ -370,7 +359,7 @@ def visibility_degrid(
 
     del (x_offset, y_offset, xmin, ymin, bin_n)
     if conj_i[0].size > 0:
-        visibility_array[conj_i, :] = np.conj(visibility_array[conj_i, :])
+        visibility_array[:, conj_i] = np.conj(visibility_array[:, conj_i])
 
     if vis_input is not None:
         visibility_array += vis_input
