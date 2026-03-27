@@ -30,7 +30,14 @@ def test_visibility_degrid_one(data_dir):
     beam_per_baseline = False
     uv_grid_phase_only = True
     conserve_memory = inputs["conserve_memory"]
-    memory_threshold = 1e8
+    if conserve_memory > 1e6:
+        memory_threshold = conserve_memory
+        conserve_memory = True
+    elif conserve_memory > 0:
+        memory_threshold = 1e8
+        conserve_memory = True
+    else:
+        conserve_memory = False
 
     vis_return = visibility_degrid(
         image_uv,
@@ -71,7 +78,14 @@ def test_visibility_degrid_two(data_dir):
     beam_per_baseline = False
     uv_grid_phase_only = True
     conserve_memory = inputs["conserve_memory"]
-    memory_threshold = 1e8
+    if conserve_memory > 1e6:
+        memory_threshold = conserve_memory
+        conserve_memory = True
+    elif conserve_memory > 0:
+        memory_threshold = 1e8
+        conserve_memory = True
+    else:
+        conserve_memory = False
 
     vis_return = visibility_degrid(
         image_uv,
@@ -112,7 +126,14 @@ def test_visibility_degrid_three(data_dir):
     beam_per_baseline = False
     uv_grid_phase_only = True
     conserve_memory = inputs["conserve_memory"]
-    memory_threshold = 1e8
+    if conserve_memory > 1e6:
+        memory_threshold = conserve_memory
+        conserve_memory = True
+    elif conserve_memory > 0:
+        memory_threshold = 1e8
+        conserve_memory = True
+    else:
+        conserve_memory = False
 
     vis_return = visibility_degrid(
         image_uv,
