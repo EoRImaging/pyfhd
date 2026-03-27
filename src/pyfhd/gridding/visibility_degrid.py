@@ -1,7 +1,10 @@
+from logging import Logger
+import warnings
+
+import h5py
 import numpy as np
 from numpy.typing import NDArray
-import warnings
-import h5py
+
 from pyfhd.gridding.gridding_utils import (
     baseline_grid_locations,
     interpolate_kernel,
@@ -22,6 +25,7 @@ def visibility_degrid(
     obs: dict,
     psf: dict | h5py.File,
     params: dict,
+    logger: Logger,
     polarization: int = 0,
     fill_model_visibilities: bool = False,
     vis_input: NDArray[np.complex128] | None = None,
@@ -79,9 +83,9 @@ def visibility_degrid(
         Updated observation metadata dictionary
     """
 
-    complex_flag = psf["complex_flag"][0]
-    n_spectral = obs["degrid_spectral_terms"][0]
-    interp_flag = psf["interpolate_kernel"][0]
+    complex_flag = psf["complex_flag"]
+    n_spectral = obs["degrid_spectral_terms"]
+    interp_flag = psf["interpolate_kernel"]
     if conserve_memory:
         # memory threshold is in bytes
         if memory_threshold < 1e6:
@@ -101,6 +105,7 @@ def visibility_degrid(
         psf,
         params,
         vis_weights,
+        logger,
         fill_model_visibilities=fill_model_visibilities,
         interp_flag=interp_flag,
     )
@@ -119,26 +124,26 @@ def visibility_degrid(
         dx0dy1_arr = baselines_dict["dx0dy1_arr"]
         dx1dy0_arr = baselines_dict["dx1dy0_arr"]
         dx1dy1_arr = baselines_dict["dx1dy1_arr"]
-    dimension = obs["dimension"][0]
-    kbinsize = obs["kpix"][0]
-    freq_bin_i = obs["baseline_info"][0]["fbin_i"][0]
-    frequency_array = obs["baseline_info"][0]["freq"][0]
-    freq_delta = (frequency_array - obs["freq_center"][0]) / obs["freq_center"][0]
-    psf_dim = psf["dim"][0]
-    psf_resolution = psf["resolution"][0]
+    dimension = obs["dimension"]
+    kbinsize = obs["kpix"]
+    freq_bin_i = obs["baseline_info"]["fbin_i"]
+    frequency_array = obs["baseline_info"]["freq"]
+    freq_delta = (frequency_array - obs["freq_center"]) / obs["freq_center"]
+    psf_dim = psf["dim"]
+    psf_resolution = psf["resolution"]
     psf_dim3 = int(psf_dim**2)
-    n_baselines = obs["n_baselines"][0]
-    n_samples = obs["n_time"][0]
+    n_baselines = obs["nbaselines"]
+    n_samples = obs["n_time"]
     n_freq_use = frequency_array.size
-    n_freq = obs["n_freq"][0]
-    group_arr = np.squeeze(psf["id"][0][:, freq_bin_i, polarization])
-    beam_arr = psf["beam_ptr"][0]
+    n_freq = obs["n_freq"]
+    group_arr = np.squeeze(psf["id"][:, freq_bin_i, polarization])
+    beam_arr = psf["beam_ptr"]
 
     if beam_per_baseline:
-        uu = params["uu"][0]
-        vv = params["vv"][0]
-        ww = params["ww"][0]
-        psf_image_dim = psf["image_info"][0]["psf_image_dim"][0]
+        uu = params["uu"]
+        vv = params["vv"]
+        ww = params["ww"]
+        psf_image_dim = psf["image_info"]["psf_image_dim"]
         psf_intermediate_res = np.min(
             np.ceil(np.sqrt(psf_resolution) / 2) * 2, psf_resolution
         )
@@ -164,7 +169,7 @@ def visibility_degrid(
         x = (np.arange(dimension) - dimension / 2) * kbinsize
         y = x.copy()
 
-    conj_i = np.where(params["vv"][0] > 0)
+    conj_i = np.where(params["vv"] > 0)
     if conj_i[0].size > 0:
         if beam_per_baseline:
             uu[conj_i] = -uu[conj_i]

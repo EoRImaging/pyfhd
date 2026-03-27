@@ -1,25 +1,25 @@
-import pytest
-import numpy.testing as npt
+from logging import Logger
 from os import environ as env
 from pathlib import Path
+
+import pytest
+import numpy.testing as npt
+
 from pyfhd.gridding.visibility_degrid import visibility_degrid
+from pyfhd.io.pyfhd_io import recarray_to_dict
 from pyfhd.pyfhd_tools.test_utils import get_savs
 
 
 @pytest.fixture
 def data_dir():
-    return Path(env.get("PYFHD_TEST_PATH"), "visibility_degrid/")
+    return Path(env.get("PYFHD_TEST_PATH"), "gridding/visibility_degrid/")
 
 
-@pytest.fixture
-def full_data_dir():
-    return Path(env.get("PYFHD_TEST_PATH"), "full_size_visibility_degrid/")
-
-
-def _test_visibility_degrid_one(data_dir):
+def test_visibility_degrid_one(data_dir):
     inputs = get_savs(data_dir, "input_1.sav")
+    inputs = recarray_to_dict(inputs)
     image_uv = inputs["image_uv"]
-    vis_weights = inputs["vis_weight_ptr"]
+    vis_weights = inputs["vis_weight_ptr"].transpose()
     obs = inputs["obs"]
     psf = inputs["psf"]
     params = inputs["params"]
@@ -38,6 +38,7 @@ def _test_visibility_degrid_one(data_dir):
         obs,
         psf,
         params,
+        Logger(1),
         polarization=polarization,
         fill_model_visibilities=fill_model_visibilities,
         vis_input=vis_input,
@@ -49,15 +50,17 @@ def _test_visibility_degrid_one(data_dir):
     )
 
     outputs = get_savs(data_dir, "output_1.sav")
+    outputs = recarray_to_dict(outputs)
 
     npt.assert_allclose(vis_return, outputs["vis_return"], atol=1e-3)
 
 
-def _test_visibility_degrid_two(data_dir):
+def test_visibility_degrid_two(data_dir):
 
     inputs = get_savs(data_dir, "input_2.sav")
+    inputs = recarray_to_dict(inputs)
     image_uv = inputs["image_uv"]
-    vis_weights = inputs["vis_weight_ptr"]
+    vis_weights = inputs["vis_weight_ptr"].transpose()
     obs = inputs["obs"]
     psf = inputs["psf"]
     params = inputs["params"]
@@ -76,6 +79,7 @@ def _test_visibility_degrid_two(data_dir):
         obs,
         psf,
         params,
+        Logger(1),
         polarization=polarization,
         fill_model_visibilities=fill_model_visibilities,
         vis_input=vis_input,
@@ -87,15 +91,17 @@ def _test_visibility_degrid_two(data_dir):
     )
 
     outputs = get_savs(data_dir, "output_2.sav")
+    outputs = recarray_to_dict(outputs)
 
     npt.assert_allclose(vis_return, outputs["vis_return"], atol=9e-6)
 
 
-def _test_visibility_degrid_three(data_dir):
+def test_visibility_degrid_three(data_dir):
 
     inputs = get_savs(data_dir, "input_3.sav")
+    inputs = recarray_to_dict(inputs)
     image_uv = inputs["image_uv"]
-    vis_weights = inputs["vis_weight_ptr"]
+    vis_weights = inputs["vis_weight_ptr"].transpose()
     obs = inputs["obs"]
     psf = inputs["psf"]
     params = inputs["params"]
@@ -114,6 +120,7 @@ def _test_visibility_degrid_three(data_dir):
         obs,
         psf,
         params,
+        Logger(1),
         polarization=polarization,
         fill_model_visibilities=fill_model_visibilities,
         vis_input=vis_input,
@@ -125,5 +132,6 @@ def _test_visibility_degrid_three(data_dir):
     )
 
     outputs = get_savs(data_dir, "output_3.sav")
+    outputs = recarray_to_dict(outputs)
 
-    npt.assert_allclose(vis_return, outputs["vis_return"], atol=9e-6)
+    npt.assert_allclose(vis_return, outputs["vis_return"].T, atol=9e-6)
