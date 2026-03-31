@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_e603c322312734f2_visibility_degrid_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.11.0">coverage.py v7.11.0</a>,
-            created at 2026-03-12 00:42 +0000
+            created at 2026-03-31 00:04 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -384,7 +384,7 @@
     <p class="run run2"><span class="n"><a id="t300" href="#t300">300</a></span><span class="t">    <span class="nam">logger</span><span class="op">:</span> <span class="nam">Logger</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t301" href="#t301">301</a></span><span class="t">    <span class="nam">uniform_filter_uv</span><span class="op">:</span> <span class="nam">NDArray</span><span class="op">[</span><span class="nam">np</span><span class="op">.</span><span class="nam">float64</span><span class="op">]</span> <span class="op">|</span> <span class="key">None</span> <span class="op">=</span> <span class="key">None</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t302" href="#t302">302</a></span><span class="t">    <span class="nam">mask</span><span class="op">:</span> <span class="nam">NDArray</span><span class="op">[</span><span class="nam">np</span><span class="op">.</span><span class="nam">integer</span><span class="op">]</span> <span class="op">|</span> <span class="key">None</span> <span class="op">=</span> <span class="key">None</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t303" href="#t303">303</a></span><span class="t">    <span class="nam">baseline_threshold</span><span class="op">:</span> <span class="nam">int</span> <span class="op">|</span> <span class="nam">float</span> <span class="op">=</span> <span class="num">0</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t303" href="#t303">303</a></span><span class="t">    <span class="nam">baseline_threshold</span><span class="op">:</span> <span class="nam">int</span> <span class="op">|</span> <span class="nam">float</span> <span class="op">|</span> <span class="key">None</span> <span class="op">=</span> <span class="key">None</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t304" href="#t304">304</a></span><span class="t">    <span class="nam">normalization</span><span class="op">:</span> <span class="nam">float</span> <span class="op">|</span> <span class="nam">NDArray</span><span class="op">[</span><span class="nam">np</span><span class="op">.</span><span class="nam">float64</span><span class="op">]</span> <span class="op">|</span> <span class="key">None</span> <span class="op">=</span> <span class="key">None</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t305" href="#t305">305</a></span><span class="t">    <span class="nam">resize</span><span class="op">:</span> <span class="nam">int</span> <span class="op">|</span> <span class="key">None</span> <span class="op">=</span> <span class="key">None</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
     <p class="run run2"><span class="n"><a id="t306" href="#t306">306</a></span><span class="t">    <span class="nam">width_smooth</span><span class="op">:</span> <span class="nam">int</span> <span class="op">|</span> <span class="nam">float</span> <span class="op">|</span> <span class="key">None</span> <span class="op">=</span> <span class="key">None</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
@@ -414,7 +414,7 @@
     <p class="pln"><span class="n"><a id="t330" href="#t330">330</a></span><span class="t"><span class="str">    mask : NDArray[np.integer] | None, optional</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t331" href="#t331">331</a></span><span class="t"><span class="str">        A 2D {u,v} mask to apply before image creation, by default None</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t332" href="#t332">332</a></span><span class="t"><span class="str">    baseline_threshold : int | float, optional</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t333" href="#t333">333</a></span><span class="t"><span class="str">        The maximum baseline length to include in units of pixels, by default 0</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t333" href="#t333">333</a></span><span class="t"><span class="str">        The maximum baseline length to include in units of pixels, default None</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t334" href="#t334">334</a></span><span class="t"><span class="str">    normalization : float | NDArray[np.float64] | None, optional</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t335" href="#t335">335</a></span><span class="t"><span class="str">        A value by which to normalize the image by, by default None</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t336" href="#t336">336</a></span><span class="t"><span class="str">    resize : int | None, optional</span>&nbsp;</span><span class="r"></span></p>
@@ -981,7 +981,7 @@
             <a class="nav" href="z_e603c322312734f2_visibility_degrid_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.11.0">coverage.py v7.11.0</a>,
-            created at 2026-03-12 00:42 +0000
+            created at 2026-03-31 00:04 +0000
         </p>
     </div>
 </footer>
