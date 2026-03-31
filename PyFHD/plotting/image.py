@@ -234,6 +234,12 @@ def quick_image(
     if ytitle:
         ax.set_ylabel(ytitle)
 
+    # Add note about clipping if clipping was applied, including the percentage of data that was clipped.
+    if sigma_clip_level is not None or percentile_clip_level is not None:
+        clip_note = f"{percent_clipped:.2f}% of data clipped."
+    
+    fig.text(0.01, 0.01, clip_note, fontsize=8)
+
     # Add colourbar with ticks calibrated to show original data values corresponding to each colour index.
     cbar = plt.colorbar(im, ax=ax) 
 
