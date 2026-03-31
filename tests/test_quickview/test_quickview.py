@@ -40,9 +40,12 @@ def before_file(tag, run, data_dir):
     if [tag, run] in skip_tests:
         return None
     before_file = Path(data_dir, f"{tag}_{run}_before_{data_dir.name}.h5")
-    # If the h5 file already exists and has been created, return the path to it
+    # If the h5 file already exists and has been created, check if it's got a
+    # valid path. if it does, return it, otherwise remake it.
     if before_file.exists():
-        return before_file
+        h5_before = load(before_file)
+        if Path(h5_before["pyfhd_config"]["output_dir"]).exists():
+            return before_file
 
     sav_file = before_file.with_suffix(".sav")
     sav_dict = convert_sav_to_dict(str(sav_file), "faked")

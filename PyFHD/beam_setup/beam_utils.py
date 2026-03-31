@@ -156,7 +156,11 @@ def beam_image(
     """
 
     psf_dim = psf["dim"]
-    freq_norm = psf["fnorm"]
+    if "freq_norm" in psf:
+        freq_norm = psf["freq_norm"]
+    elif "fnorm" in psf:
+        # handling for older files or imports from IDL FHD
+        freq_norm = psf["fnorm"]
     pix_horizon = psf["pix_horizon"]
     group_id = psf["id"][pol_i, 0, :]
     if "beam_gaussian_params" in psf:
@@ -170,10 +174,12 @@ def beam_image(
         freq_norm = freq_norm[:]
         pix_horizon = pix_horizon[0]
     dimension = elements = obs["dimension"]
-    xl = dimension / 2 - psf_dim / 2 + 1
-    xh = dimension / 2 - psf_dim / 2 + psf_dim
-    yl = elements / 2 - psf_dim / 2 + 1
-    yh = elements / 2 - psf_dim / 2 + psf_dim
+    # these should all be integers b/c dimensions are usually even numbers.
+    # but they have to be cast to ints to be used in slicing.
+    xl = int(dimension / 2 - psf_dim / 2 + 1)
+    xh = int(dimension / 2 - psf_dim / 2 + psf_dim)
+    yl = int(elements / 2 - psf_dim / 2 + 1)
+    yh = int(elements / 2 - psf_dim / 2 + psf_dim)
 
     group_n, _, ri_id = histogram(group_id, min=0)
     gi_use = np.nonzero(group_n)

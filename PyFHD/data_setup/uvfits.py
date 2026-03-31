@@ -88,17 +88,33 @@ def extract_header(
     pyfhd_header["frequency_array"] = (
         np.arange(pyfhd_header["n_freq"]) - freq_ref_i
     ) * pyfhd_header["freq_res"] + pyfhd_header["freq_ref"]
+    # the following is guaranteed from the uvfits memo (AIPS memo 117), logic
+    # stolen from pyuvdata. The uvfits memo is available in the pyuvdata repo
+    # under docs/resources and on the NRAO website.
+    if params_header["naxis"] == 7:
+        ra_axis = 6
+        dec_axis = 7
+    else:
+        ra_axis = 5
+        dec_axis = 6
+    # obsra/obsdec/ra/dec are not standard uvfits keywords
     try:
         pyfhd_header["obsra"] = params_header["obsra"]
     except KeyError:
         logger.warning("OBSRA not found in UVFITS file")
-        pyfhd_header["obsra"] = params_header["ra"]
+        if "ra" in params_header:
+            pyfhd_header["obsra"] = params_header["ra"]
+        else:
+            pyfhd_header["obsra"] = params_header[f"CRVAL{ra_axis}"]
 
     try:
         pyfhd_header["obsdec"] = params_header["obsdec"]
     except KeyError:
         logger.warning("OBSDEC not found in UVFITS file")
-        pyfhd_header["obsdec"] = params_header["dec"]
+        if "dec" in params_header:
+            pyfhd_header["obsdec"] = params_header["dec"]
+        else:
+            pyfhd_header["obsdec"] = params_header[f"CRVAL{dec_axis}"]
     # Put in locations of instrument from FITS file or from Astropy site data
     # If you want to see the list of current site names using EarthLocation.get_site_names()
     # If you want to use PyFHD with HERA in the future
@@ -113,6 +129,8 @@ def extract_header(
         # Can also do MWA or Murchison Widefield Array
         location = EarthLocation("mwa")
 
+    # These are all non-standard uvfits keywords. This information is stored in
+    # the antenna table. See pyuvdata for the right way to do this.
     try:
         pyfhd_header["lon"] = params_header["lon"]
     except KeyError:

@@ -5,10 +5,30 @@
 ### Breaking Changes!
 
 ### New Features
+* Added handling for `~` in paths in config yamls.
 
 ### Bug Fixes
+* Fixed checkpointing to actually work.
+* Fixed a bug in the uvfits reader where it assumed the presence of "ra" and 
+"dec" header items which often present in MWA uvfits files but are non-standard.
+* Fixed a bug with newer versions of numpy.
+* Fixed `vis_model_transfer` to handle standard IDL FHD folder structure.
+* Fixed a bug in `calibration_utils.vis_baseline_hist` where flagging wasn't
+fully propagated, causing shape errors.
+* Fixed a bug that could cause a KeyError in `pyfhd.main`.
+* Fixed a bug that could cause a KeyError in `beam_utils.beam_image`.
+* Fixed a bug that caused a numpy indexing error with newer versions of numpy in  
+`beam_utils.beam_image`.
+* Fixed the a bug caused by a bad default value of `baseline_threshold` in 
+`gridding_utils.dirty_image_generate`.
+* Fixed spelling errors in example config yamls.
+* Fixed a bug that could cause an undefined variable error in image plotting.
 
 ### Test Changes
+* Fixed two tests in `test_weight_invert` to handle floating point errors.
+* Fixed fixtures in `test_vis_model_transfer` and `test_quickview` to handle
+computer-specific paths in test data.
+
 
 ### Dependency Changes
 
