@@ -271,10 +271,10 @@ def visibility_degrid(
                     x_off = x_off[inds_use]
                     y_off = y_off[inds_use]
                     fbin = fbin[inds_use]
-                    baseline_inds = baseline_inds[inds]
+                    baseline_inds = baseline_inds[inds_use]
 
                     if n_xyf_bin == 1:
-                        ind_remap = np.arange(vis_n, dtype=int)
+                        ind_remap = np.zeros(vis_n, dtype=int)
                     else:
                         hist_inds_u, _, ri_xyf = histogram(xyf_ui, bin_size=1, min=0)
                         ind_remap = ind_ref[ri_xyf[0 : hist_inds_u.size] - ri_xyf[0]]
@@ -317,9 +317,13 @@ def visibility_degrid(
                 else:
                     for ii in range(vis_n):
                         # more efficient array subscript notation
-                        box_matrix[psf_dim3 * ii] = beam_arr[
-                            baseline_inds[ii], fbin[ii], polarization
-                        ][y_off[ii], x_off[ii]]
+                        box_matrix[ii] = beam_arr[
+                            baseline_inds[ii],
+                            fbin[ii],
+                            polarization,
+                            y_off[ii],
+                            x_off[ii],
+                        ]
 
             if n_spectral:
                 vis_box = np.dot(box_arr, np.transpose(box_matrix))

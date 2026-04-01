@@ -56,10 +56,10 @@ def test_visibility_degrid_one(data_dir):
         memory_threshold=memory_threshold,
     )
 
-    outputs = get_savs(data_dir, "output_1.sav")
+    outputs = get_savs(data_dir, "output_1_new.sav")
     outputs = recarray_to_dict(outputs)
 
-    npt.assert_allclose(vis_return, outputs["vis_return"].T, atol=9e-6)
+    npt.assert_allclose(vis_return, outputs["vis_return"].T, atol=1e-15)
 
 
 def test_visibility_degrid_two(data_dir):
@@ -104,10 +104,10 @@ def test_visibility_degrid_two(data_dir):
         memory_threshold=memory_threshold,
     )
 
-    outputs = get_savs(data_dir, "output_2.sav")
+    outputs = get_savs(data_dir, "output_2_new.sav")
     outputs = recarray_to_dict(outputs)
 
-    npt.assert_allclose(vis_return, outputs["vis_return"].T, atol=9e-6)
+    npt.assert_allclose(vis_return, outputs["vis_return"].T, atol=1e-15)
 
 
 def test_visibility_degrid_three(data_dir):
@@ -152,7 +152,7 @@ def test_visibility_degrid_three(data_dir):
         memory_threshold=memory_threshold,
     )
 
-    outputs = get_savs(data_dir, "output_3.sav")
+    outputs = get_savs(data_dir, "output_3_new.sav")
     outputs = recarray_to_dict(outputs)
 
-    npt.assert_allclose(vis_return, outputs["vis_return"].T, atol=9e-6)
+    npt.assert_allclose(vis_return, outputs["vis_return"].T, atol=1e-15)
