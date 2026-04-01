@@ -10,6 +10,8 @@ repo and passing None to `beam_file-path`.
 to avoid confusion with the new `uvbeam-file-path` option.
 
 ### New Features
+* Added an option to `plotting.image.quick_image` to set the colormap to any
+matplotlib colormap or to match the colormap used in the IDL version of `quick_image`.
 * UVBeams are fully and properly integrated. Beam decomposition is implemented
 in pyuvdata.UVBeam and just called directly.
 * New `uvbeam-file-path` and `uvbeam-freq-buffer` options in configuration.
@@ -18,6 +20,8 @@ the new `analytic-beam-yaml` option to configure them.
 * Added handling for `~` in paths in config yamls.
 
 ### Bug Fixes
+* Fixed a couple small bugs in `plotting.image.quick_image` that caused the
+linear scaling to be wrong and the image to be flipped vertically.
 * The telescope location is now extracted from the uvfits antenna table, rather
 than obtained from astropy's site list, preventing errors when the telescope
 is not listed in astropy's site list.
