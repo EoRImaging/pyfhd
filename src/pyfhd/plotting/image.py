@@ -1,18 +1,29 @@
-import numpy as np
-from numpy.typing import NDArray
-import matplotlib.pyplot as plt
+import os
 from pathlib import Path
+from logging import Logger
+
 from astropy.wcs import WCS
 from astropy.io import fits
 from astropy import units as u
-from logging import Logger
-import os
+import matplotlib.pyplot as plt
+import matplotlib.colors as colors
+import numpy as np
+from numpy.typing import NDArray
+
+
+def truncate_colormap(cmap, minval=0.0, maxval=1.0, nseg=100):
+    new_cmap = colors.LinearSegmentedColormap.from_list(
+        "trunc({n},{a:.2f},{b:.2f})".format(n=cmap.name, a=minval, b=maxval),
+        cmap(np.linspace(minval, maxval, nseg)),
+    )
+    return new_cmap
 
 
 def quick_image(
     image: NDArray[np.integer | np.floating | np.complexfloating],
     xvals: NDArray[np.integer | np.floating] = None,
     yvals: NDArray[np.integer | np.floating] = None,
+    *,
     data_range: NDArray[np.integer | np.floating] = None,
     data_min_abs: float = None,
     xrange: NDArray[np.integer | np.floating] = None,
@@ -20,6 +31,7 @@ def quick_image(
     data_aspect: float = None,
     log: bool = False,
     color_profile: str = "log_cut",
+    cmap: str = "viridis",
     xtitle: str = None,
     ytitle: str = None,
     title: str = None,
@@ -66,6 +78,8 @@ def quick_image(
     color_profile : str, optional
         Color bar profiles for logarithmic scaling.
         "log_cut", "sym_log", "abs", by default "log_cut"
+    cmap : str, optional
+        Matplotlib colormap to use.
     xtitle : str, optional
         The title of the x-axis, by default None
     ytitle : str, optional
@@ -184,7 +198,7 @@ def quick_image(
 
     # Validate that 2-value inputs are only 2 values
     if data_range is not None:
-        if not isinstance(data_range, np.ndarray) or len(data_range) != 2:
+        if not isinstance(data_range, np.ndarray | list) or len(data_range) != 2:
             raise ValueError("data_range must be an array with exactly two values.")
     if xrange is not None:
         if not isinstance(xrange, np.ndarray) or len(xrange) != 2:
@@ -215,18 +229,19 @@ def quick_image(
 
         data_color_range, data_n_colors = color_range(count_missing=count_missing)
 
+        # Find out-of-bounds values
+        wh_low = np.nonzero(image < data_range[0])
+        wh_high = np.nonzero(image > data_range[1])
+
         # Scale image data to be in the color range
         image = (image - data_range[0]) * (data_n_colors - 1) / (
             data_range[1] - data_range[0]
         ) + data_color_range[0]
-        print(data_range, data_color_range, data_n_colors)
 
         # Handle out-of-bounds values
-        wh_low = np.where(image < data_range[0])
-        if len(wh_low[0]) > 0:
+        if wh_low[0].size > 0:
             image[wh_low] = data_color_range[0]
-        wh_high = np.where(image > data_range[1])
-        if len(wh_high[0]) > 0:
+        if wh_high[0].size > 0:
             image[wh_high] = data_color_range[1]
 
         # Handle missing values
@@ -238,11 +253,14 @@ def quick_image(
             f"{tick * (data_range[1] - data_range[0]) / (data_n_colors - 1) + data_range[0]:.2g}"
             for tick in cb_ticks
         ]
-        print(cb_ticks, cb_ticknames)
 
     # Set up the plot
     fig, ax = plt.subplots()
-    cmap = plt.get_cmap("viridis")
+    if cmap == "idl":
+        cmap = plt.get_cmap("Spectral_r")
+        cmap = truncate_colormap(cmap, minval=(20 / 255), maxval=1, nseg=256)
+    else:
+        cmap = plt.get_cmap(cmap)
 
     # Set up the x and y ranges
     extent = None
@@ -274,6 +292,7 @@ def quick_image(
         vmin=0,
         vmax=255,
         alpha=alpha,
+        origin="lower",
     )
 
     # Add titles and labels
