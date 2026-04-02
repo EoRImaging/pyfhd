@@ -495,6 +495,7 @@ def dirty_image_generate(
 
 
 def grid_beam_per_baseline(
+    *,
     psf: dict,
     pyfhd_config: dict,
     logger: Logger,

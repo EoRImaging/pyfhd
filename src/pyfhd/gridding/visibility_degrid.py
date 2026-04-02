@@ -20,18 +20,19 @@ from pyfhd.pyfhd_tools.pyfhd_utils import (
 
 
 def visibility_degrid(
+    *,
     image_uv: NDArray[np.complex128],
     vis_weights: NDArray[np.float64],
     obs: dict,
     psf: dict | h5py.File,
     params: dict,
+    pyfhd_config: dict,
     logger: Logger,
     polarization: int = 0,
     fill_model_visibilities: bool = False,
     vis_input: NDArray[np.complex128] | None = None,
     spectral_model_uv_arr: NDArray[np.float64] | None = None,
     beam_per_baseline: bool = False,
-    uv_grid_phase_only: bool = True,
     conserve_memory: bool = False,
     memory_threshold: float | int = 1e8,
 ):
@@ -70,8 +71,6 @@ def visibility_degrid(
         Additional {u,v} planes to degrid for complicated source spectral dependencies, by default None
     beam_per_baseline : bool, optional
         Generate beams with corrective phases given the baseline location, by default False
-    uv_grid_phase_only : bool, optional
-        Generate beams with only {u,v} corrective phases, disregarding w phases, by default True
     conserve_memory : bool, optional
         Reduce memory load by running loops, by default False
 
@@ -136,13 +135,13 @@ def visibility_degrid(
     n_samples = obs["n_time"]
     n_freq_use = frequency_array.size
     n_freq = obs["n_freq"]
-    group_arr = np.squeeze(psf["id"][:, freq_bin_i, polarization])
+    group_arr = psf["id"][polarization, freq_bin_i]
     beam_arr = psf["beam_ptr"]
 
     if beam_per_baseline:
-        uu = params["uu"]
-        vv = params["vv"]
-        ww = params["ww"]
+        uu = params["uu"].copy()
+        vv = params["vv"].copy()
+        ww = params["ww"].copy()
         psf_image_dim = psf["image_info"]["psf_image_dim"]
         psf_intermediate_res = np.min(
             [np.ceil(np.sqrt(psf_resolution) / 2) * 2, psf_resolution]
@@ -158,6 +157,7 @@ def visibility_degrid(
         l_mode, m_mode, n_tracked = l_m_n(obs, psf)
 
         # w-terms have not been tested, thus they've been turned off for now
+        uv_grid_phase_only = True
         if uv_grid_phase_only:
             n_tracked = np.zeros_like(n_tracked)
 
@@ -241,7 +241,7 @@ def visibility_degrid(
                 ind_remap_flag = False
                 for ii in range(vis_n):
                     kernel = interpolate_kernel(
-                        beam_arr[baseline_inds[ii], fbin[ii], polarization],
+                        beam_arr[polarization, fbin[ii]],
                         x_off[ii],
                         y_off[ii],
                         dx0dy0[ii],
@@ -253,14 +253,15 @@ def visibility_degrid(
                         kernel
                     )
             else:
-                group_id = group_arr[inds]
+                group_id = group_arr[freq_i, baseline_inds]
                 group_max = np.max(group_id) + 1
+                # figure out where any inds have the same xoff, yoff, freq and group
                 xyf_i = (
                     x_off + y_off * psf_resolution + fbin * psf_resolution**2
                 ) * group_max + group_id
-                xyf_si = np.sort(xyf_i)
+                xyf_si = np.argsort(xyf_i)
                 xyf_i = xyf_i[xyf_si]
-                xyf_ui = np.unique(xyf_i)
+                _, xyf_ui = np.unique(xyf_i, return_index=True)
                 n_xyf_bin = xyf_ui.size
 
                 # There might be a better selection criteria to determine which is more efficient
@@ -286,44 +287,37 @@ def visibility_degrid(
 
                 if beam_per_baseline:
                     box_matrix = grid_beam_per_baseline(
-                        psf,
-                        uu,
-                        vv,
-                        ww,
-                        l_mode,
-                        m_mode,
-                        n_tracked,
-                        frequency_array,
-                        x,
-                        y,
-                        xmin_use,
-                        ymin_use,
-                        freq_i,
-                        bt_index,
-                        polarization,
-                        fbin,
-                        image_bot,
-                        image_top,
-                        psf_dim3,
-                        box_matrix,
-                        vis_n,
-                        beam_int=beam_int,
-                        beam2_int=beam2_int,
-                        n_grp_use=n_grp_use,
-                        degrid_flag=True,
-                        obs=obs,
-                        params=params,
-                        weights=vis_weights,
+                        psf=psf,
+                        pyfhd_config=pyfhd_config,
+                        logger=logger,
+                        uu=uu,
+                        vv=vv,
+                        ww=ww,
+                        l_mode=l_mode,
+                        m_mode=m_mode,
+                        n_tracked=n_tracked,
+                        frequency_array=frequency_array,
+                        x=x,
+                        y=y,
+                        xmin_use=xmin_use,
+                        ymin_use=ymin_use,
+                        freq_i=freq_i,
+                        bt_index=bt_index,
+                        polarization=polarization,
+                        image_bot=image_bot,
+                        image_top=image_top,
+                        psf_dim3=psf_dim3,
+                        box_matrix=box_matrix,
+                        vis_n=vis_n,
                     )
                 else:
                     for ii in range(vis_n):
                         # more efficient array subscript notation
                         box_matrix[ii] = beam_arr[
-                            baseline_inds[ii],
-                            fbin[ii],
                             polarization,
-                            y_off[ii],
+                            fbin[ii],
                             x_off[ii],
+                            y_off[ii],
                         ]
 
             if n_spectral:
