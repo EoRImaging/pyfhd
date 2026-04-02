@@ -11,7 +11,7 @@ import numpy as np
 from numpy.typing import NDArray
 
 
-def truncate_colormap(cmap, minval=0.0, maxval=1.0, nseg=100):
+def truncate_colormap(cmap, *, minval=0.0, maxval=1.0, nseg=100):
     new_cmap = colors.LinearSegmentedColormap.from_list(
         "trunc({n},{a:.2f},{b:.2f})".format(n=cmap.name, a=minval, b=maxval),
         cmap(np.linspace(minval, maxval, nseg)),
@@ -31,7 +31,7 @@ def quick_image(
     data_aspect: float = None,
     log: bool = False,
     color_profile: str = "log_cut",
-    cmap: str = "viridis",
+    cmap: str | None = None,
     xtitle: str = None,
     ytitle: str = None,
     title: str = None,
@@ -201,10 +201,10 @@ def quick_image(
         if not isinstance(data_range, np.ndarray | list) or len(data_range) != 2:
             raise ValueError("data_range must be an array with exactly two values.")
     if xrange is not None:
-        if not isinstance(xrange, np.ndarray) or len(xrange) != 2:
+        if not isinstance(xrange, np.ndarray | list) or len(xrange) != 2:
             raise ValueError("xrange must be an array with exactly two values.")
     if yrange is not None:
-        if not isinstance(yrange, np.ndarray) or len(yrange) != 2:
+        if not isinstance(yrange, np.ndarray | list) or len(yrange) != 2:
             raise ValueError("yrange must be an array with exactly two values.")
 
     # Apply logarithmic scaling if set. This modifies the image input directly
@@ -259,6 +259,11 @@ def quick_image(
     if cmap == "idl":
         cmap = plt.get_cmap("Spectral_r")
         cmap = truncate_colormap(cmap, minval=(20 / 255), maxval=1, nseg=256)
+    elif cmap is None:
+        if log and color_profile == "sym_log":
+            cmap = "RdBu"
+        else:
+            cmap = "viridis"
     else:
         cmap = plt.get_cmap(cmap)
 
@@ -356,6 +361,7 @@ def quick_image(
 
 def log_color_calc(
     data: NDArray[np.integer | np.floating | np.complexfloating],
+    *,
     data_range: NDArray[np.integer | np.floating] = None,
     color_profile: str = "log_cut",
     log_cut_val: float = None,
