@@ -782,7 +782,7 @@ def pyfhd_parser():
     )
     beam.add_argument(
         "--psf-dim",
-        default=54,
+        default=None,
         type=int,
         help="Controls the span of the beam in u-v space. Some defaults are 30, "
         "54 (1e6 mask with -2) or 62 (1e7 with -2).",
