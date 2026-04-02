@@ -145,10 +145,11 @@ def visibility_degrid(
         ww = params["ww"]
         psf_image_dim = psf["image_info"]["psf_image_dim"]
         psf_intermediate_res = np.min(
-            np.ceil(np.sqrt(psf_resolution) / 2) * 2, psf_resolution
-        )
-        image_bot = -(psf_dim / 2) * psf_intermediate_res + psf_image_dim / 2
-        image_top = (
+            [np.ceil(np.sqrt(psf_resolution) / 2) * 2, psf_resolution]
+        ).astype(int)
+        # psf_dim is guaranteed to be even
+        image_bot = int(-(psf_dim / 2) * psf_intermediate_res + psf_image_dim / 2)
+        image_top = int(
             (psf_dim * psf_resolution - 1)
             - (psf_dim / 2) * psf_intermediate_res
             + psf_image_dim / 2

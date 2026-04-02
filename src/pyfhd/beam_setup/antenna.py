@@ -122,7 +122,8 @@ def init_beam(obs: dict, pyfhd_config: dict, logger: Logger) -> dict:
         "pix_use": None,
     }
 
-    if pyfhd_config["psf_dim"]:
+    # psf_dim is *required* to be even
+    if pyfhd_config["psf_dim"] is not None:
         psf_dim = pyfhd_config["psf_dim"]
     else:
         psf_dim = np.ceil(
@@ -131,6 +132,7 @@ def init_beam(obs: dict, pyfhd_config: dict, logger: Logger) -> dict:
             * np.max(obs["baseline_info"]["freq"])
             / (c.value * obs["kpix"])
         )
+        psf_dim = int(np.ceil(psf_dim / 2) * 2)
 
     # Create the initial psf dict
     psf = {
@@ -153,7 +155,7 @@ def init_beam(obs: dict, pyfhd_config: dict, logger: Logger) -> dict:
     # come in if we make too small an image and then take the FFT
     psf["intermediate_res"] = np.min(
         [np.ceil(np.sqrt(psf["resolution"]) / 2) * 2, psf["resolution"]]
-    )
+    ).astype(int)
     # use a larger box to build the model than will ultimately be used, to
     # allow higher resolution in the initial image space beam model
     psf["image_dim"] = int(

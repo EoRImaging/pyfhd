@@ -1648,6 +1648,12 @@ def pyfhd_setup(options: argparse.Namespace) -> Tuple[dict, logging.Logger]:
         )
         warnings += 1
 
+    # require psf_dim to be a multiple of 2
+    if pyfhd_config["psf_dim"] is not None:
+        if pyfhd_config["psf_dim"] % 2 != 0:
+            logger.error("If set, psf-dim must be a multiple of 2.")
+            errors += 1
+
     if pyfhd_config["beam_offset_time"] < 0:
         pyfhd_config["beam_offset_time"] = 0
         logger.warning("You set the offset time to less than 0, it was reset to 0.")

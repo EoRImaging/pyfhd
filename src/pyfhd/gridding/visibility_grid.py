@@ -189,6 +189,7 @@ def visibility_grid(
         psf_image_dim = psf["image_info"]["psf_image_dim"]
         if isinstance(psf_image_dim, h5py.Dataset):
             psf_image_dim = psf_image_dim[0]
+        # psf_dim is guaranteed to be even
         image_bot = int(-(psf_dim / 2) * psf_intermediate_res + psf_image_dim / 2)
         image_top = int(
             (psf_dim * psf_resolution - 1)
