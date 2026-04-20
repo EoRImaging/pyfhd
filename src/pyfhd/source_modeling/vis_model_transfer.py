@@ -41,7 +41,9 @@ def vis_model_transfer(
     pyfhd.source_modeling.vis_model_transfer.import_vis_model_from_uvfits : Import model from a uvfits file
     """
     if pyfhd_config["model_file_type"] == "sav":
-        vis_model, params_model, obs_model = import_vis_model_from_sav(pyfhd_config, obs, logger)
+        vis_model, params_model, obs_model = import_vis_model_from_sav(
+            pyfhd_config, obs, logger
+        )
     elif pyfhd_config["model_file_type"] == "uvfits":
         vis_model, params_model, obs_model = import_vis_model_from_uvfits(
             pyfhd_config, obs, logger
@@ -88,9 +90,9 @@ def import_vis_model_from_sav(
     Read a model visibility array and metadata from multiple IDL sav files in a directory
     given by pyfhd_config['model_file_path'], or in a FHD-style directory structure given
     by pyfhd_config['model_file_path']. The data is assumed to be in the format of
-    <obs_id>_params.sav, <obs_id>_obs.sav, and <obs_id>_vis_model_<pol_name>.sav. The 
+    <obs_id>_params.sav, <obs_id>_obs.sav, and <obs_id>_vis_model_<pol_name>.sav. The
     pol_name follows the pol_names in the obs dictionary, ['XX','YY','XY','YX','I','Q',
-    'U','V']. 
+    'U','V'].
 
     Parameters
     ----------
@@ -236,7 +238,7 @@ def import_vis_model_from_uvfits(
 class _FlaggingInfoCounter(object):
     """Something to count and hold numbers to do with baselines"""
 
-    def __init__(self,  params: dict, obs: dict):
+    def __init__(self, params: dict, obs: dict):
         """
         Given a populated params and obs dict (as populated by
         `pyfhd.data_setup.uvfits.create_<name>`), calculate many useful quantities
@@ -301,7 +303,7 @@ def flag_model_visibilities(
     logger: logging.Logger,
 ) -> NDArray[np.complex128]:
     """
-    Match the times and the tile flags between the data and the input model, and 
+    Match the times and the tile flags between the data and the input model, and
     check that the uvfits are compatible. Needs to check if auto-correlations are present
 
     Parameters
@@ -330,34 +332,31 @@ def flag_model_visibilities(
     # Calculate a number of things we'll need to compare the data to the model
     flaginfo_data = _FlaggingInfoCounter(params_data, obs_data)
     flaginfo_model = _FlaggingInfoCounter(params_model, obs_model)
-    
 
     # Calculate a tolerance for the time difference between the transferred
-    # model and the data in Julian date. If the difference is greater than 
-    # this tolerance, then the model and data are not compatible. Given the 
+    # model and the data in Julian date. If the difference is greater than
+    # this tolerance, then the model and data are not compatible. Given the
     # modelling software, we might expect small differences in JD calculations.
     # Calculate half of the time integration width in JD.
     time_tolerance = (obs_data["time_res"] / (24.0 * 60 * 60)) / 1e2
-    time_half_res = (obs_data["time_res"] / 2.) / (24.0 * 60 * 60) 
+    time_half_res = (obs_data["time_res"] / 2.0) / (24.0 * 60 * 60)
 
-    # The convention for Julian dates is to mark the center of the time step 
-    # (AIPS Memo compliant). We will check if the input model matches the 
-    # expected convention or if it marks the beginning of the time step. 
-    # We will also account for the case where the data is a subset of the 
-    # model. 
+    # The convention for Julian dates is to mark the center of the time step
+    # (AIPS Memo compliant). We will check if the input model matches the
+    # expected convention or if it marks the beginning of the time step.
+    # We will also account for the case where the data is a subset of the
+    # model.
 
     # Option 1: Model matches the standard Julian date convention
     matched_times_std = np.full(flaginfo_data.num_times, -1, dtype=int)
 
-    # Option 2: Model's Julian date convention is the mark the beginning of 
+    # Option 2: Model's Julian date convention is the mark the beginning of
     #           the time step
     matched_times_beg = np.full(flaginfo_data.num_times, -1, dtype=int)
 
     for time_index, time in enumerate(flaginfo_data.unique_times):
         diffs_std = np.abs(flaginfo_model.unique_times - time)
-        diffs_beg = np.abs(
-            flaginfo_model.unique_times - (time - time_half_res)
-        )
+        diffs_beg = np.abs(flaginfo_model.unique_times - (time - time_half_res))
 
         # Minimum value and its index
         min_ind = np.argmin(diffs_std)
@@ -375,12 +374,11 @@ def flag_model_visibilities(
         if min_val < time_tolerance:
             matched_times_beg[time_index] = min_ind
 
-
     # Count how many matches were successful (i.e. != -1)
     n_matched_std = np.count_nonzero(matched_times_std != -1)
     n_matched_beg = np.count_nonzero(matched_times_beg != -1)
 
-    # If no times matched, then error. 
+    # If no times matched, then error.
     if n_matched_std == 0 and n_matched_beg == 0:
         data_path = str(
             Path(pyfhd_config["input_path"], pyfhd_config["obs_id"] + ".uvfits")
@@ -486,7 +484,8 @@ def flag_model_visibilities(
 
     # empty holder for the flagged model - this should be the same shape
     vis_model_arr_flagged = np.zeros(
-        (obs_data["n_pol"], obs_data["n_freq"], flaginfo_data.num_visis), dtype=np.complex128
+        (obs_data["n_pol"], obs_data["n_freq"], flaginfo_data.num_visis),
+        dtype=np.complex128,
     )
 
     # For each time step that matches the data, copy across any visibilities
