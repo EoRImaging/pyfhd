@@ -1,12 +1,14 @@
-import numpy as np
-from numpy.typing import NDArray
+import logging
+from pathlib import Path
+
+from astropy.coordinates import EarthLocation
 from astropy.io import fits
-from astropy.time import Time
 from astropy.io.fits.fitsrec import FITS_rec
 from astropy.io.fits.header import Header
-from pathlib import Path
-import logging
-from astropy.coordinates import EarthLocation
+from astropy.time import Time
+import numpy as np
+from numpy.typing import NDArray
+
 from PyFHD.io.pyfhd_io import save
 
 
@@ -118,8 +120,8 @@ def extract_header(
     # The telescope location information in uvfits is stored in the antenna table
     location = EarthLocation.from_geocentric(
         x=antenna_header["arrayx"],
-        y=antenna_header["arrayx"],
-        z=antenna_header["arrayx"],
+        y=antenna_header["arrayy"],
+        z=antenna_header["arrayz"],
         unit="m",
     )
 

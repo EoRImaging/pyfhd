@@ -214,8 +214,6 @@ def init_beam(obs: dict, pyfhd_config: dict, logger: Logger) -> dict:
         valid_i[ind] = elem[good_alt]
     valid_i = tuple(valid_i)
 
-    ra_arr = ra_arr[good_alt]
-    dec_arr = dec_arr[good_alt]
     alt_arr = alt_arr[good_alt]
     az_arr = az_arr[good_alt]
 
