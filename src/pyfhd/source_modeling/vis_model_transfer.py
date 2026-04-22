@@ -1,16 +1,19 @@
+import importlib_resources
+import logging
+import os
+from pathlib import Path
+import shutil
+
+import h5py
 import numpy as np
 from numpy.typing import NDArray
-from pyfhd.data_setup.uvfits import extract_visibilities, create_params, extract_header
-import logging
-from pyfhd.pyfhd_tools.pyfhd_utils import run_command
-from pyfhd.io.pyfhd_io import recarray_to_dict, save, load
-import importlib_resources
-import os
-import shutil
-import h5py
 from scipy.io import readsav
-from pathlib import Path
-import sys
+
+from pyfhd.data_setup.obs import create_obs
+from pyfhd.data_setup.uvfits import create_params, create_layout
+from pyfhd.data_setup.uvfits import extract_visibilities, extract_header
+from pyfhd.io.pyfhd_io import recarray_to_dict, save, load
+from pyfhd.pyfhd_tools.pyfhd_utils import run_command
 
 
 def vis_model_transfer(
