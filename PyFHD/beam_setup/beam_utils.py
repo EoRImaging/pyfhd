@@ -244,7 +244,7 @@ def beam_image(
                 beam_base_uv1 = np.zeros([dimension, elements], np.complex128)
                 beam_base_uv1[xl : xh + 1, yl : yh + 1] = beam_single
                 beam_base_single = np.fft.fftshift(
-                    np.fft.ifftn(np.fft.fftshift(beam_base_uv1))
+                    np.fft.fftn(np.fft.fftshift(beam_base_uv1))
                 )
                 beam_base += (
                     nf_bin * (beam_base_single * np.conjugate(beam_base_single)).real
@@ -288,10 +288,9 @@ def beam_image(
         if beam_gaussian_params is None:
             beam_base_uv1 = np.zeros([dimension, elements], dtype=np.complex128)
             beam_base_uv1[xl : xh + 1, yl : yh + 1] = beam_base_uv
-            beam_base = np.fft.fftshift(np.fft.ifftn(np.fft.fftshift(beam_base_uv1)))
+            beam_base = np.fft.fftshift(np.fft.fftn(np.fft.fftshift(beam_base_uv1)))
         else:
             beam_base = beam_base_uv
-
     beam_base /= n_bin_use
     return beam_base.real
 
@@ -307,10 +306,14 @@ def beam_image_hyperresolved(
     psf: dict,
 ) -> NDArray[np.complexfloating]:
     """
-    Build the hyperresolved image-space beam power for a station/tile. Currently, this
-    function assumes that the amplitude of the jones matrix response between two antennas,
-    multiplied by the station/tile response, is the image beam power. This calculation
-    may be suject to change in the future.
+    Build the hyperresolved image-space beam power for a station/tile. This is
+    computed as the product of the F-matrices for the two antennas. The Jones
+    matrices are decomposed into F and K, where F gives the complex sensitivity
+    of each instrumental polarization to unpolarized emission (so it only has an
+    instrumental polarization index, the phase is related to time delays which
+    can vary spatially) and K is the projection from celestial polarization
+    vector components (orthogonal on the sky) to instrumental polarization vector
+    components (often non-orthogonal on the sky)
 
     Parameters
     ----------
@@ -336,33 +339,21 @@ def beam_image_hyperresolved(
     NDArray[np.complexfloating]
         An estimation of the image-space beam power, normalized to the zenith power.
     """
+    # Create one full-scale array
+    image_power_beam = np.zeros(
+        [psf["image_dim"], psf["image_dim"]], dtype=np.complex128
+    )
+
     # FHD was designed to account for multiple antennas but in most cases only one was ever used
     # So we will just use the first antenna twice as I PyFHD does not support multiple antennas at this time,
     # If you want to use multiple antennas, please open an issue on the PyFHD GitHub repository or do the translation and/or
     # adjustments yourself.
-    beam_ant_1 = antenna["response"][ant_pol_1, freq_i]
-    beam_ant_2 = np.conjugate(antenna["response"][ant_pol_2, freq_i])
+    # baseline response (power beam) is product of the "two" antenna responses
+    image_power_beam.flat[antenna["pix_use"]] = (
+        antenna["iresponse"][ant_pol_1, freq_i]
+        * np.conjugate(antenna["iresponse"][ant_pol_2, freq_i])
+    ).flatten()
 
-    # Amplitude of the response from "ant1" (again FHD takes more than one antenna)
-    # is Sqrt(|J1[0,pol1]|^2 + |J1[1,pol1]|^2)
-    amp_1 = (
-        np.abs(antenna["jones"][0, ant_pol_1]) ** 2
-        + np.abs(antenna["jones"][1, ant_pol_1]) ** 2
-    )
-    # Amplitude of the response from "ant2" (again FHD takes more than one antenna)
-    # is Sqrt(|J2[0,pol2]|^2 + |J2[1,pol2]|^2)
-    amp_2 = (
-        np.abs(antenna["jones"][0, ant_pol_2]) ** 2
-        + np.abs(antenna["jones"][1, ant_pol_2]) ** 2
-    )
-    # Amplitude of the baseline response is the product of the "two" antenna responses
-    power_zenith_beam = np.sqrt(amp_1 * amp_2)
-
-    # Create one full-scale array
-    image_power_beam = np.zeros([psf["dim"], psf["dim"]], dtype=np.complex128)
-
-    # Co-opt the array to calculate the power at zenith
-    image_power_beam[antenna["pix_use"]] = power_zenith_beam
     # TODO: Work out the interpolation of the zenith power, it uses cubic interpolation
     # But the IDL Interpolate function in IDL uses an interpolation paramter of -0.5, where
     # scipy, numpy with their B-Splines seem to use a parameter of 0 by default with no way
@@ -374,12 +365,18 @@ def beam_image_hyperresolved(
     # Initial trying out of using pyuvdata, not close at all. This is interpolating
     # the zenith power using the x and y pixel coordinates, to use pyuvdata likely need to do
     # pixel to ra/dec then to za/az
-    power_zenith = np.interp(zen_int_x, zen_int_y, image_power_beam)
+
+    # Use order=1 for bilinear interpolation (matches IDL parameter -0.5)
+    # mode='nearest' handles out-of-bounds by using nearest edge values
+    # Interpolate the abs to get the abs power at zenith, which I think is what we want here.
+    power_zenith = map_coordinates(
+        np.abs(image_power_beam), [[zen_int_x], [zen_int_y]], order=1, mode="nearest"
+    )[0]
 
     # Normalize the image power beam to the zenith
-    image_power_beam[antenna["pix_use"]] = (
-        power_zenith_beam * beam_ant_1 * beam_ant_2
-    ) / power_zenith
+    image_power_beam.flat[antenna["pix_use"]] = (
+        image_power_beam.flat[antenna["pix_use"]] / power_zenith
+    )
 
     return image_power_beam
 
@@ -443,9 +440,8 @@ def beam_power(
         zen_int_x,
         zen_int_y,
         psf,
-        pyfhd_config,
     )
-    if pyfhd_config["kernel_window"]:
+    if pyfhd_config.get("kernel_window", False):
         image_power_beam *= antenna["pix_window"]
     psf_base_single = np.fft.fftshift(np.fft.ifftn(np.fft.fftshift(image_power_beam)))
     # TODO: Same cubic problem as in beam_image_hyperresolved here
@@ -456,19 +452,17 @@ def beam_power(
     )
 
     # Build a mask to create a well-defined finite beam
-    uv_mask_superres = np.zeros(
-        [[psf_base_superres.shape[0], psf_base_superres.shape[1]]], dtype=np.float64
-    )
+    uv_mask_superres = np.zeros(psf_base_superres.shape, dtype=np.float64)
     psf_mask_threshold_use = (
         np.max(np.abs(psf_base_superres)) / pyfhd_config["beam_mask_threshold"]
     )
     beam_i = region_grow(
         np.abs(psf_base_superres),
-        psf["superres_dim"] * (1 + psf["superres_dim"]) / 2,
+        int(psf["superres_dim"] * (1 + psf["superres_dim"]) / 2),
         low=psf_mask_threshold_use,
         high=np.max(np.abs(psf_base_superres)),
     )
-    uv_mask_superres[beam_i] = 1
+    uv_mask_superres.flat[beam_i] = 1
 
     # FFT normalization correction in case this changes the total number of pixels
     psf_base_superres *= psf["intermediate_res"] ** 2
@@ -486,7 +480,7 @@ def beam_power(
     if pyfhd_config["beam_clip_floor"]:
         i_use = np.where(np.abs(psf_base_superres))
         psf_amp = np.abs(psf_base_superres)
-        psf_phase = np.arctan(psf_base_superres.imag / psf_base_superres.real)
+        psf_phase = np.angle(psf_base_superres)
         psf_floor = psf_mask_threshold_use * (psf["intermediate_res"] ** 2)
         psf_amp[i_use] -= psf_floor
         psf_base_superres = psf_amp * np.cos(psf_phase) + 1j * psf_amp * np.sin(

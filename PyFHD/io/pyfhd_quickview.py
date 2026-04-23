@@ -347,7 +347,7 @@ def quickview(
         "mjd-obs", obs_out["astr"]["mjdobs"], "Modified Julian day of observations"
     )
     fits_file.header.set("date-obs", obs_out["astr"]["dateobs"], "Date of observations")
-    fits_file.header.set("radecsys", obs_out["astr"]["radecsys"], "Reference Frame")
+    fits_file.header.set("radesysa", obs_out["astr"]["radecsys"], "Reference Frame")
     fits_file.header.set(
         "history",
         f"World Coordinate System parameters written by PyFHD: {datetime.now().strftime('%b %d %Y %H:%M:%S')}",

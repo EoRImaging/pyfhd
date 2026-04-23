@@ -1,6 +1,15 @@
-import numpy as np
+import copy
 import logging
 from math import pi, log10
+from pathlib import Path
+
+import numpy as np
+from astropy.io import fits
+from astropy.table import Table
+from astropy.time import Time
+from astropy.coordinates import EarthLocation
+from astropy.units import Quantity
+
 from PyFHD.pyfhd_tools.pyfhd_utils import (
     idl_argunique,
     histogram,
@@ -8,10 +17,6 @@ from PyFHD.pyfhd_tools.pyfhd_utils import (
     parallactic_angle,
 )
 from PyFHD.pyfhd_tools.unit_conv import altaz_to_radec, radec_to_pixel, radec_to_altaz
-from pathlib import Path
-from astropy.io import fits
-from astropy.table import Table
-from astropy.time import Time
 
 
 def create_obs(
@@ -56,6 +61,12 @@ def create_obs(
     obs["n_freq"] = pyfhd_header["n_freq"]
     obs["n_freq_flag"] = 0
     obs["instrument"] = pyfhd_config["instrument"]
+
+    # keep location info for beam setup
+    obs["lon"] = pyfhd_header["lon"]
+    obs["lat"] = pyfhd_header["lat"]
+    obs["alt"] = pyfhd_header["alt"]
+
     obs["obsname"] = pyfhd_config["obs_id"]
     # Deal with the times
     time = params["time"]
@@ -64,10 +75,10 @@ def create_obs(
     bin_width = np.empty(obs["n_time"])
     if obs["n_time"] > 1:
         bin_width[0 : obs["n_time"]] = b0i + 1
+        b0i_range = np.arange(1, obs["n_time"])
+        bin_width[b0i_range] = b0i[b0i_range] - b0i[b0i_range - 1]
     else:
-        bin_width = time.size
-    b0i_range = np.arange(1, obs["n_time"])
-    bin_width[b0i_range] = b0i[b0i_range] - b0i[b0i_range - 1]
+        bin_width[0] = time.size
     baseline_info["bin_offset"] = np.zeros(obs["n_time"], dtype=np.int64)
     if obs["n_time"] > 1:
         baseline_info["bin_offset"][1:] = np.cumsum(bin_width[: obs["n_time"] - 1])
@@ -92,15 +103,15 @@ def create_obs(
             freq_bin_i[freq_ri[freq_ri[bin] : freq_ri[bin + 1]]] = bin
     baseline_info["fbin_i"] = freq_bin_i.astype(np.int64)
     obs["freq_center"] = np.median(baseline_info["freq"])
-
     antenna_flag = True
     if np.max(params["antenna1"]) > 0 and (np.max(params["antenna2"]) > 0):
-        baseline_info["tile_a"] = params["antenna1"]
-        baseline_info["tile_b"] = params["antenna2"]
+        baseline_info["tile_a"] = copy.deepcopy(params["antenna1"])
+        baseline_info["tile_b"] = copy.deepcopy(params["antenna2"])
         antenna_flag = False
     if antenna_flag:
         # 256 tile upper limit is hard-coded in CASA format
         # these tile numbers have been verified to be correct
+        # TODO: not clear that this works for more than 256 ants. e.g. LWA
         baseline_min = np.min(params["baseline_arr"])
         exponent = np.log(np.min(baseline_min)) / np.log(2)
         antenna_mod_index = 2 ** np.floor(exponent)
@@ -140,11 +151,11 @@ def create_obs(
         tile_a_antennas = np.where(
             layout["antenna_numbers"][tile_i] == params["antenna1"]
         )
-        if np.size(tile_a_antennas) > 0:
-            baseline_info["tile_a"][tile_a_antennas] = tile_i + 1
         tile_b_antennas = np.where(
             layout["antenna_numbers"][tile_i] == params["antenna2"]
         )
+        if np.size(tile_a_antennas) > 0:
+            baseline_info["tile_a"][tile_a_antennas] = tile_i + 1
         if np.size(tile_b_antennas) > 0:
             baseline_info["tile_b"][tile_b_antennas] = tile_i + 1
     # Change the type to int to avoid issues with numba
@@ -202,7 +213,7 @@ def create_obs(
             pyfhd_config["min_baseline"], np.min(kr_arr[np.nonzero(kr_arr)])
         )
 
-    meta = read_metafits(obs, pyfhd_header, params, pyfhd_config, logger)
+    meta = read_metafits(obs, pyfhd_header, params, pyfhd_config, layout, logger)
 
     baseline_info["time_use"] = np.ones(obs["n_time"], dtype=np.int8)
     # time cut is specified in seconds to cut (rounded up to next time integration point).
@@ -271,6 +282,7 @@ def read_metafits(
     pyfhd_header: dict,
     params: dict,
     pyfhd_config: dict,
+    layout: dict,
     logger: logging.Logger,
 ) -> dict:
     """
@@ -288,6 +300,8 @@ def read_metafits(
         The data from the UVFITS file
     pyfhd_config : dict
         PyFHD's configuration dictionary
+    layout : dict
+        Info from the uvfits antenna table
     logger : logging.Logger
         PyFHD's logger
 
@@ -347,8 +361,24 @@ def read_metafits(
         hist_A1, _, _ = histogram(tile_A1, min=1, max=obs["n_tile"])
         hist_B1, _, _ = histogram(tile_B1, min=1, max=obs["n_tile"])
         hist_AB = hist_A1 + hist_B1
-        meta["tile_names"] = np.arange(1, obs["n_tile"] + 1)
-        meta["tile_height"] = np.zeros(obs["n_tile"])
+        meta["tile_names"] = layout["antenna_names"]
+        # if pyuvdata is available, get antenna heights using pyuvdata utils
+        try:
+            from pyuvdata import utils
+
+            telescope_location = EarthLocation.from_geodetic(
+                lon=obs["lon"], lat=obs["lat"], height=obs["alt"]
+            )
+            ant_ecef = utils.ECEF_from_rotECEF(
+                layout["antenna_coords"], longitude=telescope_location.lon.rad
+            )
+            # in uvfits the antenna positions are relative to the array center.
+            # need to add those back in for the next calc
+            ant_ecef += Quantity(telescope_location.geocentric).to_value("m")
+            ant_enu = utils.ENU_from_ECEF(ant_ecef, center_loc=telescope_location)
+            meta["tile_height"] = ant_enu[:, 2]
+        except ImportError:
+            meta["tile_height"] = np.zeros(obs["n_tile"])
         tile_use = np.where(hist_AB == 0)[0]
         meta["tile_flag"] = np.zeros(obs["n_tile"], dtype=np.int8)
         if tile_use.size > 0:

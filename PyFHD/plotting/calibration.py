@@ -87,7 +87,7 @@ def plot_cals(obs: dict, cal: dict, pyfhd_config: dict):
     # Multiple pages will be required beyond 128 stations
     n_rows = 8
     n_cols = 16
-    n_pages = obs["n_tile"] // (n_cols * n_rows)
+    n_pages = int(np.ceil(obs["n_tile"] / (n_cols * n_rows)))
 
     # Create dictionary for the subplot grid to create reliable, static plots
     gridspec_kw = {
@@ -151,11 +151,11 @@ def plot_cals(obs: dict, cal: dict, pyfhd_config: dict):
                 row = (tile_i - page_i * (n_cols * n_rows)) // n_cols
 
                 ax_amp[row, col].set_title(
-                    str(obs["baseline_info"]["tile_names"][(page_i + 1) * tile_i]),
+                    str(obs["baseline_info"]["tile_names"][tile_i]),
                     fontsize=9,
                 )
                 ax_phase[row, col].set_title(
-                    str(obs["baseline_info"]["tile_names"][(page_i + 1) * tile_i]),
+                    str(obs["baseline_info"]["tile_names"][tile_i]),
                     fontsize=9,
                 )
 

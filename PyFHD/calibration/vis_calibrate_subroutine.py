@@ -309,7 +309,7 @@ def vis_calibrate_subroutine(
                 for tile_i in range(tile_use.size):
                     if n_arr[tile_i] >= min_cal_solutions:
                         if calibration_weights:
-                            xmat = vis_model_matrix[A_ind_arr[tile_i]]
+                            xmat = vis_model_matrix[(A_ind_arr[tile_i]).astype(int)]
                             # For some reason IDL multiplcation just allows two arrays of
                             # very dissimilar sizes to be multiplied by just ignoring everything
                             # after the index of the smallest one!?! Could be worth checking this is
@@ -320,13 +320,16 @@ def vis_calibrate_subroutine(
                                 1
                                 / np.dot(xmat, xmat_dag)
                                 * np.dot(
-                                    np.transpose(vis_use[A_ind_arr[tile_i]]), xmat_dag
+                                    np.transpose(
+                                        vis_use[(A_ind_arr[tile_i]).astype(int)]
+                                    ),
+                                    xmat_dag,
                                 )
                             )[0]
                         else:
                             gain_new[tile_i] = np.linalg.lstsq(
-                                vis_model_matrix[A_ind_arr[tile_i]],
-                                vis_use[A_ind_arr[tile_i]],
+                                vis_model_matrix[(A_ind_arr[tile_i]).astype(int)],
+                                vis_use[(A_ind_arr[tile_i]).astype(int)],
                                 rcond=None,
                             )[0][0][0]
 

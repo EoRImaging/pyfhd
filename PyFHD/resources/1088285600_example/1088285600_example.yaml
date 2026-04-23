@@ -26,12 +26,11 @@ override-target-phasera: ~
 override-target-phasedec: ~
 
 # Beam Setup
-beam-file-path: './PyFHD/resources/1088285600_example/gauss_beam_pointing0_167635008Hz.h5'
+saved-beam-file-path: './PyFHD/resources/1088285600_example/gauss_beam_pointing0_167635008Hz.h5'
 lazy-load-beam: false
 recalculate-beam : true
 beam-clip-floor : true
 interpolate-kernel : true
-dipole-mutual-coupling-factor : true
 beam-nfreq-avg : 16
 psf-dim: 54
 psf-resolution : 100

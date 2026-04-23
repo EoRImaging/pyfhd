@@ -26,12 +26,19 @@ override-target-phasera: ~
 override-target-phasedec: ~
 
 # Beam Setup
-beam-file-path: './input'
+# use this for an FHD saved beam:
+# saved-beam-file-path: './input'
+# this is for a UVBeam readable file:
+uvbeam-file-path: './input'
+uvbeam-freq-buffer: 2e6
+# use this for an analytic beam (e.g. short dipole shown here)
+# analytic-beam-yaml : "!AnalyticBeam
+#   class: ShortDipoleBeam
+# "
 lazy-load-beam: false
 recalculate-beam : true
 beam-clip-floor : true
 interpolate-kernel : true
-dipole-mutual-coupling-factor : true
 beam-nfreq-avg : 16
 psf-dim: 54
 psf-resolution : 100

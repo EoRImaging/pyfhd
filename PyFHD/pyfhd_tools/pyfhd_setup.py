@@ -1,16 +1,17 @@
-from pathlib import Path
-import configargparse
 import argparse
-import time
-import subprocess
+import importlib_resources
 import logging
-from typing import Tuple
 import os
-from importlib.metadata import version
-from glob import glob
 import re
 import sys
-import importlib_resources
+import time
+from glob import glob
+from importlib.metadata import version
+from pathlib import Path
+from typing import Tuple
+
+import configargparse
+import yaml
 
 
 class OrderedBooleanOptionalAction(argparse.BooleanOptionalAction):
@@ -164,8 +165,8 @@ def pyfhd_parser():
         "--instrument",
         type=str,
         default="mwa",
-        choices=["mwa", "lwa", "hera", "other"],
-        help="Set the instrument used for the FHD run, currently only MWA is supported",
+        choices=["mwa", "ovro-lwa", "hera", "other"],
+        help="Set the instrument used for the FHD run.",
     )
     parser.add_argument(
         "--dimension",
@@ -501,9 +502,42 @@ def pyfhd_parser():
     # Beam Setup Group
     beam.add_argument(
         "-b",
-        "--beam-file-path",
+        "--saved-beam-file-path",
         type=Path,
-        help="The path to the file containing a sav or fits file",
+        help="The path to an FHD written beam file (h5 or sav). "
+        "Cannot be used with uvbeam-file-path or analytic-beam-yaml, "
+        "one of these three should be set to specify the beam.",
+    )
+    beam.add_argument(
+        "--uvbeam-file-path",
+        type=Path,
+        help="The path to a beam file readable by pyuvdata.UVBeam. Consider also "
+        "setting uvbeam-freq-buffer. "
+        "Cannot be used with `saved-beam-file-path` or `analytic-beam-yaml`, "
+        "one of these three should be set to specify the beam.",
+    )
+    beam.add_argument(
+        "--uvbeam-freq-buffer",
+        type=float,
+        default=None,
+        help="Buffer around data frequency range to use when reading in the beam "
+        "in Hz. Set to allow partial beam loading (when possible) to save memory. "
+        "If not set (the default) the whole beam file will be read in. "
+        "If set, should be at least 2 * beam frequency resolution (if set too "
+        "low, beam interpolation errors can occur). "
+        "We suggest setting it to 2e6 (meaning 2 MHz) for the standard MWA beam "
+        "file, which has 1 MHz resolution.",
+    )
+    # read it in as a string to decode later. Using type=yaml.safe_load doesn't
+    # work when there are multiple lines to specify the beam.
+    beam.add_argument(
+        "--analytic-beam-yaml",
+        type=str,
+        help="The yaml specifier for a pyuvdata AnalyticBeam. See the pyuvdata "
+        "docs for details, must be enclosed in quotes around the entire (multiline)"
+        "specification. "
+        "Cannot be used with `saved-beam-file-path` or `uvbeam-file-path`, "
+        "one of these three should be set to specify the beam.",
     )
     beam.add_argument(
         "-ll",
@@ -567,12 +601,6 @@ def pyfhd_parser():
         help="Set to true if the beams were made with corrective phases given the baseline location, which then enables the gridding to be done per baseline",
     )
     beam.add_argument(
-        "--dipole-mutual-coupling-factor",
-        default=False,
-        action=OrderedBooleanOptionalAction,
-        help="Allows a modification to the beam as a result of mutual coupling between dipoles calculated in mwa_dipole_mutual_coupling (See Sutinjo 2015 for more details).",
-    )
-    beam.add_argument(
         "--beam-offset-time",
         type=float,
         default=56,
@@ -593,11 +621,14 @@ def pyfhd_parser():
         type=str,
         choices=[
             "filter_uv_uniform",
-            "filter_uv_hanning",
-            "filter_uv_natural",
-            "filter_uv_radial",
-            "filter_uv_tapered_uniform",
-            "filter_uv_optimal",
+            # the following are not implemented yet. So the code just uses
+            # uniform but names the files to match the selection (so it lies)
+            # commenting these out as options to prevent confusion.
+            # "filter_uv_hanning",
+            # "filter_uv_natural",
+            # "filter_uv_radial",
+            # "filter_uv_tapered_uniform",
+            # "filter_uv_optimal",
         ],
         help="Weighting filter to be applied to resulting snapshot images and fits files. Replaces image_filter_fn from FHD",
     )
@@ -1036,7 +1067,23 @@ def write_collated_yaml_config(
                         #     outfile.write(f"{key} : {item}\n")
                         outfile.write(line)
                 else:
-                    outfile.write(f"{yaml_key} : '{pyfhd_config[key]}'\n")
+                    basic_write = False
+                    try:
+                        from pyuvdata.analytic_beam import AnalyticBeam
+
+                        if isinstance(pyfhd_config[key], AnalyticBeam):
+                            yaml_beam_repr = yaml.safe_dump(
+                                pyfhd_config[key], default_flow_style=False
+                            )
+                            yaml_beam_repr = "\n  ".join(yaml_beam_repr.split("\n"))
+                            outfile.write(f'{yaml_key} : "{yaml_beam_repr}"\n')
+                        else:
+                            basic_write = True
+                    except ImportError:
+                        basic_write = True
+
+                    if basic_write:
+                        outfile.write(f"{yaml_key} : '{pyfhd_config[key]}'\n")
 
 
 def pyfhd_logger(pyfhd_config: dict) -> Tuple[logging.Logger, Path]:
@@ -1229,19 +1276,22 @@ def pyfhd_setup(options: argparse.Namespace) -> Tuple[dict, logging.Logger]:
     obs_uvfits_path = Path(
         pyfhd_config["input_path"], pyfhd_config["obs_id"] + ".uvfits"
     )
-    obs_metafits_path = Path(
-        pyfhd_config["input_path"], pyfhd_config["obs_id"] + ".metafits"
-    )
     if not obs_uvfits_path.exists():
         logger.error(
             "{} doesn't exist, please check your input path".format(obs_uvfits_path)
         )
         errors += 1
-    if not obs_metafits_path.exists():
-        logger.error(
-            "{} doesn't exist, please check your input path".format(obs_metafits_path)
+    if pyfhd_config["instrument"] == "mwa":
+        obs_metafits_path = Path(
+            pyfhd_config["input_path"], pyfhd_config["obs_id"] + ".metafits"
         )
-        errors += 1
+        if not obs_metafits_path.exists():
+            logger.error(
+                "{} doesn't exist, please check your input path".format(
+                    obs_metafits_path
+                )
+            )
+            errors += 1
 
     # Force PyFHD to recalculate the beam, gridding and mapping functions
     if pyfhd_config["recalculate_all"]:
@@ -1276,29 +1326,67 @@ def pyfhd_setup(options: argparse.Namespace) -> Tuple[dict, logging.Logger]:
         pyfhd_config["interpolate_kernel"] = False
 
     # If the user has set a beam file, check it exists (Error)
-    if pyfhd_config["beam_file_path"] is not None:
-        pyfhd_config["beam_file_path"] = (
-            Path(pyfhd_config["beam_file_path"]).expanduser().resolve()
+    if pyfhd_config["saved_beam_file_path"] is not None:
+        if pyfhd_config["uvbeam_file_path"] is not None:
+            logger.warning(
+                "Both saved_beam_file_path and uvbeam_file_path are set. Using saved_beam_file_path."
+            )
+            pyfhd_config["uvbeam_file_path"] = None
+        if pyfhd_config["analytic_beam_yaml"] is not None:
+            logger.warning(
+                "Both saved_beam_file_path and analytic_beam_yaml are set. Using saved_beam_file_path."
+            )
+            pyfhd_config["analytic_beam_yaml"] = None
+
+        pyfhd_config["saved_beam_file_path"] = (
+            Path(pyfhd_config["saved_beam_file_path"]).expanduser().resolve()
         )
-        if not Path(pyfhd_config["beam_file_path"]).exists():
+        if not Path(pyfhd_config["saved_beam_file_path"]).exists():
             logger.error(
-                f"Beam file {pyfhd_config['beam_file_path']} does not exist, please check your input path"
+                f"Beam file {pyfhd_config['saved_beam_file_path']} does not exist, please check your input path"
             )
             errors += 1
 
-    if pyfhd_config["beam_file_path"] is None:
-        logger.info("No beam file was set, PyFHD will calculate the beam.")
+    # If the user has set a uvbeam file, check it exists (Error)
+    if pyfhd_config["uvbeam_file_path"] is not None:
+        if pyfhd_config["analytic_beam_yaml"] is not None:
+            logger.warning(
+                "Both uvbeam_file_path and analytic_beam_yaml are set. Using uvbeam_file_path."
+            )
+            pyfhd_config["analytic_beam_yaml"] = None
+        pyfhd_config["uvbeam_file_path"] = (
+            Path(pyfhd_config["uvbeam_file_path"]).expanduser().resolve()
+        )
+        if not Path(pyfhd_config["uvbeam_file_path"]).exists():
+            logger.error(
+                f"UVBeam file {pyfhd_config['uvbeam_file_path']} does not exist, please check your input path"
+            )
+            errors += 1
+
+    if pyfhd_config["analytic_beam_yaml"] is not None:
+        # do a little cleanup so it can be turned into an analytic beam
+        temp = pyfhd_config["analytic_beam_yaml"]
+        temp = temp.replace(": - ", ":\n-")
+        temp = temp.replace("- ", "-")
+        temp = temp.replace(": ", ":")
+        temp = "\n".join(temp.split(" "))
+        temp = temp.replace(":", ": ")
+        temp = temp.replace("-", "- ")
+        try:
+            from pyuvdata.analytic_beam import AnalyticBeam  # noqa
+
+            pyfhd_config["analytic_beam_yaml"] = yaml.safe_load(temp)
+        except ImportError as ie:
+            raise ImportError(
+                "pyuvdata must be installed to use analytic beams"
+            ) from ie
 
     if (
-        pyfhd_config["instrument"] == "mwa"
-        and pyfhd_config["beam_file_path"] is None
-        and not pyfhd_config["dipole_mutual_coupling_factor"]
+        pyfhd_config["saved_beam_file_path"] is None
+        and pyfhd_config["uvbeam_file_path"] is None
+        and pyfhd_config["analytic_beam_yaml"] is None
     ):
-        logger.warning(
-            "Since the instrument is MWA and we're calculating the beam, it's recommended to set the dipole mutual coupling factor to True."
-        )
-        pyfhd_config["dipole_mutual_coupling_factor"] = True
-        warnings += 1
+        logger.error("No beam file, uvbeam file or analytic beam was set.")
 
     # cal_bp_transfer when enabled should point to a file with a saved bandpass (Error)
     errors += _check_file_exists(pyfhd_config, "cal_bp_transfer")

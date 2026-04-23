@@ -1,13 +1,14 @@
-import numpy as np
-from numpy.typing import NDArray
+import logging
+from pathlib import Path
+
+from astropy.coordinates import EarthLocation
 from astropy.io import fits
-from astropy.time import Time
 from astropy.io.fits.fitsrec import FITS_rec
 from astropy.io.fits.header import Header
-from pathlib import Path
-import logging
-from astropy.coordinates import EarthLocation
-import astropy
+from astropy.time import Time
+import numpy as np
+from numpy.typing import NDArray
+
 from PyFHD.io.pyfhd_io import save
 
 
@@ -71,7 +72,7 @@ def extract_header(
     pyfhd_header["real_index"] = 0
     pyfhd_header["imaginary_index"] = 1
     pyfhd_header["weights_index"] = 2
-    pyfhd_header["n_tile"] = 128
+    pyfhd_header["n_tile"] = antenna_header["naxis2"]
     pyfhd_header["naxis"] = params_header["naxis"]
     pyfhd_header["n_params"] = params_header["pcount"]
     pyfhd_header["n_baselines"] = params_header["gcount"]
@@ -115,19 +116,14 @@ def extract_header(
             pyfhd_header["obsdec"] = params_header["dec"]
         else:
             pyfhd_header["obsdec"] = params_header[f"CRVAL{dec_axis}"]
-    # Put in locations of instrument from FITS file or from Astropy site data
-    # If you want to see the list of current site names using EarthLocation.get_site_names()
-    # If you want to use PyFHD with HERA in the future
-    # and make it compatible you might have to put in the lat/lon/alt yourself
-    try:
-        location = EarthLocation.of_site(pyfhd_config["instrument"])
-    except astropy.coordinates.errors.UnknownSiteException:
-        # If the site isn't known then select MWA, which no longer uses inbuilt corrdinates from the FHD repo.
-        logger.info(
-            f"Failed to load in the {pyfhd_config['instrument']} instrument location from astropy. If lon/lat/alt are not in the UVFITS things will fail."
-        )
-        # Can also do MWA or Murchison Widefield Array
-        location = EarthLocation("mwa")
+
+    # The telescope location information in uvfits is stored in the antenna table
+    location = EarthLocation.from_geocentric(
+        x=antenna_header["arrayx"],
+        y=antenna_header["arrayy"],
+        z=antenna_header["arrayz"],
+        unit="m",
+    )
 
     # These are all non-standard uvfits keywords. This information is stored in
     # the antenna table. See pyuvdata for the right way to do this.
@@ -288,7 +284,7 @@ def create_params(
             if tile_B_test > 1:
                 if baseline_min % 2 == 1:
                     antenna_mod_index /= 2 ** np.floor(np.log(tile_B_test) / np.log(2))
-            # Tile numbers start from 1
+            # antenna numbers start from 1
             params["antenna1"] = np.floor(params["baseline_arr"] / antenna_mod_index)
             params["antenna2"] = np.fix(params["baseline_arr"] % antenna_mod_index)
 
