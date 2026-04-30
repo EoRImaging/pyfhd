@@ -3,8 +3,8 @@ from pathlib import Path
 import numpy as np
 import numpy.testing as npt
 import pytest
-from PyFHD.io.pyfhd_io import convert_sav_to_dict, load, recarray_to_dict, save
-from PyFHD.healpix.healpix_utils import phase_shift_uv_image
+from pyfhd.io.pyfhd_io import convert_sav_to_dict, load, recarray_to_dict, save
+from pyfhd.healpix.healpix_utils import phase_shift_uv_image
 
 
 @pytest.fixture
@@ -86,6 +86,6 @@ def test_phase_shift_uv_image(before_file, after_file):
     # Precision differences caused by radec_to_pixel double precision calculation
     # vs single. Furthermore, the !Pi used in phase_shift_uv_image is also single
     # precision rather than the double precision variant IDL has. The calculations
-    # are mathematically the same in both PyFHD and FHD. phase_shift_uv_image
+    # are mathematically the same in both pyfhd and FHD. phase_shift_uv_image
     # apply_astrometry is also taking into account refraction.
     npt.assert_allclose(rephase, expected_rephase, atol=6e-5)

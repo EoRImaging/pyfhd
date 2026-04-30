@@ -2,9 +2,9 @@ import pytest
 import numpy as np
 from os import environ as env
 from pathlib import Path
-from PyFHD.gridding.gridding_utils import conjugate_mirror
-from PyFHD.pyfhd_tools.test_utils import get_data_items
-from PyFHD.io.pyfhd_io import save, load
+from pyfhd.gridding.gridding_utils import conjugate_mirror
+from pyfhd.pyfhd_tools.test_utils import get_data_items
+from pyfhd.io.pyfhd_io import save, load
 
 
 @pytest.fixture

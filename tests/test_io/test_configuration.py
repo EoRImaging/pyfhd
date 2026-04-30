@@ -1,5 +1,5 @@
 from logging import Logger
-from PyFHD.pyfhd_tools.pyfhd_setup import pyfhd_parser, pyfhd_setup
+from pyfhd.pyfhd_tools.pyfhd_setup import pyfhd_parser, pyfhd_setup
 import sys
 import importlib_resources
 import configargparse
@@ -9,14 +9,14 @@ import pytest
 @pytest.mark.github_actions
 def test_configuration():
     """
-    Test the configuration setup for PyFHD.
+    Test the configuration setup for pyfhd.
     This function checks if the configuration parser is correctly initialized.
     """
     sys.argv = [
         "pyfhd",
         "--config",
         str(
-            importlib_resources.files("PyFHD").joinpath(
+            importlib_resources.files("pyfhd").joinpath(
                 "resources/1088285600_example/1088285600_example.yaml"
             )
         ),

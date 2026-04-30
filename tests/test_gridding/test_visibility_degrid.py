@@ -3,8 +3,8 @@ import numpy as np
 import numpy.testing as npt
 from os import environ as env
 from pathlib import Path
-from PyFHD.gridding.visibility_degrid import visibility_degrid
-from PyFHD.pyfhd_tools.test_utils import get_savs
+from pyfhd.gridding.visibility_degrid import visibility_degrid
+from pyfhd.pyfhd_tools.test_utils import get_savs
 
 
 @pytest.fixture

@@ -2,10 +2,10 @@ import pytest
 import numpy as np
 from os import environ as env
 from pathlib import Path
-from PyFHD.gridding.gridding_utils import dirty_image_generate
-from PyFHD.pyfhd_tools.test_utils import get_data, get_data_items
+from pyfhd.gridding.gridding_utils import dirty_image_generate
+from pyfhd.pyfhd_tools.test_utils import get_data, get_data_items
 from numpy.testing import assert_allclose
-from PyFHD.io.pyfhd_io import save, load
+from pyfhd.io.pyfhd_io import save, load
 from logging import Logger
 
 

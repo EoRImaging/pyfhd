@@ -4,8 +4,8 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 from logging import Logger
-from PyFHD.io.pyfhd_io import convert_sav_to_dict, load, recarray_to_dict, save
-from PyFHD.io.pyfhd_quickview import get_image_renormalization
+from pyfhd.io.pyfhd_io import convert_sav_to_dict, load, recarray_to_dict, save
+from pyfhd.io.pyfhd_quickview import get_image_renormalization
 
 
 @pytest.fixture
@@ -102,6 +102,6 @@ def test_get_image_renormalization(before_file, after_file):
     # Interestingly we are at the limit of single precision for this result so
     # IDL can't actually use the decimal places here where we can i.e. in IDL
     # 17044907.32 EQ 17044908. is True while in Python this is clearly False
-    # This means the rtol should be a max of 1 and we'll consider the PyFHD version
+    # This means the rtol should be a max of 1 and we'll consider the pyfhd version
     # to be better here as we can represent the number and decimal places
     npt.assert_allclose(renorm_factor, expected_renorm_factor, rtol=1)

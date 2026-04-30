@@ -1,16 +1,16 @@
-from PyFHD.io.pyfhd_io import recarray_to_dict
+from pyfhd.io.pyfhd_io import recarray_to_dict
 import pytest
 import numpy as np
 import numpy.testing as npt
 from os import environ as env
 from pathlib import Path
-from PyFHD.pyfhd_tools.test_utils import (
+from pyfhd.pyfhd_tools.test_utils import (
     get_data,
     get_data_items,
     sav_file_vis_arr_swap_axes,
 )
-from PyFHD.gridding.gridding_utils import baseline_grid_locations
-from PyFHD.io.pyfhd_io import save, load
+from pyfhd.gridding.gridding_utils import baseline_grid_locations
+from pyfhd.io.pyfhd_io import save, load
 from logging import Logger
 
 
@@ -119,7 +119,7 @@ def test_baselines(baseline_before: Path, baseline_after: Path):
     # for example xcen[7,278] in Python is -712.2400145863139 while in IDL it is
     # -712.23999 due to the float conversion. The difference in precision between these
     # numbers makes the x_offset calculation different due to use of fixes and floors
-    # between the numbers. In theory, PyFHD's calculation should be better.
+    # between the numbers. In theory, pyfhd's calculation should be better.
     # The best we can do is ensure the x_offset is off by no more than 1
     # It will be the same for ycen
     if "x_offset" in expected_baseline:

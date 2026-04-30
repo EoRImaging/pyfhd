@@ -4,9 +4,9 @@ import numpy.testing as npt
 from os import environ as env
 from pathlib import Path
 from logging import Logger
-from PyFHD.io.pyfhd_io import recarray_to_dict
-from PyFHD.pyfhd_tools.pyfhd_utils import simple_deproject_w_term
-from PyFHD.pyfhd_tools.test_utils import get_savs
+from pyfhd.io.pyfhd_io import recarray_to_dict
+from pyfhd.pyfhd_tools.pyfhd_utils import simple_deproject_w_term
+from pyfhd.pyfhd_tools.test_utils import get_savs
 
 
 @pytest.fixture

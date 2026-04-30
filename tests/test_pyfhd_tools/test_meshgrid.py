@@ -2,14 +2,14 @@ import pytest
 import numpy as np
 from os import environ as env
 from pathlib import Path
-from PyFHD.pyfhd_tools.test_utils import get_data_items
-from PyFHD.pyfhd_tools.pyfhd_utils import meshgrid
+from pyfhd.pyfhd_tools.test_utils import get_data_items
+from pyfhd.pyfhd_tools.pyfhd_utils import meshgrid
 import importlib_resources
 
 
 @pytest.fixture
 def data_dir():
-    return importlib_resources.files("PyFHD.resources.test_data").joinpath(
+    return importlib_resources.files("pyfhd.resources.test_data").joinpath(
         "pyfhd_tools", "meshgrid"
     )
 

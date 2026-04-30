@@ -23,6 +23,6 @@ root/.cache/
 input/**
 
 # Test Data
-PyFHD/resources/test_data/**/*
+src/pyfhd/resources/test_data/**/*
 
 # git

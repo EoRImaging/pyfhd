@@ -5,37 +5,37 @@ Usage
 =====
 
 .. argparse::
-   :ref: PyFHD.pyfhd_tools.pyfhd_setup.pyfhd_parser
+   :ref: pyfhd.pyfhd_tools.pyfhd_setup.pyfhd_parser
    :prog: pyfhd
 
-PyFHD Setup
+pyfhd Setup
 ===========
 
-.. automodule:: PyFHD.pyfhd_tools.pyfhd_setup
+.. automodule:: pyfhd.pyfhd_tools.pyfhd_setup
    :members:
 
 Data Setup
 ==========
 
-.. automodule:: PyFHD.data_setup.uvfits
+.. automodule:: pyfhd.data_setup.uvfits
    :members:
 
-.. automodule:: PyFHD.data_setup.obs
+.. automodule:: pyfhd.data_setup.obs
    :members:
 
 Beam Setup
 ==========
 
-.. automodule:: PyFHD.beam_setup.beam
+.. automodule:: pyfhd.beam_setup.beam
    :members:
 
-.. automodule:: PyFHD.beam_setup.beam_utils
+.. automodule:: pyfhd.beam_setup.beam_utils
    :members:
 
 Source Modeling
 ================
 
-.. automodule:: PyFHD.source_modeling.vis_model_transfer
+.. automodule:: pyfhd.source_modeling.vis_model_transfer
    :members:
 
 Calibration
@@ -44,19 +44,19 @@ Calibration
 calibrate
 ---------
 
-.. automodule:: PyFHD.calibration.calibrate
+.. automodule:: pyfhd.calibration.calibrate
    :members:
 
 calibration_utils
 -----------------
 
-.. automodule:: PyFHD.calibration.calibration_utils
+.. automodule:: pyfhd.calibration.calibration_utils
    :members:
 
 vis_calibrate_subroutine
 ------------------------
 
-.. automodule:: PyFHD.calibration.vis_calibrate_subroutine
+.. automodule:: pyfhd.calibration.vis_calibrate_subroutine
    :members:
 
 Gridding
@@ -65,43 +65,43 @@ Gridding
 Gridding Utilities
 ------------------
 
-.. automodule:: PyFHD.gridding.gridding_utils
+.. automodule:: pyfhd.gridding.gridding_utils
    :members:
 
 Filters
 -------
 
-.. automodule:: PyFHD.gridding.filters
+.. automodule:: pyfhd.gridding.filters
    :members:
 
 Visibility Grid
 ---------------
 
-.. automodule:: PyFHD.gridding.visibility_grid
+.. automodule:: pyfhd.gridding.visibility_grid
    :members:
 
 Visibility Degrid
 -----------------
 
-.. automodule:: PyFHD.gridding.visibility_degrid
+.. automodule:: pyfhd.gridding.visibility_degrid
    :members:
 
 Input & Output
 ==============
 
-.. automodule:: PyFHD.io.pyfhd_io
+.. automodule:: pyfhd.io.pyfhd_io
    :members:
 
-.. automodule:: PyFHD.io.pyfhd_quickview
+.. automodule:: pyfhd.io.pyfhd_quickview
    :members:
 
 HEALPix
 =======
 
-.. automodule:: PyFHD.healpix.export
+.. automodule:: pyfhd.healpix.export
    :members:
 
-.. automodule:: PyFHD.healpix.healpix_utils
+.. automodule:: pyfhd.healpix.healpix_utils
    :members:
 
 Plotting
@@ -110,31 +110,31 @@ Plotting
 Calibration Plots
 -----------------
 
-.. automodule:: PyFHD.plotting.calibration
+.. automodule:: pyfhd.plotting.calibration
    :members:
 
 Gridding Plots
 --------------
 
-.. automodule:: PyFHD.plotting.gridding
+.. automodule:: pyfhd.plotting.gridding
    :members:
 
 Plotting Utils and FITS imaging
 -------------------------------
 
-.. automodule:: PyFHD.plotting.image
+.. automodule:: pyfhd.plotting.image
    :members:
 
 Tools & Utilities
 =================
 
-.. automodule:: PyFHD.pyfhd_tools.pyfhd_utils
+.. automodule:: pyfhd.pyfhd_tools.pyfhd_utils
    :members:
 
-.. automodule:: PyFHD.pyfhd_tools.unit_conv
+.. automodule:: pyfhd.pyfhd_tools.unit_conv
 
 Testing Utilities
 =================
 
-.. automodule:: PyFHD.pyfhd_tools.test_utils
+.. automodule:: pyfhd.pyfhd_tools.test_utils
    :members:

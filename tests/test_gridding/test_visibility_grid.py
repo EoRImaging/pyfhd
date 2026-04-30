@@ -1,12 +1,12 @@
-from PyFHD.io.pyfhd_io import recarray_to_dict, convert_sav_to_dict
+from pyfhd.io.pyfhd_io import recarray_to_dict, convert_sav_to_dict
 import pytest
 import numpy.testing as npt
 import numpy as np
 from os import environ as env
 from pathlib import Path
-from PyFHD.gridding.visibility_grid import visibility_grid
-from PyFHD.pyfhd_tools.test_utils import get_savs
-from PyFHD.io.pyfhd_io import save, load
+from pyfhd.gridding.visibility_grid import visibility_grid
+from pyfhd.pyfhd_tools.test_utils import get_savs
+from pyfhd.io.pyfhd_io import save, load
 from logging import Logger
 from scipy.io import readsav
 import importlib_resources
@@ -39,7 +39,7 @@ def number(request: pytest.FixtureRequest):
 @pytest.fixture
 def before_gridding(data_dir: Path, number: int, request: pytest.FixtureRequest):
     if request.node.get_closest_marker("github_actions"):
-        data_dir = importlib_resources.files("PyFHD.resources.test_data").joinpath(
+        data_dir = importlib_resources.files("pyfhd.resources.test_data").joinpath(
             "gridding", "visibility_grid"
         )
     before_gridding = Path(data_dir, f"test_{number}_before_{data_dir.name}.h5")
@@ -118,7 +118,7 @@ def before_gridding(data_dir: Path, number: int, request: pytest.FixtureRequest)
 @pytest.fixture
 def after_gridding(data_dir: Path, number: int, request: pytest.FixtureRequest):
     if request.node.get_closest_marker("github_actions"):
-        data_dir = importlib_resources.files("PyFHD.resources.test_data").joinpath(
+        data_dir = importlib_resources.files("pyfhd.resources.test_data").joinpath(
             "gridding", "visibility_grid"
         )
     after_gridding = Path(data_dir, f"test_{number}_after_{data_dir.name}.h5")
@@ -154,7 +154,7 @@ def test_visibility_grid(
 ):
     # This was done here to make it work in GitHub Actions
     if request.node.get_closest_marker("github_actions"):
-        data_dir = importlib_resources.files("PyFHD.resources.test_data").joinpath(
+        data_dir = importlib_resources.files("pyfhd.resources.test_data").joinpath(
             "gridding", "visibility_grid"
         )
         before_gridding = Path(data_dir, before_gridding.name)

@@ -1,17 +1,17 @@
 import pytest
 from os import environ as env
 from pathlib import Path
-from PyFHD.pyfhd_tools.test_utils import get_data_items
-from PyFHD.calibration.calibration_utils import calculate_adaptive_gain
-from PyFHD.io.pyfhd_io import convert_sav_to_dict
-from PyFHD.io.pyfhd_io import save, load
+from pyfhd.pyfhd_tools.test_utils import get_data_items
+from pyfhd.calibration.calibration_utils import calculate_adaptive_gain
+from pyfhd.io.pyfhd_io import convert_sav_to_dict
+from pyfhd.io.pyfhd_io import save, load
 import numpy.testing as npt
 import importlib_resources
 
 
 @pytest.fixture
 def data_dir():
-    return importlib_resources.files("PyFHD.resources.test_data").joinpath(
+    return importlib_resources.files("pyfhd.resources.test_data").joinpath(
         "calibration", "calculate_adaptive_gain"
     )
 

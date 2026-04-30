@@ -5,8 +5,8 @@ import numpy.testing as npt
 import pytest
 import h5py
 from logging import Logger
-from PyFHD.io.pyfhd_io import convert_sav_to_dict, load, recarray_to_dict, save
-from PyFHD.healpix.healpix_utils import healpix_cnv_generate
+from pyfhd.io.pyfhd_io import convert_sav_to_dict, load, recarray_to_dict, save
+from pyfhd.healpix.healpix_utils import healpix_cnv_generate
 import importlib_resources
 
 
@@ -49,7 +49,7 @@ def before_file(tag, run, data_dir, request):
     if [tag, run] in skip_tests:
         return None
     if request.node.get_closest_marker("github_actions"):
-        data_dir = importlib_resources.files("PyFHD.resources.test_data").joinpath(
+        data_dir = importlib_resources.files("pyfhd.resources.test_data").joinpath(
             "healpix", "healpix_cnv_generate"
         )
     before_file = Path(data_dir, f"{tag}_{run}_before_{data_dir.name}.h5")
@@ -79,7 +79,7 @@ def after_file(tag, run, data_dir, request):
     if [tag, run] in skip_tests:
         return None
     if request.node.get_closest_marker("github_actions"):
-        data_dir = importlib_resources.files("PyFHD.resources.test_data").joinpath(
+        data_dir = importlib_resources.files("pyfhd.resources.test_data").joinpath(
             "healpix", "healpix_cnv_generate"
         )
     after_file = Path(data_dir, f"{tag}_{run}_after_{data_dir.name}.h5")
@@ -114,7 +114,7 @@ def test_healpix_cnv_generate(before_file, after_file, request):
 
     # This was done here to make it work in GitHub Actions
     if request.node.get_closest_marker("github_actions"):
-        data_dir = importlib_resources.files("PyFHD.resources.test_data").joinpath(
+        data_dir = importlib_resources.files("pyfhd.resources.test_data").joinpath(
             "healpix", "healpix_cnv_generate"
         )
         before_file = Path(data_dir, before_file.name)
@@ -145,7 +145,7 @@ def test_healpix_cnv_generate(before_file, after_file, request):
     # x and y (so off by one pixel in each axis). What I can probably do, is to ensure the indexes from
     # the expected array are in the output array, and then check the values of those found indexes. I can
     # do this because the minimum and maximum bins are beyond what FHD finds, but in theory the indexes should
-    # still be in there, it's just that PyFHD finds more.
+    # still be in there, it's just that pyfhd finds more.
     assert hpx_cnv["nside"] == expected_hpx_cnv["nside"]
     # The indices come from a file, they should be the same
     npt.assert_array_equal(hpx_cnv["inds"], expected_hpx_cnv["inds"])

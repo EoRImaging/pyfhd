@@ -1,11 +1,11 @@
-from PyFHD.pyfhd_tools.pyfhd_utils import resistant_mean
+from pyfhd.pyfhd_tools.pyfhd_utils import resistant_mean
 import numpy as np
 from numpy import testing as npt
 from os import environ as env
 from pathlib import Path
 import pytest
-from PyFHD.io.pyfhd_io import save, load
-from PyFHD.io.pyfhd_io import convert_sav_to_dict
+from pyfhd.io.pyfhd_io import save, load
+from pyfhd.io.pyfhd_io import convert_sav_to_dict
 
 
 @pytest.fixture

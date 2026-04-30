@@ -1,12 +1,12 @@
-from PyFHD.io.pyfhd_io import recarray_to_dict
+from pyfhd.io.pyfhd_io import recarray_to_dict
 import pytest
 from os import environ as env
 from pathlib import Path
-from PyFHD.calibration.calibration_utils import vis_cal_polyfit
-from PyFHD.io.pyfhd_io import convert_sav_to_dict
-from PyFHD.pyfhd_tools.test_utils import sav_file_vis_arr_swap_axes
+from pyfhd.calibration.calibration_utils import vis_cal_polyfit
+from pyfhd.io.pyfhd_io import convert_sav_to_dict
+from pyfhd.pyfhd_tools.test_utils import sav_file_vis_arr_swap_axes
 import numpy.testing as npt
-from PyFHD.io.pyfhd_io import save, load
+from pyfhd.io.pyfhd_io import save, load
 import numpy as np
 import importlib_resources
 from logging import Logger
@@ -14,7 +14,7 @@ from logging import Logger
 
 @pytest.fixture
 def data_dir():
-    return importlib_resources.files("PyFHD.resources.test_data").joinpath(
+    return importlib_resources.files("pyfhd.resources.test_data").joinpath(
         "calibration", "vis_cal_polyfit"
     )
 

@@ -142,14 +142,6 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
-# PyFHD Directories
-output/**
-input/**
-
-# Include these specifically files and directories
-!output/README.md
-!input/README.md
-
 # test things to ignore (for now)
 tests/*/__pycache__
 
@@ -162,3 +154,9 @@ __git__.py
 # Beam files
 mwa_full_embedded_element_pattern.h5
 
+# PyFHD Directories
+output/**
+input/**
+
+src/pyfhd/resources/test_data/**
+!src/pyfhd/resources/test_data/README.md
