@@ -417,7 +417,7 @@ def quickview(
         fits_file.data = beam_use
         beam_name = f"{pyfhd_config['obs_id']}_beam_{pol_names[pol_i]}"
         fits_file.writeto(Path(fits_output, f"{beam_name}.fits"), overwrite=True)
-        fits_file_uv.data = np.abs(weights_uv) * obs["n_vis"]
+        fits_file_uv.data = np.abs(weights_uv[pol_i]) * obs["n_vis"]
         weights_name = f"{pyfhd_config['obs_id']}_uv_weights_{pol_names[pol_i]}"
         fits_file_uv.writeto(Path(fits_output, f"{weights_name}.fits"), overwrite=True)
 
