@@ -13,6 +13,9 @@ def plot_gridding(
     pyfhd_config: dict,
     model_uv: NDArray[np.complex64] | None,
     logger: Logger,
+    log=True,
+    sigma_clip_level=3,
+    percentile_clip_level=1
 ) -> None:
     """
     Plot the continuum uv-planes for data, model, and weights.
@@ -33,6 +36,12 @@ def plot_gridding(
         Run option dictionary
     logger : Logger
         PyFHD's logger for displaying errors and info to the log files
+    log : bool, optional
+        Whether to use log scaling for the plots, by default True
+    sigma_clip_level : int, optional
+        The sigma level to use for sigma clipping when calculating the standard deviation of the image for image.py when using the log option, by default 3
+    percentile_clip_level : int, optional
+        The percentile level to use for percentile clipping when calculating the standard deviation of the image for image.py when using the linear option, by default 1
     """
 
     # Check if image, weights, and variance contain any non-zero elements
@@ -97,7 +106,9 @@ def plot_gridding(
             cb_title="Amplitude (Jy/beam)",
             savefile=save_path_pol[0],
             missing_value=0,
-            log=True,
+            log=log,
+            sigma_clip_level=sigma_clip_level,
+            percentile_clip_level=percentile_clip_level,
             png=True,
         )
         quick_image(
@@ -111,7 +122,9 @@ def plot_gridding(
             cb_title="(Jy/beam)$^2$",
             savefile=save_path_pol[1],
             missing_value=0,
-            log=True,
+            log=log,
+            sigma_clip_level=sigma_clip_level,
+            percentile_clip_level=percentile_clip_level,
             png=True,
         )
 
@@ -127,6 +140,8 @@ def plot_gridding(
                 cb_title="Amplitude (Jy/beam)",
                 savefile=save_path_pol[2],
                 missing_value=0,
-                log=True,
+                log=log,
+                sigma_clip_level=sigma_clip_level,
+                percentile_clip_level=percentile_clip_level,
                 png=True,
             )

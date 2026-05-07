@@ -785,6 +785,24 @@ def pyfhd_parser():
         action=OrderedBooleanOptionalAction,
         help="Turns on the plotting of the continuum fits images",
     )
+    plotting.add_argument(
+        "--log_plots",
+        default=True,
+        action=OrderedBooleanOptionalAction,
+        help="Set to False to use linear scaling for images rather than log scaling."
+    )
+    plotting.add_argument(
+        "--sigma_clipping",
+        type=int,
+        default=3,
+        help="The sigma level to use for sigma clipping when calculating the standard deviation of the image for image.py when using the log option."
+    )
+    plotting.add_argument(
+        "--percentile_clipping",
+        type=int,
+        default=1,
+        help="The percentile level to use for percentile clipping when calculating the standard deviation of the image for image.py when using the linear option."
+    )
 
     # Model Group
     model.add_argument(
