@@ -407,12 +407,12 @@ def read_metafits(
 
     # Get the Zenith RA and DEC from the location and time
     zenra, zendec = altaz_to_radec(
-        90,
-        0,
-        pyfhd_header["lat"],
-        pyfhd_header["lon"],
-        pyfhd_header["alt"],
-        meta["jd0"],
+        alt=90,
+        az=0,
+        lat=pyfhd_header["lat"],
+        lon=pyfhd_header["lon"],
+        height=pyfhd_header["alt"],
+        time=meta["jd0"],
     )
     meta["zenra"] = zenra
     meta["zendec"] = zendec
@@ -424,12 +424,12 @@ def read_metafits(
 
     # Get the alt and azimuth of the observation
     meta["obsalt"], meta["obsaz"] = radec_to_altaz(
-        meta["obsra"],
-        meta["obsdec"],
-        pyfhd_header["lat"],
-        pyfhd_header["lon"],
-        pyfhd_header["alt"],
-        meta["jd0"],
+        ra=meta["obsra"],
+        dec=meta["obsdec"],
+        lat=pyfhd_header["lat"],
+        lon=pyfhd_header["lon"],
+        height=pyfhd_header["alt"],
+        time=meta["jd0"],
     )
 
     if hdr is not None:

@@ -381,6 +381,13 @@ def pyfhd_parser():
         "using the same observation as you plan to process.",
     )
     calibration.add_argument(
+        "--calibration-catalog-file-path",
+        default=None,
+        type=Path,
+        help="The path to a calibration file path, must be readable by pyradiosky's "
+        "SkyModel object. ",
+    )
+    calibration.add_argument(
         "--cal-stop",
         default=False,
         action=OrderedBooleanOptionalAction,
@@ -1753,6 +1760,18 @@ def pyfhd_setup(options: argparse.Namespace) -> Tuple[dict, logging.Logger]:
     # cal_bp_transfer when enabled should point to a file with a saved bandpass (Error)
     errors += _check_file_exists(pyfhd_config, "cal_bp_transfer")
 
+    # If the user has set a calibration catalog file, check it exists (Error)
+    if pyfhd_config["calibration_catalog_file_path"] is not None:
+        pyfhd_config["calibration_catalog_file_path"] = (
+            Path(pyfhd_config["calibration_catalog_file_path"]).expanduser().resolve()
+        )
+        if not Path(pyfhd_config["calibration_catalog_file_path"]).exists():
+            logger.error(
+                f"Catalog file {pyfhd_config['calibration_catalog_file_path']} "
+                "does not exist, please check your input path"
+            )
+            errors += 1
+
     # If cal_amp_degree_fit or cal_phase_degree_fit have ben set but
     # calibration_polyfit isn't warn the user (Warning)
     if (
@@ -1767,7 +1786,8 @@ def pyfhd_setup(options: argparse.Namespace) -> Tuple[dict, logging.Logger]:
         )
         warnings += 1
 
-    # cal_reflection_hyperresolve gets ignored when cal_reflection_mode_file is set (Warning)
+    # cal_reflection_hyperresolve gets ignored when cal_reflection_mode_file is
+    # set (Warning)
     if (
         pyfhd_config["cal_reflection_hyperresolve"]
         and pyfhd_config["cal_reflection_mode_file"]

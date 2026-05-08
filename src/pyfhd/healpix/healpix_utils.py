@@ -227,12 +227,12 @@ def healpix_cnv_generate(
         lon=obs["lon"], lat=obs["lat"], height=obs["alt"]
     )
     alt, _ = radec_to_altaz(
-        pix_ra,
-        pix_dec,
-        telescope_location.lat.value,
-        telescope_location.lon.value,
-        telescope_location.height.value,
-        obs["jd0"],
+        ra=pix_ra,
+        dec=pix_dec,
+        lat=telescope_location.lat.value,
+        lon=telescope_location.lon.value,
+        height=telescope_location.height.value,
+        time=obs["jd0"],
     )
     horizon_i = np.where(alt <= 0)
     if np.size(horizon_i) > 0:

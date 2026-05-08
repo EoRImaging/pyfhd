@@ -190,12 +190,12 @@ def init_beam(obs: dict, pyfhd_config: dict, logger: Logger) -> dict:
     ra_arr = ra_arr[valid_i]
     dec_arr = dec_arr[valid_i]
     alt_arr, az_arr = radec_to_altaz(
-        ra_arr.value,
-        dec_arr.value,
-        location.lat.value,
-        location.lon.value,
-        location.height.value,
-        jdate_use,
+        ra=ra_arr.value,
+        dec=dec_arr.value,
+        lat=location.lat.value,
+        lon=location.lon.value,
+        height=location.height.value,
+        time=jdate_use,
     )
     # astropy's WCS is being used to go from x/y grid values to RA/Dec
     # then using SkyCoord to go from RA/Dec to alt/az
