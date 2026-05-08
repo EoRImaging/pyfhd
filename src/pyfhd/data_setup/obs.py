@@ -449,7 +449,9 @@ def read_metafits(
     return meta
 
 
-def project_slant_orthographic(meta: dict, obs: dict, epoch=2000) -> dict:
+def project_slant_orthographic(
+    meta: dict, obs: dict, epoch: float = 2000, frame: str = "fk5"
+) -> dict:
     """
     Create an astrometry data structure holding key astrometry information.
     It's essentially a WCS data structure, done as a Python dictionary allowing greater compatibility
@@ -463,6 +465,8 @@ def project_slant_orthographic(meta: dict, obs: dict, epoch=2000) -> dict:
         The current obs dictionary
     epoch : float
         The equinox used for the dictionary structure
+    frame : str
+        The frame for RA and Dec. Must be a frame known to astropy. Defaults to FK5.
 
     Returns
     -------
@@ -479,7 +483,11 @@ def project_slant_orthographic(meta: dict, obs: dict, epoch=2000) -> dict:
     else:
         lon_offset = meta["phasera"] - meta["zenra"]
     zenith_ang = angle_difference(
-        meta["phasera"], meta["phasedec"], meta["zenra"], meta["zendec"], degree=True
+        ra1=meta["phasera"],
+        dec1=meta["phasedec"],
+        ra2=meta["zenra"],
+        dec2=meta["zendec"],
+        degree=True,
     )
     parallactic_ang = parallactic_angle(meta["zendec"], lon_offset, meta["phasedec"])
 
@@ -513,7 +521,7 @@ def project_slant_orthographic(meta: dict, obs: dict, epoch=2000) -> dict:
     astr["coord_sys"] = "C"  # Celestial Coordinate System in MAKE_ASTR
     astr["projection"] = projection_name
     astr["known"] = np.array([1])  # The projection name is guaranteed to be known
-    astr["radecsys"] = "ICRS"  # Using ICRS instead of FK5
+    astr["radecsys"] = frame.upper()  # FK5 is the default in FHD and most catalogs
     astr["equinox"] = epoch
     astr["dateobs"] = Time(meta["jd0"], format="jd").to_value("fits")
     astr["mjdobs"] = meta["jd0"] - 2400000.5

@@ -316,7 +316,7 @@ def general_jones_matrix(
     ra_array: np.ndarray[float] | None = None,
     dec_array: np.ndarray[float] | None = None,
     az_convention: Literal["east of north", "north of east"] = "east of north",
-    frame: str = "icrs",
+    frame: str = "fk5",
     time: Time | None = None,
     telescope_location: EarthLocation | None = None,
     freq_array: np.ndarray[float] | None = None,
@@ -353,7 +353,7 @@ def general_jones_matrix(
         either "east of north" N=0, E=90 degrees or "north of east" E=0, N=90 degrees.
     frame : str
         The frame for RA and Dec, ignored if alt/az are provided. Must be a frame
-        known to astropy.
+        known to astropy. Defaults to FK5.
     time : astropy.time.Time
         Astropy Time object specifying the center of the observation time. Used
         for converting RA/Dec to AltAz, ignored if alt/az are provided.

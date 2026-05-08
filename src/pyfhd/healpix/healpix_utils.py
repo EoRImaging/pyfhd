@@ -142,10 +142,10 @@ def healpix_cnv_generate(
                 ang_dist.append(
                     np.abs(
                         angle_difference(
-                            obs["obsra"],
-                            obs["obsdec"],
-                            file["ra"],
-                            file["dec"],
+                            ra1=obs["obsra"],
+                            dec1=obs["obsdec"],
+                            ra2=file["ra"],
+                            dec2=file["dec"],
                             degree=True,
                             nearest=True,
                         )

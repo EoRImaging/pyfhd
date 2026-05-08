@@ -913,6 +913,7 @@ def idl_argunique(
 
 
 def angle_difference(
+    *,
     ra1: float,
     dec1: float,
     ra2: float,

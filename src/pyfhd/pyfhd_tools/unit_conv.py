@@ -1,4 +1,4 @@
-from astropy.coordinates import SkyCoord, EarthLocation, AltAz, ICRS
+from astropy.coordinates import SkyCoord, EarthLocation, AltAz
 from astropy.wcs import WCS
 from astropy.time import Time
 from astropy import units as u
@@ -14,6 +14,7 @@ def altaz_to_radec(
     height: float,
     time: float,
     time_format="jd",
+    frame: str = "fk5",
 ) -> tuple[float, float]:
     """
     Turn AltAz coordinates into the equatorial/celestial coordinates RA and DEC.
@@ -35,6 +36,8 @@ def altaz_to_radec(
         The time from the UVFITS file
     time_format : str
         The time format given, as per AstroPy's Time Object, by default jd (Julian)
+    frame : str
+        The frame for RA and Dec. Must be a frame known to astropy. Defaults to FK5.
 
     Returns
     -------
@@ -51,7 +54,9 @@ def altaz_to_radec(
         location=loc,
         obstime=Time(time, format=time_format),
     )
-    return altaz.transform_to(ICRS()).ra.deg, altaz.transform_to(ICRS()).dec.deg
+    radec = altaz.transform_to(frame)
+
+    return radec.ra.deg, radec.dec.deg
 
 
 def radec_to_altaz(
@@ -62,6 +67,7 @@ def radec_to_altaz(
     height: float,
     time: float,
     time_format="jd",
+    frame: str = "fk5",
 ) -> tuple[float, float]:
     """
     Turn Celestial/Equatorial coordinates into AltAz at the given location and time.
@@ -83,6 +89,8 @@ def radec_to_altaz(
         The time
     time_format : str, optional
         The format of the time, by default 'jd' (Julian)
+    frame : str
+        The frame for RA and Dec. Must be a frame known to astropy. Defaults to FK5.
 
     Returns
     -------
@@ -95,7 +103,7 @@ def radec_to_altaz(
     # Create the Earth Location
     loc = EarthLocation.from_geodetic(lon * u.deg, lat * u.deg, height=height * u.meter)
     loc_time = Time(time, format=time_format)
-    radec = SkyCoord(ra=ra * u.deg, dec=dec * u.deg)
+    radec = SkyCoord(ra=ra * u.deg, dec=dec * u.deg, frame=frame)
     altaz = radec.transform_to(AltAz(location=loc, obstime=loc_time))
     return altaz.alt.deg, altaz.az.deg
 
