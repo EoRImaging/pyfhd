@@ -159,7 +159,6 @@ def beam_image(
     elif "fnorm" in psf:
         # handling for older files or imports from IDL FHD
         freq_norm = psf["fnorm"]
-    pix_horizon = psf["pix_horizon"]
     group_id = psf["id"][pol_i, 0, :]
     if "beam_gaussian_params" in psf:
         beam_gaussian_params = psf["beam_gaussian_params"][:]
@@ -170,7 +169,6 @@ def beam_image(
     if isinstance(psf, h5py.File):
         psf_dim = psf_dim[0]
         freq_norm = freq_norm[:]
-        pix_horizon = pix_horizon[0]
     dimension = elements = obs["dimension"]
     # these should all be integers b/c dimensions are usually even numbers.
     # but they have to be cast to ints to be used in slicing.
@@ -185,6 +183,9 @@ def beam_image(
     n_groups = np.count_nonzero(group_n)
 
     if beam_gaussian_params is not None:
+        pix_horizon = psf["pix_horizon"]
+        if isinstance(psf, h5py.File):
+            pix_horizon = pix_horizon[0]
         # 1.3 is the padding factor for the gaussian fitting procedure
         # (2.*obs.kpix) is the ratio of full sky (2 in l,m) to the analysis range (1/obs.kpix)
         # (2.*obs.kpix*dimension/psf.pix_horizon) is the scale factor between the psf pixels-to-horizon and the
@@ -234,7 +235,7 @@ def beam_image(
             else:
                 for gi in range(n_groups):
                     beam_single += (
-                        psf["beam_ptr"][0, fbin, rbin, rbin] * group_n[gi_use[gi]]
+                        psf["beam_ptr"][pol_i, fbin, rbin, rbin] * group_n[gi_use[gi]]
                     ).reshape([psf_dim, psf_dim])
                 beam_single /= np.sum(group_n[gi_use])
                 if abs:
@@ -277,7 +278,7 @@ def beam_image(
             else:
                 for gi in range(n_groups):
                     beam_single += (
-                        psf["beam_ptr"][0, fbin, rbin, rbin] * group_n[gi_use[gi]]
+                        psf["beam_ptr"][pol_i, fbin, rbin, rbin] * group_n[gi_use[gi]]
                     ).reshape([psf_dim, psf_dim])
             beam_single /= np.sum(group_n[gi_use])
             beam_base_uv += beam_single
@@ -286,7 +287,10 @@ def beam_image(
         if beam_gaussian_params is None:
             beam_base_uv1 = np.zeros([dimension, elements], dtype=np.complex128)
             beam_base_uv1[xl : xh + 1, yl : yh + 1] = beam_base_uv
-            beam_base = np.fft.fftshift(np.fft.fftn(np.fft.fftshift(beam_base_uv1)))
+            # norm chosen to match FHD when starting from a psf saved from FHD
+            beam_base = np.fft.fftshift(
+                np.fft.ifftn(np.fft.fftshift(beam_base_uv1), norm="forward")
+            )
         else:
             beam_base = beam_base_uv
     beam_base /= n_bin_use
