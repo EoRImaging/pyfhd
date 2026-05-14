@@ -4,11 +4,7 @@ import numpy as np
 import numpy.testing as npt
 from os import environ as env
 from pathlib import Path
-from pyfhd.pyfhd_tools.test_utils import (
-    get_data,
-    get_data_items,
-    sav_file_vis_arr_swap_axes,
-)
+from pyfhd.pyfhd_tools.test_utils import get_data, get_data_items
 from pyfhd.gridding.gridding_utils import baseline_grid_locations
 from pyfhd.io.pyfhd_io import save, load
 from logging import Logger
@@ -39,13 +35,7 @@ def baseline_before(data_dir, number):
     if baseline_before.exists():
         return baseline_before
     # First put values from psf into pyfhd_config
-    psf = recarray_to_dict(
-        get_data(
-            data_dir,
-            f"input_psf_{number}.npy",
-        )
-    )
-    pyfhd_config = {"psf_dim": psf["dim"], "psf_resolution": psf["resolution"]}
+    psf = recarray_to_dict(get_data(data_dir, f"input_psf_{number}.npy"))
     # Take the required parameters
     obs, params, vis_weights = get_data_items(
         data_dir,

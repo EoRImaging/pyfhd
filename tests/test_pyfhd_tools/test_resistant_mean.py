@@ -89,7 +89,7 @@ def after_file(tag, run, data_dir):
 def test_points_zenith_offzenith_and_1088716296(before_file, after_file):
     """Runs the test on `resistant_mean` - reads in the data in before_file and after_file,
     and then calls `resistant_mean`, checking the outputs match expectations"""
-    if before_file == None or after_file == None:
+    if before_file is None or after_file is None:
         pytest.skip(
             f"""
                     This test has been skipped because the test was listed in the skipped tests

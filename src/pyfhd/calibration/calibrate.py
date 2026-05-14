@@ -184,7 +184,7 @@ def calibrate(
 
     if pyfhd_config["calibration_plots"]:
         logger.info(
-            f"Plotting the calibration solutions into {pyfhd_config['output_dir']/'plots'/'calibration'}"
+            f"Plotting the calibration solutions into {pyfhd_config['output_dir'] / 'plots' / 'calibration'}"
         )
         plot_cals(obs, cal, pyfhd_config)
 

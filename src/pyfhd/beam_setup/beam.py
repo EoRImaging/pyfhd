@@ -1,7 +1,5 @@
 import numpy as np
-from astropy.constants import c
 from logging import Logger
-from scipy.interpolate import interp1d
 from scipy.io import readsav
 from pyfhd.beam_setup.antenna import init_beam
 from pyfhd.beam_setup.beam_utils import beam_power
@@ -9,7 +7,6 @@ from pyfhd.io.pyfhd_io import recarray_to_dict
 from pathlib import Path
 from pyfhd.io.pyfhd_io import save, load
 from h5py import File
-import sys
 
 from pyfhd.pyfhd_tools.pyfhd_utils import histogram, rebin, weight_invert
 
@@ -97,8 +94,7 @@ def create_psf(obs: dict, pyfhd_config: dict, logger: Logger) -> dict | File:
         res_super = 1 / (psf["resolution"] / psf["intermediate_res"])
 
         xvals_uv_superres, yvals_uv_superres = np.meshgrid(
-            np.arange(psf["superres_dim"]),
-            np.arange(psf["superres_dim"]),
+            np.arange(psf["superres_dim"]), np.arange(psf["superres_dim"])
         )
         xvals_uv_superres = (
             xvals_uv_superres * res_super

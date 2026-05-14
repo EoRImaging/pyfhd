@@ -5,10 +5,7 @@ from pathlib import Path
 from pyfhd.calibration.calibration_utils import vis_cal_auto_fit
 from pyfhd.io.pyfhd_io import convert_sav_to_dict
 from pyfhd.pyfhd_tools.test_utils import sav_file_vis_arr_swap_axes
-import numpy as np
 from pyfhd.io.pyfhd_io import save, load
-import numpy.testing as npt
-import matplotlib.pyplot as plt
 
 
 @pytest.fixture
@@ -92,16 +89,16 @@ def after_file(tag, run, data_dir):
     return after_file
 
 
-def test_vis_cal_auto_fit(before_file, after_file, data_dir):
+def test_vis_cal_auto_fit(before_file, after_file):
     """Runs the test on `vis_cal_bandpass` - reads in the data in `data_loc`,
     and then calls `vis_cal_bandpass`, checking the outputs match expectations"""
-    if before_file == None or after_file == None:
+    if before_file is None or after_file is None:
         pytest.skip(
             f"This test has been skipped because the test was listed in the skipped tests due to FHD not outputting them: {skip_tests}"
         )
 
     h5_before = load(before_file)
-    expected_cal_fit = load(after_file)
+    # expected_cal_fit = load(after_file)
 
     obs = h5_before["obs"]
     cal = h5_before["cal"]
@@ -109,9 +106,8 @@ def test_vis_cal_auto_fit(before_file, after_file, data_dir):
     vis_model_auto = h5_before["vis_model_auto"]
     auto_tile_i = h5_before["auto_tile_i"]
 
-    return_cal_fit = vis_cal_auto_fit(obs, cal, vis_auto, vis_model_auto, auto_tile_i)
-
-    assert True
+    # return_cal_fit =
+    vis_cal_auto_fit(obs, cal, vis_auto, vis_model_auto, auto_tile_i)
 
     # Plots have been made already testing this against FHD, uncomment to regenerate them.
 

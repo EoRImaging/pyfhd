@@ -1,9 +1,8 @@
 import pytest
-import numpy as np
 from os import environ as env
 from pathlib import Path
 from pyfhd.gridding.gridding_utils import dirty_image_generate
-from pyfhd.pyfhd_tools.test_utils import get_data, get_data_items
+from pyfhd.pyfhd_tools.test_utils import get_data_items
 from numpy.testing import assert_allclose
 from pyfhd.io.pyfhd_io import save, load
 from logging import Logger
@@ -97,5 +96,5 @@ def test_dirty_image_generate(dirty_before: Path, dirty_after: Path):
     )
 
     assert_allclose(dirty_image, h5_after["dirty_image"], atol=1e-8)
-    if h5_after["normalization"] != None:
+    if h5_after["normalization"] is not None:
         assert_allclose(normalization, h5_after["normalization"], atol=1e-8)

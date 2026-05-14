@@ -33,9 +33,7 @@ def filter_uni_before(data_dir, number):
         return filter_uni_before
 
     image_uv, vis_count = get_data_items(
-        data_dir,
-        f"input_image_uv_{number}.npy",
-        f"input_vis_count_{number}.npy",
+        data_dir, f"input_image_uv_{number}.npy", f"input_vis_count_{number}.npy"
     )
 
     weights = get_file(data_dir, f"input_weights_{number}.npy")

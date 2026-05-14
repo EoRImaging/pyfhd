@@ -7,7 +7,6 @@ from pyfhd.io.pyfhd_io import convert_sav_to_dict
 from pyfhd.pyfhd_tools.test_utils import sav_file_vis_arr_swap_axes
 from pyfhd.io.pyfhd_io import save, load
 import numpy.testing as npt
-import matplotlib.pyplot as plt
 
 
 @pytest.fixture
@@ -89,7 +88,7 @@ def test_vis_baseline_hist(before_file: Path, after_file: Path):
     and then calls `vis_baseline_hist`, checking the outputs match expectations
     """
 
-    if before_file == None or after_file == None:
+    if before_file is None or after_file is None:
         pytest.skip(
             f"This test has been skipped because the test was listed in the skipped tests due to FHD not outpoutting them: {skip_tests}"
         )

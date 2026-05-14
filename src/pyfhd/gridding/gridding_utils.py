@@ -811,7 +811,6 @@ def holo_mapfn_convert(map_fn, psf_dim, dimension, elements=None, norm=1, thresh
     if elements is None:
         elements = dimension
     psf_dim2 = 2 * psf_dim
-    psf_n = psf_dim**2
     sub_xv = meshgrid(psf_dim2, 1) - psf_dim
     sub_yv = meshgrid(psf_dim2, 2) - psf_dim
     # Generate an array of shape elements x dimension

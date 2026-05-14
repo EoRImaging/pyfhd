@@ -1,6 +1,5 @@
 from pyfhd.io.pyfhd_io import recarray_to_dict
 import pytest
-from os import environ as env
 from pathlib import Path
 from pyfhd.calibration.calibration_utils import vis_cal_polyfit
 from pyfhd.io.pyfhd_io import convert_sav_to_dict
@@ -198,7 +197,7 @@ def after_file(tag, run, data_dir):
 def test_vis_cal_polyfit(before_file, after_file):
     """Runs the test on `vis_cal_polyfit` - reads in the data in before_file and after_file,
     and then calls `vis_cal_polyfit`, checking the outputs match expectations"""
-    if before_file == None or after_file == None:
+    if before_file is None or after_file is None:
         pytest.skip(
             f"This test has been skipped because the test was listed in the skipped tests due to FHD not outputting them: {skip_tests}"
         )

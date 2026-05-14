@@ -1,5 +1,4 @@
 import pytest
-import numpy as np
 import numpy.testing as npt
 from os import environ as env
 from pathlib import Path

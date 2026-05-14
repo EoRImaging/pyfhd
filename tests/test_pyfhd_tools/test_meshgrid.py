@@ -1,7 +1,5 @@
 import pytest
 import numpy as np
-from os import environ as env
-from pathlib import Path
 from pyfhd.pyfhd_tools.test_utils import get_data_items
 from pyfhd.pyfhd_tools.pyfhd_utils import meshgrid
 import importlib_resources

@@ -57,7 +57,6 @@ def extract_header(
 
     # Retrieve all data from the observation
     with fits.open(uvfits_path) as observation:
-
         params_header = observation[0].header
         params_data = observation[0].data
 
@@ -371,18 +370,22 @@ def _check_layout_valid(
     logger : logging.Logger
         The logger
     check_min_max : bool, optional
-        When True check if the min is the same as max, if so changes the value so its only one number, by default False
+        When True check if the min is the same as max, if so changes the value
+        so its only one number, by default False
     """
 
     if check_min_max:
-        if type(layout[key]) == np.ndarray and np.min(layout[key]) == np.max(
+        if isinstance(layout[key], np.ndarray) and np.min(layout[key]) == np.max(
             layout[key]
         ):
             layout[key] = layout[key][0]
 
-    if type(layout[key]) == np.ndarray and (layout[key].size != layout["n_antenna"]):
+    if isinstance(layout[key], np.ndarray) and (
+        layout[key].size != layout["n_antenna"]
+    ):
         logger.error(
-            f"The layout[{key}] array set is not the same size of the number of antennas. Check the UVFITS file for errors."
+            f"The layout[{key}] array set is not the same size of the number of "
+            "antennas. Check the UVFITS file for errors."
         )
 
 
@@ -495,7 +498,7 @@ def create_layout(
     # DATUTC
     try:
         layout["diff_utc"] = antenna_header["datutc"]
-    except:
+    except KeyError:
         logger.info("No difference set between time_system and UTC, set to 0")
         layout["diff_utc"] = 0
 
@@ -581,7 +584,7 @@ def create_layout(
     # Feed Polarization of feed A (Pol A)
     try:
         layout["pola"] = antenna_data["poltya"]
-    except:
+    except KeyError:
         logger.warning("Pol A polarization not given setting to X")
         layout["pola"] = "X"
 
@@ -607,7 +610,7 @@ def create_layout(
     # Feed Polarization of feed B (Pol B)
     try:
         layout["polb"] = antenna_data["poltyb"]
-    except:
+    except KeyError:
         logger.warning("Pol B polarization not given setting to Y")
         layout["polb"] = "Y"
 

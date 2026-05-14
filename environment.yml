@@ -3,7 +3,6 @@ channels:
   - conda-forge
 dependencies:
   - astropy>=6.1.7
-  - black
   - colorama>=0.4.6
   - configargparse>=1.7
   - h5py>=3.13.0
@@ -11,14 +10,15 @@ dependencies:
   - matplotlib>=3.10.3
   - numba>=0.61.2
   - numpy>=2.2.5
+  - pyinstrument
   - pyuvdata>=3.2.1
   - pytest>=8.3.5
+  - ruff
   - scipy>=1.15.3
   - setuptools
   - sphinx>=8.1.3
   - pre-commit
   - pip
-  - pyinstrument
   - pip:
     - sphinx-rtd-theme
     - sphinx-argparse

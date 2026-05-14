@@ -164,7 +164,7 @@ def healpix_cnv_generate(
                 "pyfhd.resources.healpix"
             ).joinpath(files[min_i]["name"])
         hpx_inds = load(pyfhd_config["healpix_inds"], logger=logger)
-        if type(hpx_inds) is dict:
+        if isinstance(hpx_inds, dict):
             if "nside" in hpx_inds:
                 nside = hpx_inds["nside"]
             hpx_inds = hpx_inds["hpx_inds"]
@@ -602,10 +602,7 @@ def vis_model_freq_split(
         if fft:
             # No x_range and y_range hence no check for it here
             dirty_arr[fi], _, _ = dirty_image_generate(
-                gridding_dict["image_uv"],
-                pyfhd_config,
-                logger,
-                degpix=obs["degpix"],
+                gridding_dict["image_uv"], pyfhd_config, logger, degpix=obs["degpix"]
             )
             dirty_arr[fi] *= gridding_dict["n_vis"]
             weights_arr[fi], _, _ = dirty_image_generate(
@@ -652,37 +649,37 @@ def vis_model_freq_split(
         save(
             Path(
                 uvf_dir,
-                f'{pyfhd_config["obs_id"]}_{uvf_name}_{obs["pol_names"][polarization]}_dirty_uv_arr_gridded_uvf.h5',
+                f"{pyfhd_config['obs_id']}_{uvf_name}_{obs['pol_names'][polarization]}_dirty_uv_arr_gridded_uvf.h5",
             ),
             h5_save_dict,
-            f'{pyfhd_config["obs_id"]}_{uvf_name}_{obs["pol_names"][polarization]}_dirty_uv_arr_gridded_uvf.h5',
+            f"{pyfhd_config['obs_id']}_{uvf_name}_{obs['pol_names'][polarization]}_dirty_uv_arr_gridded_uvf.h5",
             logger=logger,
         )
         save(
             Path(
                 uvf_dir,
-                f'{pyfhd_config["obs_id"]}_{uvf_name}_{obs["pol_names"][polarization]}_weights_uv_gridded_uvf.h5',
+                f"{pyfhd_config['obs_id']}_{uvf_name}_{obs['pol_names'][polarization]}_weights_uv_gridded_uvf.h5",
             ),
             h5_save_dict,
-            f'{pyfhd_config["obs_id"]}_{uvf_name}_{obs["pol_names"][polarization]}_weights_uv_gridded_uvf.h5',
+            f"{pyfhd_config['obs_id']}_{uvf_name}_{obs['pol_names'][polarization]}_weights_uv_gridded_uvf.h5",
             logger=logger,
         )
         save(
             Path(
                 uvf_dir,
-                f'{pyfhd_config["obs_id"]}_{uvf_name}_{obs["pol_names"][polarization]}_variance_uv_arr_gridded_uvf.h5',
+                f"{pyfhd_config['obs_id']}_{uvf_name}_{obs['pol_names'][polarization]}_variance_uv_arr_gridded_uvf.h5",
             ),
             h5_save_dict,
-            f'{pyfhd_config["obs_id"]}_{uvf_name}_{obs["pol_names"][polarization]}_variance_uv_arr_gridded_uvf.h5',
+            f"{pyfhd_config['obs_id']}_{uvf_name}_{obs['pol_names'][polarization]}_variance_uv_arr_gridded_uvf.h5",
             logger=logger,
         )
         save(
             Path(
                 uvf_dir,
-                f'{pyfhd_config["obs_id"]}_{uvf_name}_{obs["pol_names"][polarization]}_model_uv_arr_gridded_uvf.h5',
+                f"{pyfhd_config['obs_id']}_{uvf_name}_{obs['pol_names'][polarization]}_model_uv_arr_gridded_uvf.h5",
             ),
             h5_save_dict,
-            f'{pyfhd_config["obs_id"]}_{uvf_name}_{obs["pol_names"][polarization]}_model_uv_arr_gridded_uvf.h5',
+            f"{pyfhd_config['obs_id']}_{uvf_name}_{obs['pol_names'][polarization]}_model_uv_arr_gridded_uvf.h5",
             logger=logger,
         )
 

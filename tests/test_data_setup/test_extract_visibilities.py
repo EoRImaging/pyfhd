@@ -30,7 +30,6 @@ def test_1061316296(data_dir, uvfits_dir):
     output = get_savs(data_dir, "output.sav")
 
     for pol_i in range(pyfhd_config["n_pol"]):
-        to_shape = (vis_arr.shape[1], vis_arr.shape[-1])
         expected_vis_arr = output["vis_arr"][pol_i].transpose()
         expected_vis_weights = output["vis_weights"][pol_i].transpose()
         npt.assert_allclose(vis_arr[pol_i, :, :], expected_vis_arr)

@@ -1,6 +1,5 @@
 import numpy as np
-from astropy.constants import c
-from pyuvdata import BeamInterface, UVBeam
+from pyuvdata import UVBeam
 from pyuvdata.analytic_beam import AnalyticBeam
 from pyfhd.pyfhd_tools.pyfhd_utils import histogram, region_grow
 import h5py
@@ -52,7 +51,6 @@ def gaussian_decomp(
         Gaussian decomposition.
     """
     decomp_beam = np.zeros([x.size, y.size])
-    i = 1j
     # Expand the p vector into readable names
     var = np.reshape(p, [p.size // 5, 5])
     amp = var[:, 0]
@@ -432,14 +430,7 @@ def beam_power(
     """
     # For now we will ignore beam_gaussian_decomp and much of the debug keywords
     image_power_beam = beam_image_hyperresolved(
-        antenna,
-        beam,
-        ant_pol_1,
-        ant_pol_2,
-        freq_i,
-        zen_int_x,
-        zen_int_y,
-        psf,
+        antenna, beam, ant_pol_1, ant_pol_2, freq_i, zen_int_x, zen_int_y, psf
     )
     if pyfhd_config.get("kernel_window", False):
         image_power_beam *= antenna["pix_window"]

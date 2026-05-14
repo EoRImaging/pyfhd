@@ -1,5 +1,4 @@
 import pytest
-from os import environ as env
 from pathlib import Path
 from pyfhd.pyfhd_tools.test_utils import get_data_items
 from pyfhd.calibration.calibration_utils import calculate_adaptive_gain
@@ -106,10 +105,7 @@ def calc_test_after(data_dir, calc_test):
     if after_file.exists():
         return after_file
 
-    expected_gain = get_data_items(
-        data_dir,
-        f"output_gain_{calc_test}.npy",
-    )
+    expected_gain = get_data_items(data_dir, f"output_gain_{calc_test}.npy")
 
     h5_save_dict = {}
     h5_save_dict["expected_gain"] = expected_gain
@@ -121,7 +117,7 @@ def calc_test_after(data_dir, calc_test):
 
 @pytest.mark.github_actions
 def test_point_offzenith_and_zenith(before_file, after_file):
-    if before_file == None or after_file == None:
+    if before_file is None or after_file is None:
         pytest.skip(
             f"This test has been skipped because the test was listed in the skipped tests due to FHD not outputting them: {skip_tests}"
         )

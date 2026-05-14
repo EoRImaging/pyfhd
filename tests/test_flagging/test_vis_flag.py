@@ -2,15 +2,9 @@ from pyfhd.io.pyfhd_io import recarray_to_dict
 import pytest
 from os import environ as env
 from pathlib import Path
-from pyfhd.pyfhd_tools.test_utils import (
-    get_data_items,
-    get_data_sav,
-    try_assert_all_close,
-)
 from pyfhd.flagging.flagging import vis_flag
 from pyfhd.io.pyfhd_io import convert_sav_to_dict
 from pyfhd.pyfhd_tools.test_utils import sav_file_vis_arr_swap_axes
-import numpy as np
 from pyfhd.io.pyfhd_io import save, load
 from logging import Logger
 import numpy.testing as npt
@@ -97,7 +91,6 @@ def test_zenith_offzenith(before_file, after_file):
     h5_after = load(after_file)
 
     obs = h5_before["obs"]
-    orig_n_vis = obs["n_vis"]
     params = h5_before["params"]
     vis_arr = h5_before["vis_arr"]
     vis_weight_ptr = h5_before["vis_weight_ptr"]

@@ -1,6 +1,5 @@
 from pyfhd.io.pyfhd_io import recarray_to_dict
 import pytest
-from logging import Logger
 from pathlib import Path
 from os import environ as env
 from pyfhd.io.pyfhd_io import convert_sav_to_dict
@@ -8,7 +7,6 @@ from pyfhd.pyfhd_tools.test_utils import sav_file_vis_arr_swap_axes
 from pyfhd.pyfhd_tools.pyfhd_utils import vis_weights_update
 from pyfhd.io.pyfhd_io import save, load
 import numpy.testing as npt
-import numpy as np
 
 
 @pytest.fixture
@@ -122,7 +120,7 @@ def cal_after_file(tag, run, data_dir):
 
 
 def test_many_points(before_file, after_file):
-    if before_file == None or after_file == None:
+    if before_file is None or after_file is None:
         pytest.skip(
             f"This test has been skipped because the test was listed in the skipped tests due to FHD not outputting them: {skip_tests}"
         )
@@ -153,7 +151,7 @@ def test_many_points(before_file, after_file):
 
 
 def test_many_points_before_cal(cal_before_file, cal_after_file):
-    if cal_before_file == None or cal_after_file == None:
+    if cal_before_file is None or cal_after_file is None:
         pytest.skip(
             f"This test has been skipped because the test was listed in the skipped tests due to FHD not outputting them: {skip_tests}"
         )

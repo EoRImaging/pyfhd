@@ -3,7 +3,6 @@ from pathlib import Path
 import numpy as np
 import numpy.testing as npt
 import pytest
-import h5py
 from logging import Logger
 from pyfhd.io.pyfhd_io import convert_sav_to_dict, load, recarray_to_dict, save
 from pyfhd.healpix.healpix_utils import vis_model_freq_split
@@ -108,7 +107,7 @@ def after_file(tag, run, data_dir):
 
 def test_vis_model_freq_split(before_file, after_file, beam_file):
     pytest.skip("Skipped due to the system needing more memory than it had available.")
-    if before_file == None or after_file == None:
+    if before_file is None or after_file is None:
         pytest.skip(
             f"This test has been skipped because the test was listed in the skipped tests due to FHD not outputting them: {skip_tests}"
         )
@@ -142,22 +141,14 @@ def test_vis_model_freq_split(before_file, after_file, beam_file):
     # Only checking the first polarization due to the size of the arrays taking up too
     # much memory, now doing the split on a per polarization basis due to memory constraints
     npt.assert_allclose(
-        model_split["residual_arr"],
-        expected_model_split["dirty_arr"],
-        atol=1e-8,
+        model_split["residual_arr"], expected_model_split["dirty_arr"], atol=1e-8
     )
     npt.assert_allclose(
-        model_split["weights_arr"],
-        expected_model_split["weights_arr"],
-        atol=1e-8,
+        model_split["weights_arr"], expected_model_split["weights_arr"], atol=1e-8
     )
     npt.assert_allclose(
-        model_split["variance_arr"],
-        expected_model_split["variance_arr"],
-        atol=1e-8,
+        model_split["variance_arr"], expected_model_split["variance_arr"], atol=1e-8
     )
     npt.assert_allclose(
-        model_split["model_arr"],
-        expected_model_split["model_arr"],
-        atol=1e-8,
+        model_split["model_arr"], expected_model_split["model_arr"], atol=1e-8
     )

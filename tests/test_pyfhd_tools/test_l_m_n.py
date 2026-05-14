@@ -32,11 +32,7 @@ def test_l_m_n_one(data_dir):
 
 
 def test_l_m_n_two(data_dir):
-    obs, psf = get_data(
-        data_dir,
-        "input_obs_2.npy",
-        "input_psf_2.npy",
-    )
+    obs, psf = get_data(data_dir, "input_obs_2.npy", "input_psf_2.npy")
     (
         obsdec,
         obsra,

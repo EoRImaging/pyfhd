@@ -1,7 +1,6 @@
 import pytest
 from logging import Logger
 from pathlib import Path
-from os import environ as env
 from pyfhd.data_setup.uvfits import (
     extract_header,
     create_params,
@@ -9,22 +8,14 @@ from pyfhd.data_setup.uvfits import (
     extract_visibilities,
 )
 from pyfhd.data_setup.obs import create_obs
-from pyfhd.io.pyfhd_io import convert_sav_to_dict
-from pyfhd.io.pyfhd_io import recarray_to_dict
-from pyfhd.io.pyfhd_io import save, load
+from pyfhd.io.pyfhd_io import load
 import numpy.testing as npt
 import numpy as np
-from scipy.io import readsav
 import importlib_resources
 from pyfhd.source_modeling.vis_model_transfer import vis_model_transfer
 
 
-@pytest.fixture(
-    scope="function",
-    params=[
-        "1088285600",
-    ],
-)
+@pytest.fixture(scope="function", params=["1088285600"])
 def obs_id(request):
     return request.param
 

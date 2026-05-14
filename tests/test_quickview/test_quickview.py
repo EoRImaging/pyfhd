@@ -1,7 +1,6 @@
 from os import environ as env
 from pathlib import Path
 import numpy as np
-import numpy.testing as npt
 import pytest
 from logging import Logger
 import astropy
@@ -85,7 +84,7 @@ def before_file(tag, run, data_dir):
 
 
 def test_quickview(before_file, data_dir):
-    if before_file == None:
+    if before_file is None:
         pytest.skip(
             f"This test has been skipped because the test was listed in the skipped tests due to FHD not outputting them: {skip_tests}"
         )
@@ -167,10 +166,7 @@ def test_quickview(before_file, data_dir):
         if expected_header.get("HISTORY") is not None:
             del expected_header["HISTORY"]
         header_diff = astropy.io.fits.HeaderDiff(
-            actual_header,
-            expected_header,
-            atol=2e-4,
-            ignore_comments=["*"],
+            actual_header, expected_header, atol=2e-4, ignore_comments=["*"]
         )
         print(header_diff.report())
         # print(actual_header)

@@ -3,9 +3,7 @@ import numpy.testing as npt
 import numpy as np
 from os import environ as env
 from pathlib import Path
-from pyfhd.source_modeling.vis_model_transfer import (
-    vis_model_transfer,
-)
+from pyfhd.source_modeling.vis_model_transfer import vis_model_transfer
 from pyfhd.io.pyfhd_io import save, load, recarray_to_dict
 from pyfhd.io.pyfhd_io import convert_sav_to_dict
 from logging import Logger

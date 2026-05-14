@@ -127,8 +127,7 @@ def after_grid_per_baseline(data_dir, number):
 
     h5_save_dict = {
         "box_matrix": get_data_items(
-            data_dir,
-            f"visibility_grid_box_matrix_output_{number}.npy",
+            data_dir, f"visibility_grid_box_matrix_output_{number}.npy"
         )
     }
 
