@@ -43,11 +43,11 @@ run the example data:
   pyfhd -c ./input/1088285600_example/1088285600_example.yaml 1088285600
 
 The command on most machines takes 1-2 minutes to run, and the output is stored
-in the ``output`` directory. 
+in the ``output`` directory.
 
-This will run the entire pyfhd pipeline in this order: 
+This will run the entire pyfhd pipeline in this order:
 
-1. Setting up the run with logs and outputs 
+1. Setting up the run with logs and outputs
 
 2. Extracting visibilities
 
@@ -79,18 +79,18 @@ that looks something like this:
   <p>
 
 .. code-block:: text
-                                                                            
-  ooooooooo.               oooooooooooo ooooo   ooooo oooooooooo.    
-  8888   `Y88.             8888       8 8888    888   888     Y8b    
-  888   .d88' oooo    ooo  888          888     888   888      888   
-  888ooo88P'   `88.  .8'   888oooo8     888ooooo888   888      888   
-  888           `88..8'    888          888     888   888      888   
-  888            `888'     888          888     888   888     d88'   
-  o888o            .8'     o888o        o888o   o888o o888bood8P'    
-              .o..P'                                                
-              `Y8P'                                                  
-                                                                    
-  Python Fast Holographic Deconvolution 
+
+  ooooooooo.               oooooooooooo ooooo   ooooo oooooooooo.
+  8888   `Y88.             8888       8 8888    888   888     Y8b
+  888   .d88' oooo    ooo  888          888     888   888      888
+  888ooo88P'   `88.  .8'   888oooo8     888ooooo888   888      888
+  888           `88..8'    888          888     888   888      888
+  888            `888'     888          888     888   888     d88'
+  o888o            .8'     o888o        o888o   o888o o888bood8P'
+              .o..P'
+              `Y8P'
+
+  Python Fast Holographic Deconvolution
 
   Translated from IDL to Python as a collaboration between Astronomy Data and
   Computing Services (ADACS) and the Epoch of Reionisation (EoR) Team.
@@ -361,22 +361,22 @@ that looks something like this:
   2025-05-30 09:53:36 - INFO:
     Plotting the continuum images for polarization XX into output/pyfhd_1088285600_example/plots/images
   2025-05-30 09:53:36 - WARNING:
-    /home/skywatcher/projects/pyfhd/.venv/lib/python3.13/site-packages/astropy/wcs/wcs.py:537: FITSFixedWarning: RADECSYS= 'ICRS ' / Reference Frame 
+    /home/skywatcher/projects/pyfhd/.venv/lib/python3.13/site-packages/astropy/wcs/wcs.py:537: FITSFixedWarning: RADECSYS= 'ICRS ' / Reference Frame
   the RADECSYS keyword is deprecated, use RADESYSa.
     wcsprm = _wcs.Wcsprm(
 
   2025-05-30 09:53:37 - WARNING:
-    /home/skywatcher/projects/pyfhd/.venv/lib/python3.13/site-packages/astropy/wcs/wcs.py:537: FITSFixedWarning: RADECSYS= 'ICRS ' / Reference Frame 
+    /home/skywatcher/projects/pyfhd/.venv/lib/python3.13/site-packages/astropy/wcs/wcs.py:537: FITSFixedWarning: RADECSYS= 'ICRS ' / Reference Frame
   the RADECSYS keyword is deprecated, use RADESYSa.
     wcsprm = _wcs.Wcsprm(
 
   2025-05-30 09:53:38 - WARNING:
-    /home/skywatcher/projects/pyfhd/.venv/lib/python3.13/site-packages/astropy/wcs/wcs.py:537: FITSFixedWarning: RADECSYS= 'ICRS ' / Reference Frame 
+    /home/skywatcher/projects/pyfhd/.venv/lib/python3.13/site-packages/astropy/wcs/wcs.py:537: FITSFixedWarning: RADECSYS= 'ICRS ' / Reference Frame
   the RADECSYS keyword is deprecated, use RADESYSa.
     wcsprm = _wcs.Wcsprm(
 
   2025-05-30 09:53:38 - WARNING:
-    /home/skywatcher/projects/pyfhd/.venv/lib/python3.13/site-packages/astropy/wcs/wcs.py:537: FITSFixedWarning: RADECSYS= 'ICRS ' / Reference Frame 
+    /home/skywatcher/projects/pyfhd/.venv/lib/python3.13/site-packages/astropy/wcs/wcs.py:537: FITSFixedWarning: RADECSYS= 'ICRS ' / Reference Frame
   the RADECSYS keyword is deprecated, use RADESYSa.
     wcsprm = _wcs.Wcsprm(
 
@@ -387,22 +387,22 @@ that looks something like this:
   2025-05-30 09:53:39 - INFO:
     Plotting the continuum images for polarization YY into output/pyfhd_1088285600_example/plots/images
   2025-05-30 09:53:39 - WARNING:
-    /home/skywatcher/projects/pyfhd/.venv/lib/python3.13/site-packages/astropy/wcs/wcs.py:537: FITSFixedWarning: RADECSYS= 'ICRS ' / Reference Frame 
+    /home/skywatcher/projects/pyfhd/.venv/lib/python3.13/site-packages/astropy/wcs/wcs.py:537: FITSFixedWarning: RADECSYS= 'ICRS ' / Reference Frame
   the RADECSYS keyword is deprecated, use RADESYSa.
     wcsprm = _wcs.Wcsprm(
 
   2025-05-30 09:53:40 - WARNING:
-    /home/skywatcher/projects/pyfhd/.venv/lib/python3.13/site-packages/astropy/wcs/wcs.py:537: FITSFixedWarning: RADECSYS= 'ICRS ' / Reference Frame 
+    /home/skywatcher/projects/pyfhd/.venv/lib/python3.13/site-packages/astropy/wcs/wcs.py:537: FITSFixedWarning: RADECSYS= 'ICRS ' / Reference Frame
   the RADECSYS keyword is deprecated, use RADESYSa.
     wcsprm = _wcs.Wcsprm(
 
   2025-05-30 09:53:41 - WARNING:
-    /home/skywatcher/projects/pyfhd/.venv/lib/python3.13/site-packages/astropy/wcs/wcs.py:537: FITSFixedWarning: RADECSYS= 'ICRS ' / Reference Frame 
+    /home/skywatcher/projects/pyfhd/.venv/lib/python3.13/site-packages/astropy/wcs/wcs.py:537: FITSFixedWarning: RADECSYS= 'ICRS ' / Reference Frame
   the RADECSYS keyword is deprecated, use RADESYSa.
     wcsprm = _wcs.Wcsprm(
 
   2025-05-30 09:53:42 - WARNING:
-    /home/skywatcher/projects/pyfhd/.venv/lib/python3.13/site-packages/astropy/wcs/wcs.py:537: FITSFixedWarning: RADECSYS= 'ICRS ' / Reference Frame 
+    /home/skywatcher/projects/pyfhd/.venv/lib/python3.13/site-packages/astropy/wcs/wcs.py:537: FITSFixedWarning: RADECSYS= 'ICRS ' / Reference Frame
   the RADECSYS keyword is deprecated, use RADESYSa.
     wcsprm = _wcs.Wcsprm(
 
@@ -492,7 +492,7 @@ Take note of the line:
   Logging and configuration file created and copied to here: /home/skywatcher/projects/pyfhd/output/pyfhd_1088285600_example
 
 More details about the output of the pyfhd pipeline and the required inputs is
-clarified in the next section. 
+clarified in the next section.
 
 .. important::
   The configuration used for the sample is very different to a full MWA run due
@@ -507,7 +507,7 @@ The Required Inputs and the outputs of ``pyfhd``
 directory inside the package, so when specifying only the observation ID, it will
 use the default configuration file. The default configuration is not suitable for
 every observation, so it's likely you'll need to adjust the default configuration
-file to suit your needs. Some validation is performed before and during runtime of 
+file to suit your needs. Some validation is performed before and during runtime of
 ``pyfhd`` to check for incompatibilities though it is not exhaustive.
 
 .. _pyfhd-config-file:
@@ -661,7 +661,7 @@ stored in the ``checkpoints`` directory and they are saved at the fopllowing poi
 
 In the case that you wish to skip a step in the pipeline, you can use the
 ``--calibrate-checkpoint`` or ``--grid-checkpoint`` options to skip the calibration
-or gridding steps respectively. 
+or gridding steps respectively.
 
 .. attention::
   The ``--obs-checkpoint`` and ``--calibrate-checkpoint`` will check for each
@@ -670,11 +670,11 @@ or gridding steps respectively.
 
 In the below example we will run ``pyfhd`` with the ``--calibrate-checkpoint``
 option, which will skip the calibration and visibility step and go straight to
-gridding. 
+gridding.
 
 .. code-block:: bash
 
-  pyfhd -c ./input/1088285600_example/1088285600_example.yaml --calibrate-checkpoint ./output/pyfhd_1088285600_example/checkpoints/1088285600_example_calibrate_checkpoint.h5 1088285600 
+  pyfhd -c ./input/1088285600_example/1088285600_example.yaml --calibrate-checkpoint ./output/pyfhd_1088285600_example/checkpoints/1088285600_example_calibrate_checkpoint.h5 1088285600
 
 Within the logs of the ``pyfhd`` you should see the following message::
 
@@ -694,7 +694,7 @@ to allow the use of ``YAML`` files. Inside the repository we have 2 examples of
 configuration files, one is in the root of the repository and is the template
 yaml file, ``pyfhd.yaml``, use this to create your own configuration file.
 Alternatively, you can use the example configuration file ``1088285600_example.yaml``
-in the ``input/1088285600_example`` directory to build your configuration file. 
+in the ``input/1088285600_example`` directory to build your configuration file.
 All of these options replace the
 `dictionary.md <https://github.com/EoRImaging/FHD/blob/master/dictionary.md>`_
 file that used in `FHD`_, most of the options come from `FHD`_, however some of
@@ -708,20 +708,20 @@ two arguments that target the one option, one is the option itself, for example,
 ``--silent`` which when used will set the ``silent`` option to ``True``, and
 ``--no-silent`` which when used will set the ``silent`` option to ``False``.
 All boolean options have the ``no-`` prefix available to you, in case you wish
-to temporarily negate the options set in the configuration file via the command line. 
+to temporarily negate the options set in the configuration file via the command line.
 
 .. tip::
 
   The hierarchy of the configuration in pyfhd is as follows:
 
-  .. code-block:: 
+  .. code-block::
 
          Code
           ⬇️
       Command Line
           ⬇️
          YAML
-  
+
   The command line argument will override the YAML file, and the code will
   override the command line argument in certain situations. In situations where
   the code overrides the command line (or YAML), it's generally if a warning is
@@ -756,7 +756,7 @@ Find them Here: :doc:`Usage <../documentation/documentation>`
 
 You can also find the options in the ``pyfhd_setup.py`` file, this is the file
 that is used to generate the command line interface and the configuration file.
-Specifically look for the ``pyfhd_parser()`` function. 
+Specifically look for the ``pyfhd_parser()`` function.
 You can see the source here: `pyfhd_parser <../_modules/pyfhd/pyfhd_tools/pyfhd_setup.html#pyfhd_parser>`_
 
 Downloading MWA Data
@@ -822,8 +822,8 @@ Calibration
 
 Calibration is fully available in ``pyfhd`` and can be enabled using the
 ``--calibrate-visibilities`` option being set to true. Most of the options for
-calibration are found under the 
-`Calibration <../documentation/documentation.html#pyfhd.pyfhd_tools.pyfhd_setup-pyfhd_parser-calibration>`_ group in the argument parser. 
+calibration are found under the
+`Calibration <../documentation/documentation.html#pyfhd.pyfhd_tools.pyfhd_setup-pyfhd_parser-calibration>`_ group in the argument parser.
 The first example we'll do is the a calibration of the sample data using only
 the command line interface to show the options that changed
 in comparison to the template in the root of the repository (which will be used
@@ -837,7 +837,7 @@ Running calibration on the sample data
   This assumes you have retrieved the sample data and have it the directory
   ``input/1088285600_example/``. If you haven't retrieved the sample data,
   please refer to the section above on how to get the :ref:`sample-data`.
-  
+
 
 .. code-block:: bash
 
@@ -1104,7 +1104,7 @@ We have solutions!
 .. Running advanced calibration
 .. ++++++++++++++++++++++++++++
 .. .. todo::
-   
+
 ..    Check what this calibration is actually doing, and whether it is actually updating the solutions in the second part. The add motivation as to why we have to run in this manner
 
 .. .. note:: This mode of running is intended for power users of ``FHD`` who already know what they want to run, but want to take advantage of ``pyfhd`` already.
@@ -1185,11 +1185,11 @@ We have solutions!
 .. .. image:: 1088281328_cal_phase_advanced.png
 ..   :width: 600px
 
-Gridding 
+Gridding
 ---------
 
 .. note::
-  
+
   Performing gridding in pyfhd, requires you to import a beam, the beams that
   are currently supported are those generated by ``FHD``, however, ``pyfhd``
   has nothing currently to do the beam forming (although work has been done on
@@ -1197,7 +1197,7 @@ Gridding
   ``scipy.io.readsav`` and the beam is converted to a numpy complex array, however
   for large beams this can take a long time and can use a lot of memory,
   so it should only be done once. ``pyfhd`` will save convert any beam ``sav``
-  file into a ``HDF5`` file, in the same location as the ``sav`` file. 
+  file into a ``HDF5`` file, in the same location as the ``sav`` file.
 
 Running the gridding step in ``pyfhd`` is relatively simple as its enabled by
 default, and the small number of options available to you are found in the
@@ -1211,7 +1211,7 @@ We'll use the calibrate-checkpoint example earlier to run it
 
 .. code-block:: bash
 
-  pyfhd -c ./input/1088285600_example/1088285600_example.yaml --calibrate-checkpoint ./output/pyfhd_1088285600_example/checkpoints/1088285600_example_calibrate_checkpoint.h5 1088285600 
+  pyfhd -c ./input/1088285600_example/1088285600_example.yaml --calibrate-checkpoint ./output/pyfhd_1088285600_example/checkpoints/1088285600_example_calibrate_checkpoint.h5 1088285600
 
 This would be the same as runnning the command below:
 
@@ -1288,7 +1288,7 @@ section below.
       --digital-gain-jump-polyfit \
       --calibration-plots \
       --gridding-plots
-      
+
 
 Below we have the example plots of the gridded continuum data for the two
 polarizations, XX and YY, for the full MWA data.
@@ -1318,7 +1318,7 @@ We can also plot the variance of the gridded visibilities.
 Other Telescopes
 ----------------
 ``pyfhd`` was translated and tested with MWA data, but in theory should need
-minor adjusting to support additional telescopes. 
+minor adjusting to support additional telescopes.
 
 .. important::
 
@@ -1339,7 +1339,7 @@ Saving and Loading files
 ``pyfhd`` uses ``h5py`` to read and write the files, the main functions that you
 can see how ``pyfhd``
 saves and loads HDF5 files are in the ``pyfhd_io`` module, found here:
-`pyfhd_io <../_modules/pyfhd/io/pyfhd_io.html>`_. 
+`pyfhd_io <../_modules/pyfhd/io/pyfhd_io.html>`_.
 More specifically look for the ``save`` and ``load`` functions.
 
 Examples of both can be seen below:
@@ -1356,20 +1356,20 @@ Examples of both can be seen below:
       "example_in_group": np.arange(10),
     }
   }
-  
+
   save("example.h5", example_dict, "example")
 
   # Loading
 
   from pyfhd.io.pyfhd_io import load
-  
+
   loaded_example = load("example.h5")
 
   print(loaded_example["example"]) # [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
   print(loaded_example["example_group"]["example_in_group"]) # [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 If you wish to see the contents of the HDF5 file, there are ways outside of
-pyfhd to do this, you could use extensions for your IDE like 
+pyfhd to do this, you could use extensions for your IDE like
 `H5 Web <https://marketplace.visualstudio.com/items?itemName=h5web.vscode-h5web>`_
 or you can use CLI tools like
 `h5dump <https://support.hdfgroup.org/documentation/hdf5/latest/_h5_t_o_o_l__d_p__u_g.html#sec_cltools_h5dump>`_.
@@ -1387,7 +1387,7 @@ H5 Web is shown below:
 Lazy Loading
 +++++++++++++
 The load function inside of ``pyfhd`` also has the capability to lazy load the
-data, which means that the data is not loaded into memory until you access it. 
+data, which means that the data is not loaded into memory until you access it.
 This is done by setting the ``lazy_load`` argument to ``True`` when calling the
 load function. It's important to note that when a HDF5 file is lazy loaded, then
 theloaded data is stored inside a ``HDF5 File`` object rather than a Python dictionary.
@@ -1395,7 +1395,7 @@ theloaded data is stored inside a ``HDF5 File`` object rather than a Python dict
 .. code-block:: python
 
   from pyfhd.io.pyfhd_io import load
-  
+
   loaded_example = load("example.h5", lazy_load=True)
 
   print(type(loaded_example)) # <class 'h5py._hl.files.File'>
@@ -1411,7 +1411,7 @@ This is useful primarily for any beam files that are large, as they can take a
 long time to load into memory and can use a lot of memory.
 
 .. tip::
-  
+
   If you are using lazy loading, then you need to be careful when using the data,
   as it is not loaded into memory until you access it. This means that if you
   try to use the data in a way that requires it to be loaded into memory, you
@@ -1426,7 +1426,7 @@ Loading pyfhd Outputs into FHD
 typically ``HDF5`` files, IDL is capable of reading in HDF5 files using functions like
 `H5F_OPEN <https://www.nv5geospatialsoftware.com/docs/H5F_OPEN.html>`_,
 `H5D_OPEN <https://www.nv5geospatialsoftware.com/docs/H5D_OPEN.html>`_ and
-`H5D_READ <https://www.nv5geospatialsoftware.com/docs/H5D_READ.html>`_ 
+`H5D_READ <https://www.nv5geospatialsoftware.com/docs/H5D_READ.html>`_
 (There are also the same functions for groups, replace ``F`` or ``D`` with ``G``).
 Loading the ``pyfhd`` into `FHD`_ does require some data manipulation to get it
 in the same format that `FHD`_ expects, for example, the beam array is stored as
@@ -1455,7 +1455,7 @@ it to the format that `FHD`_ expects.
     ;load in the hdf5 file
     print, "Now loading model data from ", hdf5_filepath
     file_id = H5F_OPEN(hdf5_filepath)
-    
+
     ;for as many polarisations as specified by n_pol, write out FHD style .sav
     ;files
     pol_names = ['XX', 'YY', 'XY', 'YX']
@@ -1508,7 +1508,7 @@ it to the format that `FHD`_ expects.
     ;load in the hdf5 file
     print, "Now loading model data from ", beam_filepath
     file_id = H5F_OPEN(beam_filepath)
-    
+
     ;Get all the ints and floats from the hdf5 file
     beam_mask_threshold = H5D_OPEN(file_id, "beam_mask_threshold")
     beam_mask_threshold = H5D_READ(beam_mask_threshold)
@@ -1559,8 +1559,8 @@ it to the format that `FHD`_ expects.
             'psf_image_dim', psf_image_dim, $
             'psf_image_resolution', psf_image_resolution $
         ) $
-    ) 
-    
+    )
+
 
     beam_gaussian_params_h5 = H5D_OPEN(file_id, "beam_gaussian_params")
     beam_gaussian_params_h5 = H5D_READ(beam_gaussian_params_h5)
@@ -1580,7 +1580,7 @@ it to the format that `FHD`_ expects.
         for freq_i = 0, n_freq-1 do begin
             box_matrix = ptrarr(dims[2], dims[1])
             for box_x = 0, dims[1] - 1 do begin
-                for box_y = 0, dims[2] - 1 do begin                    
+                for box_y = 0, dims[2] - 1 do begin
                     box_matrix[box_x, box_y] = ptr_new(COMPLEX(beam_ptr_h5[*, box_y, box_x, freq_i, pol_i].r, beam_ptr_h5[*, box_y, box_x, freq_i, pol_i].i))
                 endfor
             endfor
@@ -1708,12 +1708,12 @@ To run the docker image of pyfhd, you can use the following commands:
   docker run skywa7ch3r/pyfhd:latest pyfhd -v
 
 .. code-block:: bash
-  
+
   # grab the sample data into your machine
   docker run --volume .:/pyfhd/input --user $(id -u):$(id -g) skywa7ch3r/pyfhd:latest pyfhd --get-sample-data 1088285600
 
 .. code-block:: bash
-  
+
   # To run pyfhd with the sample data (with the output going to the current directory)
   docker run --volume /path/to/output:/pyfhd/output --volume /path/to/1088285600_example:/pyfhd/input/1088285600_example --user $(id -u):$(id -g) skywa7ch3r/pyfhd:latest  \
     pyfhd -c ./input/1088285600_example/1088285600_example.yaml \
@@ -1735,7 +1735,7 @@ and ``output`` directories inside the container.
     --volume /absolute/path/to/data/1091128160/:/pyfhd/input/1091128160 \
     --volume /absolute/path/to/beams/:/pyfhd/input/beams \
     --volume /absolute/path/to/output/:/pyfhd \
-    --user $(id -u):$(id -g) 
+    --user $(id -u):$(id -g)
     skywa7ch3r/pyfhd:latest \
     pyfhd -c ./input/1091128160.yaml \
     --description 1091128160_docker_example \
@@ -1757,7 +1757,7 @@ Creating an Apptainer image for using ``pyfhd`` where using docker isn't possibl
   apptainer run --pwd /pyfhd pyfhd.sif pyfhd -v
 
 .. code-block:: bash
-  
+
   # To run pyfhd with the sample data (with the output going to the current directory)
   apptainer run --pwd /pyfhd -B /path/to/output:/pyfhd/output pyfhd.sif \
     pyfhd -c ./input/1088285600_example/1088285600_example.yaml \
@@ -1787,8 +1787,8 @@ and ``output`` directories inside the container.
 Problems that need to be solved
 -------------------------------
 
-.. attention:: 
-  
+.. attention::
+
   This entire section is a call to action!
 
   If you believe you can address these problems, and or do the features, then
@@ -1836,7 +1836,7 @@ a config of your choice with the following options:
   restrict-healpix-inds : true
   healpix-inds: ~
   split-ps-export : true
-  
+
 The most important options are the ``save-healpix-fits`` and the
 ``snapshot-healpix-export`` options, which are set to ``true`` by default and are
 the toggles which allow the HEALPIX functions to be called.

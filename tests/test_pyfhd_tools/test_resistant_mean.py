@@ -92,7 +92,7 @@ def test_points_zenith_offzenith_and_1088716296(before_file, after_file):
     if before_file == None or after_file == None:
         pytest.skip(
             f"""
-                    This test has been skipped because the test was listed in the skipped tests 
+                    This test has been skipped because the test was listed in the skipped tests
                     due to FHD not outputting them: {skip_tests}. In this case precision played a
                     major factor, resistant_mean when using the double keyword in IDL will get the same
                     result as Python, but the tests taken here were single_precision."""

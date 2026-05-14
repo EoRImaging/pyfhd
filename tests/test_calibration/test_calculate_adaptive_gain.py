@@ -159,7 +159,7 @@ def test_calc_test_1_and_2(calc_test_before, calc_test_after):
 
 """
 The below test will never pass due to IDL's default median behaviour, for example
-PRINT, MEDIAN([1, 2, 3, 4], /EVEN) 
+PRINT, MEDIAN([1, 2, 3, 4], /EVEN)
 2.50000
 PRINT, MEDIAN([1, 2, 3, 4])
 3.00000
@@ -167,7 +167,7 @@ PRINT, MEDIAN([1, 2, 3, 4])
 One has to use the EVEN keyword to get the *proper* median behaviour that most mathematicians and scientists
 expect. This was the only thing that produced the wrong results was the use of numpy median instead of IDL MEDIAN.
 The array that went into it est_final_conv produced the exact same results in Python and IDL (with the exception of
-Python producing a more accurate result due to double precision) 
+Python producing a more accurate result due to double precision)
 
 def test_calc_adapt_gain_three(data_dir):
     gain_list, convergence_list, iter, base_gain, expected_gain = get_data_items(

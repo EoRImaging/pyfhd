@@ -69,7 +69,6 @@ transfer-calibration : ~
 cal-stop : false
 transfer-model-uv : ~
 max-cal-iter: 100
-calibration-plots: true
 
 # Flagging
 flag-basic: true

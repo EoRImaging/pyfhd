@@ -7,7 +7,7 @@ to follow best practices.
 
 ## Developer Installation of pyfhd
 
-If you're a developer of pyfhd, welcome to the club! 
+If you're a developer of pyfhd, welcome to the club!
 
 For development purposes there are several ways to manage your developer install
 of pyfhd, the main preference for pyfhd for now is [uv](https://docs.astral.sh/uv/),
@@ -63,8 +63,8 @@ output that looks like this:
     |                 .o..P'                                                |
     |                `Y8P'                                                  |
     |_______________________________________________________________________|
-    
-    Python Fast Holographic Deconvolution 
+
+    Python Fast Holographic Deconvolution
 
     Translated from IDL to Python as a collaboration between Astronomy Data and
     Computing Services (ADACS) and the Epoch of Reionisation (EoR) Team.
@@ -99,7 +99,7 @@ Here's how you install `pyfhd` for development purposes using conda:
     ```bash
     pip install -e .
     ```
-   
+
 5. Verify the installation using the version command, which should generate
 output that looks like this:
     ```
@@ -115,8 +115,8 @@ output that looks like this:
        |                 .o..P'                                                |
        |                `Y8P'                                                  |
        |_______________________________________________________________________|
-       
-       Python Fast Holographic Deconvolution 
+
+       Python Fast Holographic Deconvolution
 
        Translated from IDL to Python as a collaboration between Astronomy Data
        and Computing Services (ADACS) and the Epoch of Reionisation (EoR) Team.
@@ -145,7 +145,7 @@ docs useful to you.
 The very first question you should ask yourself before making a new function is,
 do you need to or has someone already created the function?
 
-Take the `histogram` function for example, are you wondering why we did a histogram function? 
+Take the `histogram` function for example, are you wondering why we did a histogram function?
 
 After all, `IDL's` histogram function can be done using a combination of
 `np.histogram` and the reverse indices can technically be done using many indexing
@@ -161,7 +161,7 @@ histogram from scratch with speed as the priority given that `histogram` in
 To summarise, only make a new function if it hasn't been made before, or the ones
 that do exist do not meet your requirements. The requirements initally should not
 include anything in regards to the speed of the function unless you know before
-hand that the function is going to be called a lot or in a loop. 
+hand that the function is going to be called a lot or in a loop.
 
 If you're wondering what to do in the case that the function is in a library/package
 that is no longer being supported anymore? It's likely you'll need to remake it
@@ -185,7 +185,7 @@ If you think it's the start of a new part of the pipeline, then create a new
 directory, and inside that new directory you must also create an `__init__.py`
 file. The `__init__.py` file tells Python this is a part of the package and to
 look there for new modules, the `__init__.py` can be completely empty if you have
-no use for it. 
+no use for it.
 
 From there I'll leave it upto you, time to put that function from your head to a screen.
 
@@ -251,7 +251,7 @@ plotting.add_argument(
 ```
 
 This will add the option for `--no-calibration-plots` in the command line without
-having to define it inside the code or configuration files. 
+having to define it inside the code or configuration files.
 
 ### Documenting and Typing the new function
 
@@ -289,7 +289,7 @@ In the future, it's possible to use tools such as [MyPy](https://mypy.readthedoc
 to enforce these types too.
 
 For examples of docstrings in pyfhd check out the following doc strings from the
-`get_ri` and `histogram` functions. 
+`get_ri` and `histogram` functions.
 
 ```python
 # Notice how we can specificy we're wanting a numpy array of type int64 or float64,
@@ -303,7 +303,7 @@ def get_ri(
     max: int | float
 ) -> NDArray[np.int64]:
     """
-    Calculates the reverse indices of a data and histogram. 
+    Calculates the reverse indices of a data and histogram.
     The function replicates IDL's REVERSE_INDICES keyword within
     their HISTOGRAM function. The reverse indices array which is returned
     by this function can be hard to understand at first, I will explain it here
@@ -319,7 +319,7 @@ def get_ri(
     The first vector indexes contain the starting positions of each bin in the
     second vector. For example, between the indexes given by first_vector[0] and
     first_vector[1] of the second vector should be all the indexes of bins[0] from
-    inside the data. So if I wanted to make adjustments to the entire first bin, 
+    inside the data. So if I wanted to make adjustments to the entire first bin,
     and only the first bin I can use the reverse indices array, ri to do this.
     Let's say I wanted to flag all values of bins[0] with -1 for some reason to
     make them invalid in other calculations with the data, then I could do this:
@@ -412,11 +412,11 @@ def histogram(
     -------
     hist : NDArray[np.int64]
         The histogram of the data
-    bins : NDArray[np.float64 | np.int64] 
+    bins : NDArray[np.float64 | np.int64]
         The bins of the histogram
     ri : NDArray[np.int64]
         The reverse indices array for the histogram and data
-    
+
     See Also
     --------
     get_bins: Calculates the bins only
@@ -447,7 +447,7 @@ Combining docstrings, comments and typing together when used well and best pract
 followed allows for easier, faster debugging in the future. Furthermore, it's
 easier to keep track of your changes and how they could affect the rest of the
 codebase. If that sounds good to you as it does to us, let's keep the faster
-debugging train going. 
+debugging train going.
 
 ### Testing the new function
 
@@ -462,7 +462,7 @@ as we wanted given we were replicating the IDL function, this is the best case
 scenario. With functions that were translated from `FHD`, in general we'd run
 the functions in `FHD` and save the input variables and the output variables.
 The `sav` files would then be read in by a testing function and generally
-converted to HDF5 for faster and easier reading in the future for the same test. 
+converted to HDF5 for faster and easier reading in the future for the same test.
 
 For creating a test in `pyfhd` we have utilised the pytest framework which is a
 powerful testing framework that searches for any function and/or directory that
@@ -546,7 +546,7 @@ import numpy.testing as npt
 def data_dir():
     return Path(env.get('PYFHD_TEST_PATH'), "calibration", "cal_auto_ratio_divide")
 
-# With the FHD runs we used test tags, so all the files had consistent naming formats, 
+# With the FHD runs we used test tags, so all the files had consistent naming formats,
 # for example, one of the test files was point_zenith_run1_before_cal_auto_ratio_divide.sav
 # In that file, we used the tags point_zenith, run1 and before to indicate to the
 # developer and to the tests, which test the files were for and if the files
@@ -589,7 +589,7 @@ def before_file(tag, run, data_dir):
         sets of parameters for each observation we used to generate tests from
         FHD to ensure we covered the different functions in FHD.
     data_dir: Path
-        The path to the directory containing the files required for each test 
+        The path to the directory containing the files required for each test
     """
     # Note the check for skip tests right at the start
     if ([tag, run] in skip_tests):
@@ -599,14 +599,14 @@ def before_file(tag, run, data_dir):
     # This is done because the fixtures are re-executed for each test.
     if before_file.exists():
         return before_file
-    
+
     sav_file = before_file.with_suffix('.sav')
     sav_dict = convert_sav_to_dict(str(sav_file), "faked")
 
     obs = recarray_to_dict(sav_dict['obs'])
     cal = recarray_to_dict(sav_dict['cal'])
     vis_auto = sav_file_vis_arr_swap_axes(sav_dict['vis_auto'])
-        
+
     #super dictionary to save everything in
     h5_save_dict = {}
     h5_save_dict['obs'] = obs
@@ -633,7 +633,7 @@ def after_file(tag, run, data_dir):
     # If the h5 file already exists and has been created, return the path to it
     if after_file.exists():
         return after_file
-    
+
     sav_file = after_file.with_suffix('.sav')
     sav_dict = convert_sav_to_dict(str(sav_file), "faked")
 
@@ -771,7 +771,7 @@ if request.node.get_closest_marker("github_actions"):
 In order to run these tests you need to do the following:
 
 1. Download the data, you can do so here:
-[![Static Badge](https://img.shields.io/badge/Test%20Data%20DOI-10.5281%2Fzenodo.15687722-grey?labelColor=blue)](https://doi.org/10.5281/zenodo.15687722). 
+[![Static Badge](https://img.shields.io/badge/Test%20Data%20DOI-10.5281%2Fzenodo.15687722-grey?labelColor=blue)](https://doi.org/10.5281/zenodo.15687722).
 
     Put the zip file in the following directory inside the repository (the
     directory given is relative to the root of the repository):
@@ -796,7 +796,7 @@ folder and delete the now empty `pyfhd_test_data` folder.
     rootdir: /home/skywatcher/projects/pyfhd
     configfile: pyproject.toml
     plugins: metadata-3.1.1, cov-6.1.1, html-4.1.1
-    collected 436 items / 315 deselected / 121 selected                                                       
+    collected 436 items / 315 deselected / 121 selected
 
     tests/test_calibration/test_cal_auto_ratio_divide.py .....s                                         [  4%]
     tests/test_calibration/test_cal_auto_ratio_remultiply.py .....s                                     [  9%]
@@ -896,13 +896,13 @@ root directory of all the test data.
 
     Alternatively, you can also just run one test file:
     ```bash
-    pytest tests/test_pyfhd_tools/test_histogram.py 
+    pytest tests/test_pyfhd_tools/test_histogram.py
     =============================================================================================================================================================================================== test session starts ===============================================================================================================================================================================================
     platform linux -- Python 3.12.7, pytest-8.3.5, pluggy-1.5.0
     rootdir: /home/skywatcher/projects/pyfhd
     configfile: pyproject.toml
     plugins: cov-6.1.1
-    collected 16 items                                                                                                                                                                                                                                                                                                                                                                                                
+    collected 16 items
 
     tests/test_pyfhd_tools/test_histogram.py .............. ..                                                                                                                                                                                                                                                                                                                                                   [100%]
 
@@ -916,7 +916,7 @@ root directory of all the test data.
     rootdir: /home/skywatcher/projects/pyfhd
     configfile: pyproject.toml
     plugins: cov-6.1.1
-    collected 1 item                                                                                                                                                                                                                                                                                                                                                                                                  
+    collected 1 item
 
     tests/test_pyfhd_tools/test_histogram.py .                                                                                                                                                                                                                                                                                                                                                                  [100%]
 
@@ -1000,7 +1000,7 @@ below, this is based on running the sample data as per the tutorial:
             // I'd suggest duplicating the configuration, and change the name
             // and args to get multiple debugging profiles.
             "args": [
-                "-c", 
+                "-c",
                 "./input/1088285600_example/1088285600_example.yaml",
                 // Here's an example of using the command line to override or negate the yaml file
                 "--no-silent",
@@ -1038,7 +1038,7 @@ What has been particuarly useful is the ability at this breakpoint to go deeper
 into the arrays and see their values, that way you can keep an eye on certain
 values as they go through parts of the `pyfhd` pipeline. There's also a **Watch**
 feature, right clicking on a variable can allow you to add it to the watch list,
-so instead of finding the variable each time you can just check the watch list. 
+so instead of finding the variable each time you can just check the watch list.
 
 There are lots of other debugging features that I haven't gove over or explored,
 if you're interested check out the documentation for the debugging tools in VSCode
@@ -1067,7 +1067,7 @@ with CuPy. Another library that can support CPU/GPU agnostic code is
 [Dask](https://docs.dask.org/en/stable/10-minutes-to-dask.html) which is a library
 made for parallel computing with interpoability with NumPy and Pandas, however
 it does have less support for a lot of the mathematical functions and linear
-algebra done in `pyfhd`. 
+algebra done in `pyfhd`.
 
 Given that we're using Python, you can of course create a module in
 C/C++/Fortran/Julia/Rust and use that within `pyfhd`. I have purposely for now
@@ -1165,7 +1165,7 @@ up with checkboxes, please follow the pull request template and do what it asks
 of you, one of which you're doing now by reading this contribution guide
 (Thanks 🙌). The pull request template is there for you to make sure you have
 followed best practices and for the reviewers to check you have followed best
-practices as well. 
+practices as well.
 
 The pull request will run a black formatting check to ensure the code you made
 meets the formatting specification

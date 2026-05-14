@@ -101,7 +101,7 @@ def test_vis_calibration_flag(before_file, after_file):
     """Runs the test on `vis_calibration_flag` - reads in the data in before_file and after_file,
     and then calls `vis_calibration_flag`, checking the outputs match expectations"""
     if before_file == None or after_file == None:
-        pytest.skip(f"""This test has been skipped because the test was listed in the 
+        pytest.skip(f"""This test has been skipped because the test was listed in the
                     skipped tests due to FHD not outputting them: {skip_tests}. The reason
                     for skipping point_offzenith_run3 is due to the difference of NumPy median
                     and median in IDL. IDL doesn't take the average of the two middle numbers

@@ -96,7 +96,7 @@ def test_cal_auto_ratio_remultiply(before_file, after_file):
     and then calls `cal_auto_ratio_remultiply`, checking the outputs match expectations
     """
     if before_file == None or after_file == None:
-        pytest.skip(f"""This test has been skipped because the test was listed in the 
+        pytest.skip(f"""This test has been skipped because the test was listed in the
                     skipped tests due to FHD not outputting them: {skip_tests}""")
 
     h5_before = load(before_file)

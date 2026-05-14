@@ -1,4 +1,4 @@
-name: Black Formatting Check    
+name: Black Formatting Check
 
 on:
     workflow_dispatch:

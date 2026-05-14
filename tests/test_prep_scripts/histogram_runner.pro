@@ -26,7 +26,7 @@ PRO histogram_runner
 
     normals_hist_min_max = histogram(normals, binsize = 0.25, min = 0, max = 1, reverse_indices = normals_inds_binsize_min_max)
 
-    normals_hist_times10 = histogram(normals*10, binsize = 2, reverse_indices = normals_inds_times10) 
+    normals_hist_times10 = histogram(normals*10, binsize = 2, reverse_indices = normals_inds_times10)
     ; Do a uniform distribution, but scale it big to 1 billion integers
     one_billion = FLOOR(ABS(10*RANDOMU(42,1e9)))
 
@@ -39,7 +39,7 @@ PRO histogram_runner
     ; Test large bin size and large data
     oneB_large_nums = RANDOMU(42,1e9, /DOUBLE)*1e6
 
-    oneB_large_hist = HISTOGRAM(oneB_large_nums, reverse_indices = oneB_large_inds) 
+    oneB_large_hist = HISTOGRAM(oneB_large_nums, reverse_indices = oneB_large_inds)
 
     ;Adjust the path as required on the system you're running
     SAVE, /VARIABLES, FILENAME = 'histogram.sav'

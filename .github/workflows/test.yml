@@ -55,7 +55,7 @@ jobs:
       - name: Unzip the test data
         run: |
           unzip src/pyfhd/resources/test_data/pyfhd_test_data.zip -d src/pyfhd/resources/test_data
-    
+
       - name: Run tests
         run: |
           uv run ${{ matrix.uv-options }} coverage run --branch --source=pyfhd -m pytest -m github_actions --html=pyfhd_report.html --self-contained-html
@@ -79,9 +79,9 @@ jobs:
       - name: Change Title of the Unit Test Report
         if: (matrix.os == 'ubuntu-latest' && matrix.python-version == '3.13' && matrix.uv-options == '--frozen')
         run: |
-          sed -i 's/<h1 id="title">pyfhd_report.html<\/h1>/<h1 id="title">pyfhd GitHub Actions Unit Test Report<\/h1>/' pyfhd_report.html 
+          sed -i 's/<h1 id="title">pyfhd_report.html<\/h1>/<h1 id="title">pyfhd GitHub Actions Unit Test Report<\/h1>/' pyfhd_report.html
           sed -i 's/<title id="head-title">pyfhd_report.html<\/title>/<title id="head-title">pyfhd GitHub Actions Unit Test Report<\/title>/' pyfhd_report.html
-    
+
       - name: Upload Unit Test HTML Report
         if: (matrix.os == 'ubuntu-latest' && matrix.python-version == '3.13' && matrix.uv-options == '--frozen')
         uses: actions/upload-artifact@v4
