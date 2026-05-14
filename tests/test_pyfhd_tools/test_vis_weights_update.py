@@ -1,12 +1,12 @@
-from PyFHD.io.pyfhd_io import recarray_to_dict
+from pyfhd.io.pyfhd_io import recarray_to_dict
 import pytest
 from logging import Logger
 from pathlib import Path
 from os import environ as env
-from PyFHD.io.pyfhd_io import convert_sav_to_dict
-from PyFHD.pyfhd_tools.test_utils import sav_file_vis_arr_swap_axes
-from PyFHD.pyfhd_tools.pyfhd_utils import vis_weights_update
-from PyFHD.io.pyfhd_io import save, load
+from pyfhd.io.pyfhd_io import convert_sav_to_dict
+from pyfhd.pyfhd_tools.test_utils import sav_file_vis_arr_swap_axes
+from pyfhd.pyfhd_tools.pyfhd_utils import vis_weights_update
+from pyfhd.io.pyfhd_io import save, load
 import numpy.testing as npt
 import numpy as np
 

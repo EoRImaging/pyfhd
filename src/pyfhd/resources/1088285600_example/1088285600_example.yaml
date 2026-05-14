@@ -1,0 +1,157 @@
+# Default Arguments for pyfhd
+# ~ returns None in Python (i.e. NULL)
+input-path : './src/pyfhd/resources/1088285600_example/'
+recalculate-all : false
+silent : false
+log-file : true
+conserve-memory : false
+instrument : 'mwa'
+memory-threshold : 100000000
+dimension : 2048
+elements : 2048
+kbinsize : 0.5
+FoV : ~
+min-baseline : 1.
+n-pol : 2
+deproject-w-term : ~
+
+# Checkpointing
+save-checkpoints: true
+obs-checkpoint: ~
+calibrate-checkpoint: ~
+gridding-checkpoint: ~
+
+# Instrument
+override-target-phasera: ~
+override-target-phasedec: ~
+
+# Beam Setup
+saved-beam-file-path: './src/pyfhd/resources/1088285600_example/gauss_beam_pointing0_167635008Hz.h5'
+lazy-load-beam: false
+recalculate-beam : true
+beam-clip-floor : true
+interpolate-kernel : true
+beam-nfreq-avg : 16
+psf-dim: 54
+psf-resolution : 100
+beam-mask-threshold: 100
+beam-model-version : 2
+beam-offset-time : 0
+beam-per-baseline: false
+
+# Calibration
+calibrate-visibilities : true
+cable-bandpass-fit : false # Depends on instrument cable length text file
+cal-bp-transfer : ~
+calibration-polyfit : true
+cal-amp-degree-fit : 2
+cal-phase-degree-fit : 1
+cal-reflection-hyperresolve : false
+cal-reflection-mode-theory : 0
+cal-reflection-mode-delay : false
+cal-reflection-mode-file : false
+calibration-auto-fit: false
+calibration-auto-initialize: false
+cal-gain-init: 1
+cal-convergence-threshold: 1e-7
+cal-adaptive-calibration-gain: false
+cal-base-gain: ~ # This is set to None by default to set the default based on cal-adaptive-calibration-gain as per FHD
+cal-phase-fit-iter: 4
+min-cal-baseline : 50.
+vis-baseline-hist : false
+bandpass-calibrate : true
+auto-ratio-calibration: true
+cal-time-average: false
+digital-gain-jump-polyfit: false
+diffuse-calibrate : ~
+calibration-catalog-file-path  :  ~ # 'GLEAM_v2_plus_rlb2019.sav' (FHD Default)
+transfer-calibration : ~
+cal-stop : false
+transfer-model-uv : ~
+max-cal-iter: 100
+calibration-plots: true
+
+# Flagging
+flag-basic: true
+flag-freq-start : ~
+flag-freq-end : ~
+flag-tiles: []
+flag-frequencies: false
+flag-model: true
+flag-calibration : true
+flag-calibration-frequencies: false
+flag-visibilities : false
+transfer-weights : ~
+time-cut: ~
+
+# Gridding
+recalculate-grid : true
+image-filter : 'filter_uv_uniform'
+mask-mirror-indices: false
+grid-spectral: false
+grid-weights: true
+grid-variance: true
+grid-uniform: false
+
+# Deconvolution
+# deconvolve : false
+# max-deconvolution-components : 20000
+# filter-background : true
+# smooth-width : 32
+dft-threshold : true
+# return-decon-visibilities : false
+# deconvolution-filter : 'filter_uv_uniform'
+
+# Export
+output-path : './output'
+export-images : true
+save-obs: true
+save-params: true
+save-cal: true
+save-visibilities : true
+save-weights: true
+save-healpix-fits: true
+snapshot-healpix-export : true
+save-model: true
+pad-uv-image : 1.
+ring-radius-multi : 10.
+description : 1088285600_example
+
+# Plotting
+calibration-plots: true
+gridding-plots: true
+image-plots: true
+
+# Model
+# Current choices of model-file-type are sav and uvfits
+model-file-type : 'uvfits'
+# If you set model-file-type to uvfits, set import-model-uvfits to the (ideally absolute) path of the fits file
+# If model-file-type is set to sav then it will look for the sav files as said in the function import_vis_model_from_sav
+model-file-path: './src/pyfhd/resources/1088285600_example/1088285600_model.uvfits'
+diffuse-model : ~
+model-catalog-file-path  :  ~ # 'GLEAM_v2_plus_rlb2019.sav' (FHD Default)
+allow-sidelobe-model-sources : false
+
+# Simulation
+# run-simulation : false
+# in-situ-sim-input : ~
+# eor-vis-filepath : ~
+# enhance-eor : 1
+# sim-noise : ~
+# tile-flag-list : ~
+# remove-sim-flags : false
+
+# HEALPIX
+ps-kbinsize : 0.5
+ps-kspan : 200
+ps-beam-threshold: 0
+ps-fov: ~
+ps-dimension: ~
+ps-degpix: ~
+ps-nfreq-avg: ~
+ps-tile-flag-list: []
+n-avg : 2
+rephase-weights: True
+restrict-healpix-inds : true
+healpix-inds: ~
+split-ps-export : true

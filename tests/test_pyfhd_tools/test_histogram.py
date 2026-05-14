@@ -2,15 +2,15 @@ import pytest
 import numpy as np
 from os import environ as env
 from pathlib import Path
-from PyFHD.pyfhd_tools.pyfhd_utils import histogram
-from PyFHD.pyfhd_tools.test_utils import get_data, get_data_items
+from pyfhd.pyfhd_tools.pyfhd_utils import histogram
+from pyfhd.pyfhd_tools.test_utils import get_data, get_data_items
 import importlib_resources
 
 
 @pytest.fixture
 def data_dir():
     # This assumes you have used the splitter.py and have done a general format of **/FHD/PyFHD/tests/test_fhd_*/data/<function_name_being_tested>/*.npy
-    return importlib_resources.files("PyFHD.resources.test_data").joinpath(
+    return importlib_resources.files("pyfhd.resources.test_data").joinpath(
         "pyfhd_tools", "histogram"
     )
 

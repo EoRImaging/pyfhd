@@ -1,15 +1,15 @@
-from PyFHD.io.pyfhd_io import recarray_to_dict
+from pyfhd.io.pyfhd_io import recarray_to_dict
 import pytest
 import numpy as np
 from os import environ as env
 from pathlib import Path
-from PyFHD.calibration.vis_calibrate_subroutine import vis_calibrate_subroutine
+from pyfhd.calibration.vis_calibrate_subroutine import vis_calibrate_subroutine
 from glob import glob
 from logging import Logger
-from PyFHD.pyfhd_tools.test_utils import get_data_items, sav_file_vis_arr_swap_axes
-from PyFHD.io.pyfhd_io import convert_sav_to_dict
+from pyfhd.pyfhd_tools.test_utils import get_data_items, sav_file_vis_arr_swap_axes
+from pyfhd.io.pyfhd_io import convert_sav_to_dict
 from numpy.testing import assert_allclose
-from PyFHD.io.pyfhd_io import save, load
+from pyfhd.io.pyfhd_io import save, load
 import importlib_resources
 
 
@@ -41,7 +41,7 @@ def before_file(tag, run, data_dir, request: pytest.FixtureRequest):
     if tag == "point_zenith" and run == "run1":
         request.node.add_marker(pytest.mark.github_actions)
     if request.node.get_closest_marker("github_actions"):
-        data_dir = importlib_resources.files("PyFHD.resources.test_data").joinpath(
+        data_dir = importlib_resources.files("pyfhd.resources.test_data").joinpath(
             "calibration", "vis_calibrate_subroutine"
         )
         # Use the one of the files that has been created as before file
@@ -61,7 +61,7 @@ def before_file(tag, run, data_dir, request: pytest.FixtureRequest):
     h5_save_dict["cal"]["gain"] = sav_file_vis_arr_swap_axes(
         h5_save_dict["cal"]["gain"]
     )
-    # Since we don't want to copy data we are leaving uu and vv in params in PyFHD
+    # Since we don't want to copy data we are leaving uu and vv in params in pyfhd
     # Thus we need to copy across for the test and save params as a separate dict
     params = {}
     params["uu"] = h5_save_dict["cal"]["uu"]
@@ -98,7 +98,7 @@ def after_file(tag, run, data_dir, request: pytest.FixtureRequest):
     if tag == "point_zenith" and run == "run1":
         request.node.add_marker(pytest.mark.github_actions)
     if request.node.get_closest_marker("github_actions"):
-        data_dir = importlib_resources.files("PyFHD.resources.test_data").joinpath(
+        data_dir = importlib_resources.files("pyfhd.resources.test_data").joinpath(
             "calibration", "vis_calibrate_subroutine"
         )
     after_file = Path(data_dir, f"{tag}_{run}_after_{data_dir.name}.h5")

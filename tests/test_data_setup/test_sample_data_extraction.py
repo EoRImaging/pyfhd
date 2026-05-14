@@ -2,21 +2,21 @@ import pytest
 from logging import Logger
 from pathlib import Path
 from os import environ as env
-from PyFHD.data_setup.uvfits import (
+from pyfhd.data_setup.uvfits import (
     extract_header,
     create_params,
     create_layout,
     extract_visibilities,
 )
-from PyFHD.data_setup.obs import create_obs
-from PyFHD.io.pyfhd_io import convert_sav_to_dict
-from PyFHD.io.pyfhd_io import recarray_to_dict
-from PyFHD.io.pyfhd_io import save, load
+from pyfhd.data_setup.obs import create_obs
+from pyfhd.io.pyfhd_io import convert_sav_to_dict
+from pyfhd.io.pyfhd_io import recarray_to_dict
+from pyfhd.io.pyfhd_io import save, load
 import numpy.testing as npt
 import numpy as np
 from scipy.io import readsav
 import importlib_resources
-from PyFHD.source_modeling.vis_model_transfer import vis_model_transfer
+from pyfhd.source_modeling.vis_model_transfer import vis_model_transfer
 
 
 @pytest.fixture(
@@ -34,12 +34,12 @@ def test_obs_creation(obs_id):
     # The obs creation test is more of an integration test, since we will be
     # using the extract_header, create_params, and create_layout to create the obs dictionary.
     # If this test pass then it essentially means that the dictionaries are almost identical
-    # to that of the IDL structures in the ways that matter for a PyFHD run.
+    # to that of the IDL structures in the ways that matter for a pyfhd run.
     # In this case we're only going to test the obs structure from run1 of each test.
     logger = Logger(1)
     pyfhd_config = {
         "obs_id": obs_id,
-        "input_path": importlib_resources.files("PyFHD").joinpath(
+        "input_path": importlib_resources.files("pyfhd").joinpath(
             "resources/1088285600_example/"
         ),
         "n_pol": 2,
@@ -60,12 +60,12 @@ def test_obs_creation(obs_id):
         "save_model": False,
         "model_file_type": "uvfits",
         "model_file_path": str(
-            importlib_resources.files("PyFHD").joinpath(
+            importlib_resources.files("pyfhd").joinpath(
                 "resources/1088285600_example/1088285600_model.uvfits"
             )
         ),
     }
-    data_dir = importlib_resources.files("PyFHD").joinpath(
+    data_dir = importlib_resources.files("pyfhd").joinpath(
         "resources/test_data/data_setup"
     )
     obs_fhd = load(data_dir / f"{obs_id}_obs.h5")
@@ -150,7 +150,7 @@ def test_obs_creation(obs_id):
 
     # Check the model
     expected_vis_model_arr = load(
-        importlib_resources.files("PyFHD").joinpath(
+        importlib_resources.files("pyfhd").joinpath(
             f"resources/test_data/source_modelling/{obs_id}_vis_model.h5"
         )
     )

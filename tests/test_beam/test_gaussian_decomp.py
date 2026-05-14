@@ -4,8 +4,8 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 from logging import Logger
-from PyFHD.io.pyfhd_io import convert_sav_to_dict, load, recarray_to_dict, save
-from PyFHD.beam_setup.beam_utils import gaussian_decomp
+from pyfhd.io.pyfhd_io import convert_sav_to_dict, load, recarray_to_dict, save
+from pyfhd.beam_setup.beam_utils import gaussian_decomp
 
 
 @pytest.fixture

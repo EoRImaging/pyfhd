@@ -2,8 +2,8 @@ import pytest
 import numpy as np
 from os import environ as env
 from pathlib import Path
-from PyFHD.gridding.gridding_utils import holo_mapfn_convert
-from PyFHD.pyfhd_tools.test_utils import get_data_items
+from pyfhd.gridding.gridding_utils import holo_mapfn_convert
+from pyfhd.pyfhd_tools.test_utils import get_data_items
 
 
 @pytest.fixture

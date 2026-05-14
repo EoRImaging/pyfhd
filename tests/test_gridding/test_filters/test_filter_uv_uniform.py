@@ -2,9 +2,9 @@ import pytest
 import numpy.testing as npt
 from os import environ as env
 from pathlib import Path
-from PyFHD.gridding.filters import filter_uv_uniform
-from PyFHD.pyfhd_tools.test_utils import get_data_items
-from PyFHD.io.pyfhd_io import save, load
+from pyfhd.gridding.filters import filter_uv_uniform
+from pyfhd.pyfhd_tools.test_utils import get_data_items
+from pyfhd.io.pyfhd_io import save, load
 
 
 @pytest.fixture

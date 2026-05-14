@@ -1,4 +1,4 @@
-name: PyFHD pytest
+name: pyfhd pytest
 
 on: [push, pull_request]
 
@@ -43,22 +43,22 @@ jobs:
         id: cache-test-data
         uses: actions/cache@v4
         with:
-          path: PyFHD/resources/test_data/pyfhd_test_data.zip
+          path: src/pyfhd/resources/test_data/pyfhd_test_data.zip
           key: test-data-${{ hashFiles('**/pyfhd_test_data.zip') }}
           restore-keys: test-data-
 
       - name: Download the test data from Zenodo
         if: steps.cache-test-data.outputs.cache-hit != 'true'
         run: |
-          wget -O PyFHD/resources/test_data/pyfhd_test_data.zip https://zenodo.org/records/15687722/files/pyfhd_test_data.zip?download=1
+          wget -O src/pyfhd/resources/test_data/pyfhd_test_data.zip https://zenodo.org/records/15687722/files/pyfhd_test_data.zip?download=1
 
       - name: Unzip the test data
         run: |
-          unzip PyFHD/resources/test_data/pyfhd_test_data.zip -d PyFHD/resources/test_data
+          unzip src/pyfhd/resources/test_data/pyfhd_test_data.zip -d src/pyfhd/resources/test_data
     
       - name: Run tests
         run: |
-          uv run ${{ matrix.uv-options }} coverage run --branch --source=PyFHD -m pytest -m github_actions --html=pyfhd_report.html --self-contained-html
+          uv run ${{ matrix.uv-options }} coverage run --branch --source=pyfhd -m pytest -m github_actions --html=pyfhd_report.html --self-contained-html
           uv run ${{ matrix.uv-options }} coverage xml  -o ./coverage.xml
 
       - name: check coverage report
@@ -74,13 +74,13 @@ jobs:
 
       - name: Get coverage HTML report
         if: (matrix.os == 'ubuntu-latest' && matrix.python-version == '3.13' && matrix.uv-options == '--frozen')
-        run: uv run coverage html --directory=coverage_html_report --title="PyFHD GitHub Actions Coverage Report"
+        run: uv run coverage html --directory=coverage_html_report --title="pyfhd GitHub Actions Coverage Report"
 
       - name: Change Title of the Unit Test Report
         if: (matrix.os == 'ubuntu-latest' && matrix.python-version == '3.13' && matrix.uv-options == '--frozen')
         run: |
-          sed -i 's/<h1 id="title">pyfhd_report.html<\/h1>/<h1 id="title">PyFHD GitHub Actions Unit Test Report<\/h1>/' pyfhd_report.html 
-          sed -i 's/<title id="head-title">pyfhd_report.html<\/title>/<title id="head-title">PyFHD GitHub Actions Unit Test Report<\/title>/' pyfhd_report.html
+          sed -i 's/<h1 id="title">pyfhd_report.html<\/h1>/<h1 id="title">pyfhd GitHub Actions Unit Test Report<\/h1>/' pyfhd_report.html 
+          sed -i 's/<title id="head-title">pyfhd_report.html<\/title>/<title id="head-title">pyfhd GitHub Actions Unit Test Report<\/title>/' pyfhd_report.html
     
       - name: Upload Unit Test HTML Report
         if: (matrix.os == 'ubuntu-latest' && matrix.python-version == '3.13' && matrix.uv-options == '--frozen')

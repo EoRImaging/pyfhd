@@ -1,12 +1,12 @@
-from PyFHD.io.pyfhd_io import recarray_to_dict
+from pyfhd.io.pyfhd_io import recarray_to_dict
 import pytest
 from os import environ as env
 from pathlib import Path
-from PyFHD.calibration.calibration_utils import vis_cal_auto_fit
-from PyFHD.io.pyfhd_io import convert_sav_to_dict
-from PyFHD.pyfhd_tools.test_utils import sav_file_vis_arr_swap_axes
+from pyfhd.calibration.calibration_utils import vis_cal_auto_fit
+from pyfhd.io.pyfhd_io import convert_sav_to_dict
+from pyfhd.pyfhd_tools.test_utils import sav_file_vis_arr_swap_axes
 import numpy as np
-from PyFHD.io.pyfhd_io import save, load
+from pyfhd.io.pyfhd_io import save, load
 import numpy.testing as npt
 import matplotlib.pyplot as plt
 
@@ -132,7 +132,7 @@ def test_vis_cal_auto_fit(before_file, after_file, data_dir):
     # fig, axs = plt.subplots(2, 1)
 
     # axs[0].plot(np.abs(gx[0, :]), 's', mfc='none', linestyle='none', label='Sim gains')
-    # axs[0].plot(return_cal_fit['gain'][0, 0, :], 'x', mfc='none', linestyle='none', label='Fit PyFHD')
+    # axs[0].plot(return_cal_fit['gain'][0, 0, :], 'x', mfc='none', linestyle='none', label='Fit pyfhd')
 
     # print(expected_cal_fit['gain'][0, 0, 1])
     # print(return_cal_fit['gain'][0, 0, 1])

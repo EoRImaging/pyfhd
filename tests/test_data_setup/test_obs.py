@@ -2,11 +2,11 @@ import pytest
 from logging import Logger
 from pathlib import Path
 from os import environ as env
-from PyFHD.data_setup.uvfits import extract_header, create_params, create_layout
-from PyFHD.data_setup.obs import create_obs
-from PyFHD.io.pyfhd_io import convert_sav_to_dict
-from PyFHD.io.pyfhd_io import recarray_to_dict
-from PyFHD.io.pyfhd_io import save, load
+from pyfhd.data_setup.uvfits import extract_header, create_params, create_layout
+from pyfhd.data_setup.obs import create_obs
+from pyfhd.io.pyfhd_io import convert_sav_to_dict
+from pyfhd.io.pyfhd_io import recarray_to_dict
+from pyfhd.io.pyfhd_io import save, load
 import numpy.testing as npt
 import numpy as np
 from scipy.io import readsav
@@ -46,7 +46,7 @@ def check_sav_file(path: Path, run: int, pyfhd_config: dict) -> Path:
     path : Path
         Path to the obs testing directory containing the resulting FHD obs structures
     pyfhd_config : dict
-        A mock example of PyFHD's configuration given to the test
+        A mock example of pyfhd's configuration given to the test
 
     Returns
     -------
@@ -76,7 +76,7 @@ def test_2_pol_obs_creation(obs_id, data_dir, obs_dir):
     # The obs creation test is more of an integration test, since we will be
     # using the extract_header, create_params, and create_layout to create the obs dictionary.
     # If this test pass then it essentially means that the dictionaries are almost identical
-    # to that of the IDL structures in the ways that matter for a PyFHD run.
+    # to that of the IDL structures in the ways that matter for a pyfhd run.
     # In this case we're only going to test the obs structure from run1 of each test.
     logger = Logger(1)
     pyfhd_config = {
@@ -173,7 +173,7 @@ def test_4_pol_obs_creation(obs_id, data_dir, obs_dir):
     # The obs creation test is more of an integration test, since we will be
     # using the extract_header, create_params, and create_layout to create the obs dictionary.
     # If this test pass then it essentially means that the dictionaries are almost identical
-    # to that of the IDL structures in the ways that matter for a PyFHD run.
+    # to that of the IDL structures in the ways that matter for a pyfhd run.
     # In this case we're only going to test the obs structure from run1 of each test.
     if obs_id == "1088716296":
         pytest.skip("1088716296 hasn't been prepared to do 4 polarizations")

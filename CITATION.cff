@@ -1,5 +1,5 @@
 cff-version: 1.2.0
-message: If you use PyFHD, please cite according to the instructions.
+message: If you use pyfhd, please cite according to the instructions.
 authors:
   - family-names: Dunstan
     given-names: Joel
@@ -10,12 +10,12 @@ authors:
   - family-names: Line
     given-names: Jack
     orcid: https://orcid.org/0000-0002-9130-5920
-title: Python Fast Holographic Deconvolution (PyFHD)
+title: Python Fast Holographic Deconvolution (pyfhd)
 version: 1.0.2
 date-released: '2025-07-03'
 license: MIT
 type: software
-url: https://github.com/EoRImaging/PyFHD
+url: https://github.com/EoRImaging/pyfhd
 keywords:
   - eor
   - epoch of reionisation

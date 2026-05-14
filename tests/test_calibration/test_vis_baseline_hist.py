@@ -1,11 +1,11 @@
-from PyFHD.io.pyfhd_io import recarray_to_dict
+from pyfhd.io.pyfhd_io import recarray_to_dict
 import pytest
 from os import environ as env
 from pathlib import Path
-from PyFHD.calibration.calibration_utils import vis_baseline_hist
-from PyFHD.io.pyfhd_io import convert_sav_to_dict
-from PyFHD.pyfhd_tools.test_utils import sav_file_vis_arr_swap_axes
-from PyFHD.io.pyfhd_io import save, load
+from pyfhd.calibration.calibration_utils import vis_baseline_hist
+from pyfhd.io.pyfhd_io import convert_sav_to_dict
+from pyfhd.pyfhd_tools.test_utils import sav_file_vis_arr_swap_axes
+from pyfhd.io.pyfhd_io import save, load
 import numpy.testing as npt
 import matplotlib.pyplot as plt
 
@@ -110,7 +110,7 @@ def test_vis_baseline_hist(before_file: Path, after_file: Path):
 
     atol = 4e-4
 
-    # Can test that the fixed final polarisation is close to PyFHD result
+    # Can test that the fixed final polarisation is close to pyfhd result
     # Out results are ordered by pol, bin so need to do a transpose
     npt.assert_allclose(
         result_vis_baseline_hist["vis_res_ratio_mean"],
@@ -145,7 +145,7 @@ def test_vis_baseline_hist(before_file: Path, after_file: Path):
 
     # axs[0].set_title('FHD')
 
-    # axs[1].set_title('PyFHD')
+    # axs[1].set_title('pyfhd')
 
     # for ax in axs.flatten():
     #     ax.set_xlabel('Polarisation')

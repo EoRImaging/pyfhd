@@ -33,14 +33,14 @@ RUN .venv/bin/python -c "from astropy.utils.iers import IERS_Auto; iers_a = IERS
 RUN .venv/bin/python -c "from astropy.coordinates import EarthLocation; site_names = EarthLocation.get_site_names()"
 
 # Grab the MWA FEE Beam file
-RUN cd /pyfhd/PyFHD/resources/instrument_config && wget "http://ws.mwatelescope.org/static/mwa_full_embedded_element_pattern.h5" && cd /pyfhd
+RUN cd /pyfhd/src/pyfhd/resources/instrument_config && wget "http://ws.mwatelescope.org/static/mwa_full_embedded_element_pattern.h5" && cd /pyfhd
 
 RUN rm -rf /pyfhd/.git /pyfhd/.cache/uv 
 
 # Separate build stage as uv is not needed in the final image
 FROM python:3.13-slim-bookworm AS runner
 
-# This essentially "installs" PyFHD into the final image
+# This essentially "installs" pyfhd into the final image
 COPY --from=builder --chown=1000:1000 /pyfhd /pyfhd
 
 # Set the cache for astropy

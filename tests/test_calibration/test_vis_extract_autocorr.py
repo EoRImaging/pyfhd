@@ -1,12 +1,12 @@
 import pytest
 from os import environ as env
 from pathlib import Path
-from PyFHD.io.pyfhd_io import save, load
+from pyfhd.io.pyfhd_io import save, load
 import numpy as np
 
-from PyFHD.calibration.calibration_utils import vis_extract_autocorr
-from PyFHD.io.pyfhd_io import convert_sav_to_dict
-from PyFHD.io.pyfhd_io import recarray_to_dict
+from pyfhd.calibration.calibration_utils import vis_extract_autocorr
+from pyfhd.io.pyfhd_io import convert_sav_to_dict
+from pyfhd.io.pyfhd_io import recarray_to_dict
 
 
 @pytest.fixture
@@ -121,8 +121,8 @@ def test_points_offzenith_zenith_1088716296(before_file, after_file):
     )
 
     # Outputs from .sav file can be an a 1D array containging 2D arrays
-    # PyFHD is making 3D arrays. So test things match as a loop
-    # over polarisations. Furthermore, FHD and PyFHD have different
+    # pyfhd is making 3D arrays. So test things match as a loop
+    # over polarisations. Furthermore, FHD and pyfhd have different
     # axes orders, so transpose the expected values
 
     for pol_i in range(obs["n_pol"]):

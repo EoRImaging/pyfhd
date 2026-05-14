@@ -1,13 +1,18 @@
 [project]
-name = "PyFHD"
-version = "1.0.2"
+name = "pyfhd"
+dynamic = ["version"]
 readme = "README.md"
 license = { file = "LICENSE" }
 description = "Python Fast Holograhic Deconvolution: A Python package that does fast-mode Epoch of Reionization analysis."
 authors = [
     { name = "Joel Dunstan (SkyWa7ch3r)", email = "joel.g.w.dunstan@gmail.com"},
     { name = "Jack Line (JLBLine)", email = "jack.line@curtin.edu.au"},
-    { name = "Nichole Barry (nicholebarry)", email = "nichole.barry@unsw.edu.au"}
+    { name = "Nichole Barry (nicholebarry)", email = "nichole.barry@unsw.edu.au"},
+    { name = "Bryna Hazelton (bhazelton)", email = "brynah@uw.edu"}
+]
+maintainers = [
+    { name = "Nichole Barry (nicholebarry)", email = "nichole.barry@unsw.edu.au"},
+    { name = "Bryna Hazelton (bhazelton)", email = "brynah@uw.edu"}
 ]
 requires-python = ">=3.11"
 classifiers = [
@@ -33,16 +38,17 @@ dependencies = [
     "numba>=0.61.2",
     "numpy>=2.2.5",
     "pyuvdata>=3.2.1",
+    "setuptools_scm>=8.1",
     "scipy>=1.15.3",
 ]
 
 [project.scripts]
-pyfhd = "PyFHD.pyfhd:main"
+pyfhd = "pyfhd.pyfhd:main"
 
 [project.urls]
-"Repository" = "https://github.com/EoRImaging/PyFHD"
+"Repository" = "https://github.com/EoRImaging/pyfhd"
 "Documentation" = "https://pyfhd.readthedocs.io/en/latest/"
-"Bug Tracker" = "https://github.com/EoRImaging/PyFHD/issues"
+"Bug Tracker" = "https://github.com/EoRImaging/pyfhd/issues"
 "Changelog" = "https://pyfhd.readthedocs.io/en/latest/changelog/changelog.html"
 
 [dependency-groups]
@@ -64,27 +70,10 @@ dev = [
 ]
 
 [build-system]
-requires = ["hatch-build-scripts", "hatchling"]
-build-backend = "hatchling.build"
+requires = ["setuptools>=65", "wheel", "setuptools_scm>=8.1"]
+build-backend = "setuptools.build_meta"
 
-[tool.hatch.build]
-ignore-vcs = true
-include = ["PyFHD/**", "PyFHD/__git__.py"]
-exclude = ["mwa_full_embedded_element_pattern.h5", "*.pyc", "PyFHD/resources/test_data/**/*"]
-
-
-[[tool.hatch.build.hooks.build-scripts.scripts]]
-out_dir = "."
-work_dir = "."
-artifacts = [
-    "PyFHD/__git__.py"
-]
-commands = [
-    'echo __git_commit__ = \"$(git rev-parse HEAD)\" > PyFHD/__git__.py',
-    'echo __git_commit_date__ = \"$(git log -1 --format=%cd)\" >> PyFHD/__git__.py',
-    'echo __git_branch__ = \"$(git rev-parse --abbrev-ref HEAD)\" >> PyFHD/__git__.py',
-]
-clean_artifacts = true
+[tool.setuptools_scm]
 
 [tool.pytest.ini_options]
 markers = [

@@ -23,9 +23,20 @@
       "email": "nichole.barry@unsw.edu.au",
       "familyName": "Barry",
       "givenName": "Nichole"
+    },
+    {
+      "id": "https://orcid.org/0000-0001-7532-645X",
+      "type": "Person",
+      "affiliation": {
+        "type": "Organization",
+        "name": "University of Washington"
+      },
+      "email": "brynah@uw.edu",
+      "familyName": "Hazelton",
+      "givenName": "Bryna"
     }
   ],
-  "codeRepository": "https://github.com/EoRImaging/PyFHD",
+  "codeRepository": "https://github.com/EoRImaging/pyfhd",
   "contributor": {
     "id": "https://orcid.org/0000-0002-9130-5920",
     "type": "Person",
@@ -40,16 +51,16 @@
   "dateCreated": "2022-01-06",
   "dateModified": "2025-07-03",
   "datePublished": "2025-06-24",
-  "description": "Python Fast Holographic Deconvolution (PyFHD) is an open source Python package that is a translation of the Interactive Data Language (IDL) package, Fast Holographic Deconvolution (FHD). PyFHD is primarily used for fast-mode Epoch of Reionization analysis.",
-  "downloadUrl": "https://github.com/EoRImaging/PyFHD",
+  "description": "Python Fast Holographic Deconvolution (pyfhd) is an open source Python package that is a translation of the Interactive Data Language (IDL) package, Fast Holographic Deconvolution (FHD).",
+  "downloadUrl": "https://github.com/EoRImaging/pyfhd",
   "license": "https://spdx.org/licenses/MIT",
-  "name": "Python Fast Holographic Deconvolution (PyFHD)",
+  "name": "Python Fast Holographic Deconvolution (pyfhd)",
   "programmingLanguage": "Python",
   "version": "1.0.2",
   "codemeta:contIntegration": {
-    "id": "https://github.com/EoRImaging/PyFHD/actions"
+    "id": "https://github.com/EoRImaging/pyfhd/actions"
   },
-  "continuousIntegration": "https://github.com/EoRImaging/PyFHD/actions",
+  "continuousIntegration": "https://github.com/EoRImaging/pyfhd/actions",
   "developmentStatus": "active",
-  "issueTracker": "https://github.com/EoRImaging/PyFHD/issues"
+  "issueTracker": "https://github.com/EoRImaging/pyfhd/issues"
 }

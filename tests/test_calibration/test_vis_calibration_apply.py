@@ -1,13 +1,13 @@
-from PyFHD.io.pyfhd_io import recarray_to_dict
+from pyfhd.io.pyfhd_io import recarray_to_dict
 import pytest
 from os import environ as env
 from pathlib import Path
-from PyFHD.pyfhd_tools.test_utils import get_data_items, get_data_sav
-from PyFHD.calibration.calibration_utils import vis_calibration_apply
-from PyFHD.io.pyfhd_io import convert_sav_to_dict
-from PyFHD.pyfhd_tools.test_utils import sav_file_vis_arr_swap_axes
+from pyfhd.pyfhd_tools.test_utils import get_data_items, get_data_sav
+from pyfhd.calibration.calibration_utils import vis_calibration_apply
+from pyfhd.io.pyfhd_io import convert_sav_to_dict
+from pyfhd.pyfhd_tools.test_utils import sav_file_vis_arr_swap_axes
 import numpy as np
-from PyFHD.io.pyfhd_io import save, load
+from pyfhd.io.pyfhd_io import save, load
 import numpy.testing as npt
 from logging import Logger
 
@@ -129,7 +129,7 @@ def test_vis_calibration_apply(before_file, after_file):
     vis_ptr = h5_before["vis_ptr"]
     cal = h5_before["cal"]
 
-    # The FHD code has made copies of things from `obs` into `cal`. In PyFHD,
+    # The FHD code has made copies of things from `obs` into `cal`. In pyfhd,
     # we just supply the `obs`. Means we need to make a mini `obs` for testing
     # here
     obs = {}

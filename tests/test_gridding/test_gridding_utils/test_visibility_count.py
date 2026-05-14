@@ -1,15 +1,15 @@
-from PyFHD.io.pyfhd_io import recarray_to_dict
+from pyfhd.io.pyfhd_io import recarray_to_dict
 import pytest
 import numpy as np
 from os import environ as env
 from pathlib import Path
-from PyFHD.pyfhd_tools.test_utils import (
+from pyfhd.pyfhd_tools.test_utils import (
     get_data,
     get_data_items,
     sav_file_vis_arr_swap_axes,
 )
-from PyFHD.gridding.gridding_utils import visibility_count
-from PyFHD.io.pyfhd_io import save, load
+from pyfhd.gridding.gridding_utils import visibility_count
+from pyfhd.io.pyfhd_io import save, load
 from logging import Logger
 from numpy.testing import assert_allclose
 

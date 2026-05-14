@@ -2,8 +2,8 @@ import pytest
 import numpy as np
 from os import environ as env
 from pathlib import Path
-from PyFHD.pyfhd_tools.test_utils import get_data_items, get_data_sav
-from PyFHD.pyfhd_tools.pyfhd_utils import weight_invert
+from pyfhd.pyfhd_tools.test_utils import get_data_items, get_data_sav
+from pyfhd.pyfhd_tools.pyfhd_utils import weight_invert
 import importlib_resources
 
 
@@ -15,7 +15,7 @@ def data_dir():
 @pytest.mark.github_actions
 def test_weight_invert_one():
     "This checks weight invert for a float64 array that is 2048x2048."
-    data_dir = importlib_resources.files("PyFHD.resources.test_data").joinpath(
+    data_dir = importlib_resources.files("pyfhd.resources.test_data").joinpath(
         "pyfhd_tools", "weight_invert"
     )
     threshold, weights, expected_result = get_data_items(

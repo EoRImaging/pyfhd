@@ -14,17 +14,20 @@ import html
 import os
 import sys
 
+import pyfhd
+
 # sys.path.append(os.path.abspath('../..'))
 sys.path.insert(0, os.path.abspath("../.."))
 
 # -- Project information -----------------------------------------------------
 
-project = "PyFHD"
-copyright = "2025, Joel Dunstan, Jack Line and Nichole Barry"
-author = "Joel Dunstan, Jack Line and Nichole Barry"
+project = "pyfhd"
+copyright = "2025, Radio imaging"
+author = "Joel Dunstan, Jack Line, Nichole Barry and Bryna Hazelton"
 
 # The full version, including alpha/beta/rc tags
-release = "1.0.2"
+version = pyfhd.__version__
+release = version
 
 
 # -- General configuration ---------------------------------------------------
@@ -80,15 +83,3 @@ source_suffix = {
 
 # --- LaTEX options
 latex_engine = "xelatex"
-
-# ==============================================================================
-# Sphinx-reports - DocCov
-# ==============================================================================
-report_doccov_packages = {
-    "src": {
-        "name": "PyFHD",
-        "directory": "../../PyFHD",
-        "fail_below": 80,
-        "levels": "default",
-    }
-}

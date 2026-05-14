@@ -5,8 +5,8 @@ import numpy.testing as npt
 import pytest
 import h5py
 from logging import Logger
-from PyFHD.io.pyfhd_io import convert_sav_to_dict, load, recarray_to_dict, save
-from PyFHD.healpix.healpix_utils import vis_model_freq_split
+from pyfhd.io.pyfhd_io import convert_sav_to_dict, load, recarray_to_dict, save
+from pyfhd.healpix.healpix_utils import vis_model_freq_split
 
 
 @pytest.fixture

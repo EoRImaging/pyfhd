@@ -1,17 +1,24 @@
 # Installation
 
-The dependencies on PyFHD to run with FHD have been removed, this makes installing and `PyFHD` much easier than FHD. `PyFHD` is currently supported for Python 3.10+.
+The dependencies on pyfhd to run with FHD have been removed, this makes installing
+and `pyfhd` much easier than FHD. `pyfhd` is currently supported for Python 3.11+.
 
-## Installing to do some development on PyFHD?
+## Installing to do some development on pyfhd?
 
 Please follow the [contribution guide](../develop/contribution_guide.md).
 
 ## pip
 
-PyFHD is on [PyPi](https://pypi.org/) and is installable via pip. Typically you'll create a virtual environment using `venv`, `mamba/conda` or `uv` to ensure you're not installing things into any other Python
-Installations you may have. Typically `venv` is best in places where you are restricted by what you can and can't install (HPC environments). `uv` is best used for development as it supports a lot of features
-that Python developers of packages will appreciate (oh, and by the way, _it's fast_, like _really fast_ at installing packages). `mamba` is best used where you need to use more than just Python, but perhaps a combination
-of languages and tools, `mamba` has the ability to manage any compilers, CUDA versions, system tools etc.
+pyfhd is on [PyPi](https://pypi.org/) and is installable via pip. Typically
+you'll create a virtual environment using `venv`, `conda` or `uv` to ensure
+you're not installing things into any other python installations you may have.
+Typically `venv` is best in places where you are restricted by what you can and
+can't install (HPC environments). `uv` is best used for development as it supports
+a lot of features that Python developers of packages will appreciate (oh,
+and by the way, _it's fast_, like _really fast_ at installing packages).
+`conda` is best used where you need to use more than just Python, but perhaps a
+combination of languages and tools, `conda` has the ability to manage any
+compilers, CUDA versions, system tools etc.
 
 ### Make a venv environment
 This assumes you have python installed.
@@ -23,7 +30,8 @@ python -m venv pyfhd
 source pyfhd/bin/activate
 ```
 
-You should now notice some brackets `(pyfhd)` present in the terminal. You can deactivate the environment at any time by putting `deactivate` in the terminal.
+You should now notice some brackets `(pyfhd)` present in the terminal. You can
+deactivate the environment at any time by putting `deactivate` in the terminal.
 
 ### Make a venv via uv
 
@@ -34,20 +42,21 @@ uv venv
 source .venv/bin/activate
 ```
 
-Since `uv` just uses `venv` under the hood, you can get out of the environment by calling `deactivate` at any time.
+Since `uv` just uses `venv` under the hood, you can get out of the environment
+by calling `deactivate` at any time.
 
-### Make a mamba environment
+### Make a conda environment
 
-Install [mamba](https://mamba.readthedocs.io/en/latest/installation/mamba-installation.html)
+Install [conda](https://github.com/conda-forge/miniforge#install)
 
 ```bash
-mamba env create -n pyfhd python=3.10 # You can make it 3.10, 3.11 or 3.12
-mamba activate pyfhd
+conda env create --file environment.yml python=3.11 # You can make it 3.11 or 3.12 or 3.13
+conda activate pyfhd
 ```
 
-You can deactivate the environment anytime by using `mamba deactivate`
+You can deactivate the environment anytime by using `conda deactivate`
 
-### Installing PyFHD
+### Installing pyfhd
 
 Inside your virtual environment, run
 
@@ -78,9 +87,10 @@ It should give you output that looks like this:
     
     Python Fast Holographic Deconvolution 
 
-    Translated from IDL to Python as a collaboration between Astronomy Data and Computing Services (ADACS) and the Epoch of Reionisation (EoR) Team.
+    Translated from IDL to Python as a collaboration between Astronomy Data and
+    Computing Services (ADACS) and the Epoch of Reionisation (EoR) Team.
 
-    Repository: https://github.com/EoRImaging/PyFHD
+    Repository: https://github.com/EoRImaging/pyfhd
 
     Documentation: https://pyfhd.readthedocs.io/en/latest/
 

@@ -5,8 +5,8 @@ import numpy.testing as npt
 import pytest
 from logging import Logger
 import astropy
-from PyFHD.io.pyfhd_io import convert_sav_to_dict, load, recarray_to_dict, save
-from PyFHD.io.pyfhd_quickview import quickview
+from pyfhd.io.pyfhd_io import convert_sav_to_dict, load, recarray_to_dict, save
+from pyfhd.io.pyfhd_quickview import quickview
 
 
 @pytest.fixture
