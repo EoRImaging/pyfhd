@@ -116,8 +116,8 @@ def init_beam(obs: dict, pyfhd_config: dict, logger: Logger) -> dict:
         "gain": np.ones([n_ant_pol, freq_center.size, n_dipoles], dtype=np.float64),
         "coords": coords,
         "delays": delays,
-        "iresponse": None,
-        "projection": None,
+        "aligned_response": None,
+        "aligned_projection": None,
         # pyfhd supports one instrument at a time, so we setup the group so they're all in the same group.
         "group_id": np.zeros([n_ant_pol, obs["n_tile"]], dtype=np.int8),
         "pix_window": None,
@@ -291,15 +291,15 @@ def init_beam(obs: dict, pyfhd_config: dict, logger: Logger) -> dict:
     # Get the jones matrix for the antenna
     # shape is: (number of vector directions (usually 2), number of feeds (usually 2),
     # number of frequencies, number of directions on the sky)
-    antenna["iresponse"], antenna["projection"] = general_jones_matrix(
+    antenna["aligned_response"], antenna["aligned_projection"] = general_jones_matrix(
         beam,
         za_array=zenith_angle_arr.flatten(),
         az_array=azimuth_arr.flatten(),
         freq_array=freq_center,
         telescope_location=location,
     )
-    # remove the initial shallow dimension in iresponse
-    antenna["iresponse"] = antenna["iresponse"][0]
+    # remove the initial shallow dimension in aligned_response
+    antenna["aligned_response"] = antenna["aligned_response"][0]
 
     return antenna, psf, beam
 
@@ -435,12 +435,12 @@ def general_jones_matrix(
     noe_az_array[where_neg_az] = noe_az_array[where_neg_az] + np.pi * 2.0
 
     if isinstance(beam_obj, UVBeam):
-        f_obj, k_obj = beam_obj.decompose_feed_iresponse_projection()
+        f_obj, k_obj = beam_obj.decompose_feed_aligned_terms()
         f_beam = BeamInterface(f_obj)
         k_beam = BeamInterface(k_obj)
     else:
-        f_beam = BeamInterface(beam_obj, beam_type="feed_iresponse")
-        k_beam = BeamInterface(beam_obj, beam_type="feed_projection")
+        f_beam = BeamInterface(beam_obj, beam_type="feed_aligned_response")
+        k_beam = BeamInterface(beam_obj, beam_type="feed_aligned_projection")
 
     f_vals = f_beam.compute_response(
         az_array=noe_az_array,
