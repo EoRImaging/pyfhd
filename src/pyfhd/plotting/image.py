@@ -186,7 +186,7 @@ def quick_image(
 
     # Handle missing values by setting them to NaN
     if missing_value is not None:
-        wh_missing = np.where(image == missing_value)
+        wh_missing = np.nonzero(image == missing_value)
         count_missing = len(wh_missing[0])
         if count_missing > 0:
             image[wh_missing] = np.nan
@@ -433,7 +433,7 @@ def log_color_calc(
     data_color_range, data_n_colors = color_range(count_missing=count_missing)
 
     # Handle positive values
-    wh_pos = np.where(data > 0)
+    wh_pos = np.nonzero(data > 0)
     count_pos = len(wh_pos[0])
     if count_pos > 0:
         min_pos = np.nanmin(data[wh_pos])
@@ -445,7 +445,7 @@ def log_color_calc(
         min_pos = 0.01
 
     # Handle negative values
-    wh_neg = np.where(data < 0)
+    wh_neg = np.nonzero(data < 0)
     count_neg = len(wh_neg[0])
     if count_neg > 0:
         max_neg = np.nanmax(data[wh_neg])
@@ -455,7 +455,7 @@ def log_color_calc(
         max_neg = data_range[0] / 10
 
     # Handle zero values
-    wh_zero = np.where(data == 0)
+    wh_zero = np.nonzero(data == 0)
     count_zero = len(wh_zero[0])
 
     # Handle log_cut color profile
@@ -477,19 +477,18 @@ def log_color_calc(
         if count_zero > 0:
             min_pos_color = 2
             zero_color = 1
-            zero_val = log_data_range[0]
         else:
             min_pos_color = 1
 
         neg_color = 0
-        neg_val = log_data_range[0]
 
-        data_log = np.log10(data)
-        wh_under = np.where(data < 10**log_cut_val)
+        data_log = np.zeros_like(data)
+        data_log[wh_pos] = np.log10(data[wh_pos])
+        wh_under = np.nonzero(data < 10**log_cut_val)
         if len(wh_under[0]) > 0:
             data_log[wh_under] = log_data_range[0]
 
-        wh_over = np.where(data_log > log_data_range[1])
+        wh_over = np.nonzero(data_log > log_data_range[1])
         if len(wh_over[0]) > 0:
             data_log[wh_over] = log_data_range[1]
 
@@ -528,9 +527,9 @@ def log_color_calc(
 
         # Normalize data
         data_log_norm = np.zeros_like(data, dtype=float)
-        wh_pos = np.where(data > 0)
-        wh_neg = np.where(data < 0)
-        wh_zero = np.where(data == 0)
+        wh_pos = np.nonzero(data > 0)
+        wh_neg = np.nonzero(data < 0)
+        wh_zero = np.nonzero(data == 0)
 
         midpoint = (data_color_range[1] - data_color_range[0]) // 2
 
@@ -559,11 +558,11 @@ def log_color_calc(
             data_log_norm[wh_zero] = data_color_range[0] + midpoint
 
         # Handle out-of-bounds values
-        wh_under = np.where(data_log_norm < data_color_range[0])
+        wh_under = np.nonzero(data_log_norm < data_color_range[0])
         if len(wh_under[0]) > 0:
             data_log_norm[wh_under] = data_color_range[0]
 
-        wh_over = np.where(data_log_norm > data_color_range[1])
+        wh_over = np.nonzero(data_log_norm > data_color_range[1])
         if len(wh_over[0]) > 0:
             data_log_norm[wh_over] = data_color_range[1]
 
@@ -575,11 +574,11 @@ def log_color_calc(
         ) + data_color_range[0]
 
         # Handle out-of-bounds values
-        wh_under = np.where(data_log_norm < data_color_range[0])
+        wh_under = np.nonzero(data_log_norm < data_color_range[0])
         if len(wh_under[0]) > 0:
             data_log_norm[wh_under] = data_color_range[0]
 
-        wh_over = np.where(data_log_norm > data_color_range[1])
+        wh_over = np.nonzero(data_log_norm > data_color_range[1])
         if len(wh_over[0]) > 0:
             data_log_norm[wh_over] = data_color_range[1]
 
