@@ -243,7 +243,7 @@ def beam_image(
                 beam_base_uv1 = np.zeros([dimension, elements], np.complex128)
                 beam_base_uv1[xl : xh + 1, yl : yh + 1] = beam_single
                 beam_base_single = np.fft.fftshift(
-                    np.fft.fftn(np.fft.fftshift(beam_base_uv1))
+                    np.fft.ifftn(np.fft.fftshift(beam_base_uv1), norm="forward")
                 )
                 beam_base += (
                     nf_bin * (beam_base_single * np.conjugate(beam_base_single)).real
@@ -438,7 +438,10 @@ def beam_power(
     )
     if pyfhd_config.get("kernel_window", False):
         image_power_beam *= antenna["pix_window"]
-    psf_base_single = np.fft.fftshift(np.fft.ifftn(np.fft.fftshift(image_power_beam)))
+    # norm chosen to match default IDL FFT
+    psf_base_single = np.fft.fftshift(
+        np.fft.fftn(np.fft.fftshift(image_power_beam), norm="forward")
+    )
     # TODO: Same cubic problem as in beam_image_hyperresolved here
     # Map Coordinates isn't the same as IDL Interpolate
     # But its closish, more of a placeholder for now.
