@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_c8a1e36c52caf653___init___py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.11.0">coverage.py v7.11.0</a>,
-            created at 2026-05-14 03:08 +0000
+            created at 2026-06-03 02:04 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -434,8 +434,8 @@
     <p class="pln"><span class="n"><a id="t350" href="#t350">350</a></span><span class="t">    <span class="com"># adjustments yourself.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t351" href="#t351">351</a></span><span class="t">    <span class="com"># baseline response (power beam) is product of the "two" antenna responses</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis show_mis"><span class="n"><a id="t352" href="#t352">352</a></span><span class="t">    <span class="nam">image_power_beam</span><span class="op">.</span><span class="nam">flat</span><span class="op">[</span><span class="nam">antenna</span><span class="op">[</span><span class="str">"pix_use"</span><span class="op">]</span><span class="op">]</span> <span class="op">=</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis mis2 show_mis"><span class="n"><a id="t353" href="#t353">353</a></span><span class="t">        <span class="nam">antenna</span><span class="op">[</span><span class="str">"iresponse"</span><span class="op">]</span><span class="op">[</span><span class="nam">ant_pol_1</span><span class="op">,</span> <span class="nam">freq_i</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis mis2 show_mis"><span class="n"><a id="t354" href="#t354">354</a></span><span class="t">        <span class="op">*</span> <span class="nam">np</span><span class="op">.</span><span class="nam">conjugate</span><span class="op">(</span><span class="nam">antenna</span><span class="op">[</span><span class="str">"iresponse"</span><span class="op">]</span><span class="op">[</span><span class="nam">ant_pol_2</span><span class="op">,</span> <span class="nam">freq_i</span><span class="op">]</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis mis2 show_mis"><span class="n"><a id="t353" href="#t353">353</a></span><span class="t">        <span class="nam">antenna</span><span class="op">[</span><span class="str">"aligned_response"</span><span class="op">]</span><span class="op">[</span><span class="nam">ant_pol_1</span><span class="op">,</span> <span class="nam">freq_i</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
+    <p class="mis mis2 show_mis"><span class="n"><a id="t354" href="#t354">354</a></span><span class="t">        <span class="op">*</span> <span class="nam">np</span><span class="op">.</span><span class="nam">conjugate</span><span class="op">(</span><span class="nam">antenna</span><span class="op">[</span><span class="str">"aligned_response"</span><span class="op">]</span><span class="op">[</span><span class="nam">ant_pol_2</span><span class="op">,</span> <span class="nam">freq_i</span><span class="op">]</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="mis mis2 show_mis"><span class="n"><a id="t355" href="#t355">355</a></span><span class="t">    <span class="op">)</span><span class="op">.</span><span class="nam">flatten</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t356" href="#t356">356</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t357" href="#t357">357</a></span><span class="t">    <span class="com"># TODO: Work out the interpolation of the zenith power, it uses cubic interpolation</span>&nbsp;</span><span class="r"></span></p>
@@ -583,7 +583,7 @@
             <a class="nav" href="z_c8a1e36c52caf653___init___py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.11.0">coverage.py v7.11.0</a>,
-            created at 2026-05-14 03:08 +0000
+            created at 2026-06-03 02:04 +0000
         </p>
     </div>
 </footer>
