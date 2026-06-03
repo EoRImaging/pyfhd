@@ -350,8 +350,8 @@ def beam_image_hyperresolved(
     # adjustments yourself.
     # baseline response (power beam) is product of the "two" antenna responses
     image_power_beam.flat[antenna["pix_use"]] = (
-        antenna["iresponse"][ant_pol_1, freq_i]
-        * np.conjugate(antenna["iresponse"][ant_pol_2, freq_i])
+        antenna["aligned_response"][ant_pol_1, freq_i]
+        * np.conjugate(antenna["aligned_response"][ant_pol_2, freq_i])
     ).flatten()
 
     # TODO: Work out the interpolation of the zenith power, it uses cubic interpolation
