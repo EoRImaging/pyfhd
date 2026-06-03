@@ -258,7 +258,7 @@ errors may lead to values of error of 1 or 2.
 
 For example, in IDL we have:
 FLOOR(1.9999999) == 1.0
-FLOOR(1.99999999) == 2.0 
+FLOOR(1.99999999) == 2.0
 
 In Python we have:
 np.floor(1.999999999999999) == 1.0
@@ -354,7 +354,7 @@ With the other expanding tests, precision errors did occur hence the thresholds.
 These thresholds had to be applied as multiple precision errors compounded, leading to errors
 that we have no way to solve, as IDL is actually less accurate than Python in these cases.
 Taking that into account, as we expand to 1 billion elements, those precision errors get
-compunded even more. Its also possible that in the case of integer array given as input, IDL's rebin 
+compunded even more. Its also possible that in the case of integer array given as input, IDL's rebin
 does every calculation in integers, while I do all my calculations in floats no matter the type
 of the array, and then floor to integers only at the end.
 

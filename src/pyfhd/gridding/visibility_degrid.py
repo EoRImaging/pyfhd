@@ -191,10 +191,10 @@ def visibility_degrid(
     for bi in range(n_bin_use):
         vis_n = bin_n[bin_i[bi]]
         """
-            Python is not inclusive of end of loop 
+            Python is not inclusive of end of loop
             while IDL is, as such n_bin_use - 1 does not do
             the last index properly on Python, as such when we
-            have reached the last index we need to change the 
+            have reached the last index we need to change the
             indexation of ri to include from that point to the end.
         """
         if bi == n_bin_use - 1:

@@ -44,7 +44,7 @@ and `healpix_utils.healpix_cnv_generate`.
 h5py errors.
 * Fixed a bug in FITS file writing that caused deprecation warnings from astropy.
 * Fixed checkpointing to actually work.
-* Fixed a bug in the uvfits reader where it assumed the presence of "ra" and 
+* Fixed a bug in the uvfits reader where it assumed the presence of "ra" and
 "dec" header items which often present in MWA uvfits files but are non-standard.
 * Fixed a bug with newer versions of numpy.
 * Fixed `vis_model_transfer` to handle standard IDL FHD folder structure.
@@ -52,9 +52,9 @@ h5py errors.
 fully propagated, causing shape errors.
 * Fixed a bug that could cause a KeyError in `pyfhd.main`.
 * Fixed a bug that could cause a KeyError in `beam_utils.beam_image`.
-* Fixed a bug that caused a numpy indexing error with newer versions of numpy in  
+* Fixed a bug that caused a numpy indexing error with newer versions of numpy in
 `beam_utils.beam_image`.
-* Fixed the a bug caused by a bad default value of `baseline_threshold` in 
+* Fixed the a bug caused by a bad default value of `baseline_threshold` in
 `gridding_utils.dirty_image_generate`.
 * Fixed spelling errors in example config yamls.
 * Fixed a bug that could cause an undefined variable error in image plotting.
@@ -99,14 +99,14 @@ In terms of the FHD pipeline that has been translated we'll go through it bit by
 the options have help text associated with them, coming from the FHD dictionary
 or comments in the code. The initial setup also setups a logging system using
 Python's inbuilt logging system giving you control on whether you see the log in
-the terminal, in a file, or both or neither. 
+the terminal, in a file, or both or neither.
 2. Extracting visibilities data, weights, and parameters,has been fully translated
 with the exception that the shape of visiblities in general is
 `[number of polarizations, number of frequencies, number of baselines]` to
 accomodate the fact that Python is row based vs column based in IDL. The shape
 change made it easier to translate the indexing across to pyfhd, as the indexing
 could be translated directly, if you wish to import pyfhd visibilities into FHD
-at some point, you will need to transpose the baselines and frequencies. 
+at some point, you will need to transpose the baselines and frequencies.
 3. The observation metadata structure/dictionary and the antenna layout
 structure/dictionary has been recreated as it was in FHD with small changes in
 names where it made sense and/or values due to the use of libraries like `astropy`.
@@ -117,7 +117,7 @@ to experiment with it as it has not been tested and will need additional work
 to import a beam from a `sav` file or `HDF5` file has been done, however it is
 going to expect the file to have the same structure as the `psf` structure in
 `FHD`. Furthermore, the beam HDF5 can be lazy loaded to reduce memory use at the
-expense of some performance in gridding (takes twice as long in tests). 
+expense of some performance in gridding (takes twice as long in tests).
 5. Basic Flagging has been translated directly into pyfhd, and `vis_source_model`
 hasn't been translated as other libraries like WODEN are good for creating
 visibility models. pyfhd only has the ability to import a visibility model and

@@ -16,7 +16,7 @@ PRO rebin_runner
              [ 15, -12,  5, 4]]
     hundred = FLOOR(ABS(10*RANDOMU(42, 10, 10)))
     billion = FLOOR(ABS(10*RANDOMU(42,1e4, 1e5)))
-    
+
     ;Do the Tests
     test_1R_8C = rebin(test, 8, 1)
 
@@ -33,7 +33,7 @@ PRO rebin_runner
     test2_vertical = rebin(test2, 1, 8)
 
     test2_to_square = rebin(test2, 4, 4)
-    
+
     test2_to_smaller_square = rebin(test2, 2, 2)
 
     test2_to_rect = rebin(test2, 4, 8)
@@ -72,7 +72,7 @@ PRO rebin_runner
     data_fl_8R_5C = rebin(data_fl, 5, 8)
 
     data_fl_4R_10C = rebin(data_fl, 10, 4)
-    
+
     data_fl_8R_10C = rebin(data_fl, 10, 8)
 
     data_fl_2R_1C = rebin(data_fl, 1, 2)
@@ -88,7 +88,7 @@ PRO rebin_runner
     data3_sample_up = rebin(data3, 12, 12, /SAMPLE)
 
     data3_sample_down = rebin(data3, 2, 2, /SAMPLE)
-    
+
     test_sample_up = rebin(test, 8, 1, /SAMPLE)
 
     test_sample_down = rebin(test, 2, 1, /SAMPLE)
@@ -138,7 +138,7 @@ PRO rebin_runner
     billion_1KR_1KC = rebin(billion, 1000, 1000)
 
     billion_extreme = rebin(billion, 1, 1)
-    
+
     ;Adjust the path as required on the system you're running
     SAVE, /VARIABLES, FILENAME = 'rebin.sav'
 END

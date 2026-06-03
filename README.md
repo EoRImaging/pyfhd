@@ -52,8 +52,8 @@ You should see output that resembles something like this:
     |                 .o..P'                                                |
     |                `Y8P'                                                  |
     |_______________________________________________________________________|
-    
-    Python Fast Holographic Deconvolution 
+
+    Python Fast Holographic Deconvolution
 
     Translated from IDL to Python as a collaboration between Astronomy Data and Computing Services (ADACS) and the Epoch of Reionisation (EoR) Team.
 
@@ -93,7 +93,7 @@ TODO: A JOSS Paper is being done and will be submitted soon, put pre-print or JO
 ## Maintainers
 FHD was built by Ian Sullivan and the University of Washington radio astronomy team.
 Maintenance is a group effort split across University of Washington and Brown
-University, with contributions from University of Melbourne and Arizona State University. 
+University, with contributions from University of Melbourne and Arizona State University.
 
 pyfhd was initiated by Nichole Barry and Astronomy Data and Computing Services
 (ADACS) member Joel Dunstan. ADACS is a collaboration between the University of
@@ -105,4 +105,3 @@ Thank you to the previous maintainers:
 Jack Line - Astronomy Data and Computing Services (ADACS)
 
 Acknowledgements to Bryna Hazelton and Paul Hancock for their advice and knowledge.
-

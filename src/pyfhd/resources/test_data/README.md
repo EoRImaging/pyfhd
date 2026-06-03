@@ -2,7 +2,7 @@
 
 In order to run the tests that will have the test data storeed in this directory you need to do the following:
 
-1. Download the data, you can do so here: [![Static Badge](https://img.shields.io/badge/Test%20Data%20DOI-10.5281%2Fzenodo.15687722-grey?labelColor=blue)](https://doi.org/10.5281/zenodo.15687722). Put the zip file 
+1. Download the data, you can do so here: [![Static Badge](https://img.shields.io/badge/Test%20Data%20DOI-10.5281%2Fzenodo.15687722-grey?labelColor=blue)](https://doi.org/10.5281/zenodo.15687722). Put the zip file
 in the following directory inside the repository (the directory given is relative to the root of the repository): `src/pyfhd/resources/test_data`
 
 2. Unzip the zip file in the previously mentioned `src/pyfhd/resources/test_data` directory.
@@ -21,7 +21,7 @@ platform linux -- Python 3.12.7, pytest-8.3.5, pluggy-1.5.0
 rootdir: /home/skywatcher/projects/pyfhd
 configfile: pyproject.toml
 plugins: metadata-3.1.1, cov-6.1.1, html-4.1.1
-collected 436 items / 315 deselected / 121 selected                                                       
+collected 436 items / 315 deselected / 121 selected
 
 tests/test_calibration/test_cal_auto_ratio_divide.py .....s                                         [  4%]
 tests/test_calibration/test_cal_auto_ratio_remultiply.py .....s                                     [  9%]

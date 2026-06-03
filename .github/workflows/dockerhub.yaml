@@ -21,7 +21,7 @@ on:
         required: false
 
 env:
-  IMAGE_NAME: skywa7ch3r/pyfhd 
+  IMAGE_NAME: skywa7ch3r/pyfhd
 
 jobs:
   push_to_registry:
@@ -70,7 +70,7 @@ jobs:
           push: true
           tags: skywa7ch3r/pyfhd:${{ steps.tag.outputs.LIST }}
           labels: ${{ steps.meta.outputs.labels }}
-        
+
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v2
         with:

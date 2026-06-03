@@ -65,7 +65,7 @@ pip install pyfhd
 ```
 
 You can Verify the installation using the version command
-    
+
 ```bash
 pyfhd -v
 ```
@@ -84,8 +84,8 @@ It should give you output that looks like this:
     |                 .o..P'                                                |
     |                `Y8P'                                                  |
     |_______________________________________________________________________|
-    
-    Python Fast Holographic Deconvolution 
+
+    Python Fast Holographic Deconvolution
 
     Translated from IDL to Python as a collaboration between Astronomy Data and
     Computing Services (ADACS) and the Epoch of Reionisation (EoR) Team.

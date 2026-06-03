@@ -1,8 +1,8 @@
 # Pull Request Title
 
-General Description for your Pull Request goes here in terms of the main features it adds or bugfixes in the pull request. 
+General Description for your Pull Request goes here in terms of the main features it adds or bugfixes in the pull request.
 
-Add any motivation or context here, especially if a particular issue sparked this pull request, make sure it gets tagged and mentioned with the proper keyword to close it in the changelog below! 
+Add any motivation or context here, especially if a particular issue sparked this pull request, make sure it gets tagged and mentioned with the proper keyword to close it in the changelog below!
 
 Please also remove any changelog sections that don't match/relate to your pull request to ensure the changelog in the pull request is succinct, except for additional Translation, any additional translation will likely include all changes and checklists.
 
@@ -19,7 +19,7 @@ Please also remove any changelog sections that don't match/relate to your pull r
 
 ### Breaking Changes!
 * If any code you have produced breaks backwards compatibility with previous versions and will break existing codebases put those changes here
-  
+
 ### New Features
 * Add any new features here and if they were from an issue, ideally keep the issue open and have it get resolved through the pull request being merged and closed using the closing keywords followed by the issue number [Linking a pull request to an issue using a keyword](https://docs.github.com/en/issues/tracking-your-work-with-issues/linking-a-pull-request-to-an-issue#linking-a-pull-request-to-an-issue-using-a-keyword).
 
@@ -40,7 +40,7 @@ Please also remove any changelog sections that don't match/relate to your pull r
 * Note any new CI setups, changes of the build going to [PyPI](https://pypi.org/) and [Conda-Forge](https://conda-forge.org/)
 
 ### Translation Changes
-* If you translated anything from the original FHD, please explain why 
+* If you translated anything from the original FHD, please explain why
 
 ## Checklist
 
@@ -66,8 +66,8 @@ Please also remove any changelog sections that don't match/relate to your pull r
   - [ ] The documentation is able to build successfully with any new changes and they are visible in your own build
 ### Version Checklist
   - [ ] Updated the changelog to put all the previous unreleased changelog into a version
-  - [ ] Noted dependency changes since the last version 
-### Build/CI 
+  - [ ] Noted dependency changes since the last version
+### Build/CI
   - [ ] Added a badge for any new CI actions or setups
   - [ ] Existing badges remain unaffected, if not, document why in changelog
 ### Translation Checklist

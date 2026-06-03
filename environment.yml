@@ -28,4 +28,3 @@ dependencies:
     - pytest-html-merger
     - myst-parser
     - healpy>=1.18.1
-    

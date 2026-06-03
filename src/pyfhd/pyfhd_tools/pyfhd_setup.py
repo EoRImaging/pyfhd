@@ -175,8 +175,8 @@ def pyfhd_parser():
     |                 .o..P'                                                |
     |                `Y8P'                                                  |
     |_______________________________________________________________________|
-    
-    Python Fast Holographic Deconvolution 
+
+    Python Fast Holographic Deconvolution
 
     Translated from IDL to Python as a collaboration between Astronomy Data and
     Computing Services (ADACS) and the Epoch of Reionisation (EoR) Team.
@@ -1436,7 +1436,7 @@ def pyfhd_logger(pyfhd_config: dict) -> Tuple[logging.Logger, Path]:
     |                 .o..P'                                                |
     |                `Y8P'                                                  |
     |_______________________________________________________________________|
-        Python Fast Holographic Deconvolution 
+        Python Fast Holographic Deconvolution
 
         Translated from IDL to Python as a collaboration between Astronomy Data
         and Computing Services (ADACS) and the Epoch of Reionisation (EoR) Team.
@@ -1454,7 +1454,7 @@ def pyfhd_logger(pyfhd_config: dict) -> Tuple[logging.Logger, Path]:
         Observation ID: {pyfhd_config["obs_id"]}
 
         Confifuration File: {pyfhd_config["config"]}
-        
+
         Validating your input..."""
 
     # Setup logging

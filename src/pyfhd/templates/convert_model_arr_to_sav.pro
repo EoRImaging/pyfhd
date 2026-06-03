@@ -14,7 +14,7 @@ PRO convert_model_arr_to_sav
     ;load in the hdf5 file
     print, "Now loading model data from ", hdf5_filepath
     file_id = H5F_OPEN(hdf5_filepath)
-    
+
     ;for as many polarisations as specified by n_pol, write out FHD style .sav
     ;files
     pol_names = ['XX', 'YY', 'XY', 'YX']

@@ -35,7 +35,7 @@ Now that you have IDL, you'll need to follow the
 You'll notice that all the functions get added to the IDL path, IDL only really
 has one namespace for functions, do keep that in mind unlike Python which has
 packages/libraries, modules/subpackages which divide up the name spaces and
-require explicit imports. 
+require explicit imports.
 
 ## FHD Dependency Equivalents
 
@@ -126,7 +126,7 @@ calls, parameters store the results, this is the case with many IDL functions,li
 the reverse indices into an `ri` variable. This is also used extensively for
 many `FHD` functions and can get confusing, in Python doing returns this way is
 possible but for the sake of being consistent, any and all returns are done with
-an explicit `return` statement and put into the docstrings as a return.  
+an explicit `return` statement and put into the docstrings as a return.
 
 ### Python Subsetting vs IDL subsetting
 When dealing with how IDL deals with subsetting, it's important to remember than
@@ -136,7 +136,7 @@ values upto and including the 3rd value. In Python the subsetting is only inclus
 of the start but not the end index, i.e. if we index an array between the 0th
 value and the 3rd value, we will get the 0th value and all the values upto the
 3rd value, but not including the third value.
-    
+
     IDL
     ```idl
     IDL> test = [1,2,3,4,5]
@@ -208,7 +208,7 @@ behaviour, if we follow our test array again of 4 values and we try to access th
     IDL> test = [[1.,2.],[3.,4.]]
     IDL> test[5]
     % Attempt to subscript TEST with <INT      (       5)> is out of range.
-    % Execution halted at: $MAIN$ 
+    % Execution halted at: $MAIN$
     ```
     However if we put that index into another array, let's call it `idx` and then
     access the `test` array with the `idx` array we get the following:
@@ -268,7 +268,7 @@ When dealing with complex numbers in IDL, it's possible to get different results
 when using `WHERE` in IDL and `np.where` as `WHERE` in IDL applies to the
 absolute values of the numbers, while `np.where` looks at just the real numbers
 for example:
-  
+
   IDL
   ```idl
   IDL> test = COMPLEX([1,2,0],[1,2,3])

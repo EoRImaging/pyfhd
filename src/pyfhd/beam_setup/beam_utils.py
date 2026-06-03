@@ -468,7 +468,7 @@ def beam_power(
     psf_base_superres *= psf["intermediate_res"] ** 2
 
     """
-    total of the gaussian decomposition can be calculated analytically, but is an over-estimate 
+    total of the gaussian decomposition can be calculated analytically, but is an over-estimate
     of the numerical representation and results in a beam norm of greater than one,
     thus the discrete total is used
     """
