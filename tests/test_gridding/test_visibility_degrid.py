@@ -7,7 +7,7 @@ import numpy.testing as npt
 
 from pyfhd.gridding.visibility_degrid import visibility_degrid
 from pyfhd.io.pyfhd_io import load, recarray_to_dict, save
-from pyfhd.pyfhd_tools.test_utils import get_savs
+from pyfhd.pyfhd_tools.test_utils import get_savs, sav_file_rearrange_psf
 
 
 @pytest.fixture
@@ -44,10 +44,10 @@ def before_degridding(data_dir: Path, number: int, request: pytest.FixtureReques
         beam_per_baseline = False
 
     h5_save_dict = get_savs(data_dir, f"input_{number}.sav")
-    # Subset the beam_ptr so we only take the first index of the baselines
-    # which contains the pointer for the rest of the baselines
-    h5_save_dict["psf"]["beam_ptr"][0] = h5_save_dict["psf"]["beam_ptr"][0].T[:, :, 0]
-    h5_save_dict["psf"]["id"] = h5_save_dict["psf"]["id"].T
+
+    # fix the psf to be properly arranged
+    h5_save_dict["psf"] = sav_file_rearrange_psf(h5_save_dict["psf"])
+
     h5_save_dict = recarray_to_dict(h5_save_dict)
     h5_save_dict["obs"]["n_baselines"] = h5_save_dict["obs"]["nbaselines"]
     # Transpose the model if it exists
@@ -68,6 +68,7 @@ def before_degridding(data_dir: Path, number: int, request: pytest.FixtureReques
     }
 
     h5_save_dict["vis_weight_ptr"] = h5_save_dict["vis_weight_ptr"].T
+    h5_save_dict["image_uv"] = h5_save_dict["image_uv"].T
 
     h5_save_dict["vis_input"] = None
     h5_save_dict["beam_per_baseline"] = beam_per_baseline
@@ -110,8 +111,6 @@ def test_visibility_degrid(
 ):
     h5_before = load(before_degridding)
     vis_expected = load(after_degridding)
-
-    h5_before["psf"]["id"] = h5_before["psf"]["id"].T
 
     vis_return = visibility_degrid(
         image_uv=h5_before["image_uv"],

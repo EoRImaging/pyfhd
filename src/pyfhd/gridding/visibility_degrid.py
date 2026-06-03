@@ -230,7 +230,7 @@ def visibility_degrid(
 
             box_matrix = np.zeros((vis_n, psf_dim3), dtype=arr_type)
             box_arr = image_uv[
-                ymin_use : ymin_use + psf_dim, xmin_use : xmin_use + psf_dim
+                xmin_use : xmin_use + psf_dim, ymin_use : ymin_use + psf_dim
             ].flatten()
 
             if interp_flag:
@@ -330,8 +330,8 @@ def visibility_degrid(
                     prefactor_use = prefactor[s_i]
                     box_matrix *= freq_term_arr
                     box_arr_ptr[s_i] = spectral_model_uv_arr[s_i][
-                        ymin_use : ymin_use + psf_dim - 1,
                         xmin_use : xmin_use + psf_dim - 1,
+                        ymin_use : ymin_use + psf_dim - 1,
                     ].flatten()
 
                     for s_i_i in range(s_i):
