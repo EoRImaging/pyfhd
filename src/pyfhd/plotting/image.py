@@ -358,6 +358,8 @@ def quick_image(
     *,
     data_range: NDArray[np.integer | np.floating] = None,
     data_min_abs: float = None,
+    sigma_clip_level: float | None = None,
+    percentile_clip_level: float | None = None,
     xrange: NDArray[np.integer | np.floating] = None,
     yrange: NDArray[np.integer | np.floating] = None,
     data_aspect: float = None,
@@ -376,8 +378,6 @@ def quick_image(
     start_multi_params: dict = None,
     alpha: float = None,
     missing_value: int | float | complex = None,
-    sigma_clip_level: float | None = None,
-    percentile_clip_level: float | None = None,
     savefile: str = None,
     png: bool = False,
     eps: bool = False,
@@ -408,12 +408,25 @@ def quick_image(
 
     Parameters
     ----------
-    data : NDArray[np.integer | np.floating | np.complexfloating]
-        A 2D array of data to be displayed as an image. The data can be of type int, float, or complex.
+    image : NDArray[np.integer | np.floating | np.complexfloating]
+        A 2D array of data to be displayed as an image.
+        The data can be of type int, float, or complex.
+    xvals : NDArray[np.integer | np.floating], optional
+        An array of x-axis values, by default None
+    yvals : NDArray[np.integer | np.floating], optional
+        An array of y-axis values, by default None
     data_range : NDArray[np.integer | np.floating], optional
         Min/max color bar range, by default [np.nanmin(image), np.nanmax(image)]
     data_min_abs : float, optional
         The minimum absolute value for the color bar, by default None
+    sigma_clip_level : float, optional
+        Number of standard deviations to use as clipping threshold, only used it
+        log is True. Default is None meaning that true min and max are used.
+    percentile_clip_level : float, optional
+        Percentile level to use for clipping. For example, a value of 1 means that
+        the display range will be set to the 1st and 99th percentiles of the data.
+        Only used if log is False. Default is None meaning that true min and max
+        are used.
     xrange : NDArray[np.integer | np.floating], optional
         The indices (or xvals, if provided) to zoom the image, by default None
     yrange : NDArray[np.integer | np.floating], optional
@@ -435,14 +448,14 @@ def quick_image(
         The title of the image.
     cb_title : str, optional
         The title of the colourbar.
-    sigma_clip_level : float, optional
-        Number of standard deviations to use as clipping threshold, only used it
-        log is True. Default is None meaning that true min and max are used.
-    percentile_clip_level : float, optional
-        Percentile level to use for clipping. For example, a value of 1 means that
-        the display range will be set to the 1st and 99th percentiles of the data.
-        Only used if log is False. Default is None meaning that true min and max
-        are used.
+    note : str, optional
+        A small note to place on the bottom right of the image, by default None
+    charsize : int, optional
+        The size of the font, by default None
+    xlog : bool, optional
+        Use logarithmic scale for the x-axis, by default False
+    ylog : bool, optional
+        Use logarithmic scale for the y-axis, by default False
     savefile : str | Path, optional
         The path to save the image file. If None, the image is displayed on screen.
     missing_value : float | int, optional
