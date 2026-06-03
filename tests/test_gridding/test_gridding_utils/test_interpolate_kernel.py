@@ -24,7 +24,13 @@ def interp_kernel_before(data_dir, number):
     interp_kernel_before = Path(data_dir, f"test_{number}_before_{data_dir.name}.h5")
 
     if interp_kernel_before.exists():
-        return interp_kernel_before
+        h5_before = load(interp_kernel_before, lazy_load=True)
+        after_axes_reorder = (
+            "after_axes_reorder" in h5_before.keys() and h5_before["after_axes_reorder"]
+        )
+        h5_before.close()
+        if after_axes_reorder:
+            return interp_kernel_before
 
     kernel_arr, x_offset, y_offset, dx0dy0, dx1dy0, dx0dy1, dx1dy1 = get_data_items(
         data_dir,
@@ -37,8 +43,9 @@ def interp_kernel_before(data_dir, number):
         f"visibility_grid_input_dx1dy1_{number}.npy",
     )
 
+    # transpose kernel as it was saved before the axis reordering to match IDL FHD
     h5_save_dict = {
-        "kernel_arr": kernel_arr,
+        "kernel_arr": kernel_arr.T,
         "x_offset": x_offset,
         "y_offset": y_offset,
         "dx0dy0": dx0dy0,
@@ -51,6 +58,7 @@ def interp_kernel_before(data_dir, number):
 
     save(interp_kernel_before, h5_save_dict, "before_file")
 
+    h5_save_dict["after_axes_reorder"] = True
     return interp_kernel_before
 
 

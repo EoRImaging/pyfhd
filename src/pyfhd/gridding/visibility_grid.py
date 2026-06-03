@@ -410,7 +410,7 @@ def visibility_grid(
                         box_mat = frequency_cache[fbin[ii]]
                     # For each visibility, calculate the kernel values on the static uv-grid given the
                     # hyperresolved kernel
-                    box_matrix[ii, :] = box_mat[y_off[ii], x_off[ii]]
+                    box_matrix[ii, :] = box_mat[x_off[ii], y_off[ii]]
 
         #  Calculate the conjugate transpose (dagger) of the uv-pixels that the current beam kernel contributes to
         box_matrix_dag = np.conj(box_matrix)
@@ -426,13 +426,13 @@ def visibility_grid(
                 np.transpose(box_matrix_dag), np.transpose(freq_i**2 / n_vis)
             )
             spectral_A[
-                ymin_use : ymin_use + psf_dim, xmin_use : xmin_use + psf_dim
+                xmin_use : xmin_use + psf_dim, ymin_use : ymin_use + psf_dim
             ].flat += term_A_box
             spectral_B[
-                ymin_use : ymin_use + psf_dim, xmin_use : xmin_use + psf_dim
+                xmin_use : xmin_use + psf_dim, ymin_use : ymin_use + psf_dim
             ].flat += term_B_box.real
             spectral_D[
-                ymin_use : ymin_use + psf_dim, xmin_use : xmin_use + psf_dim
+                xmin_use : xmin_use + psf_dim, ymin_use : ymin_use + psf_dim
             ].flat += term_D_box.real
             # del(term_A_box, term_B_box, term_D_box)
             if model is not None:
@@ -441,7 +441,7 @@ def visibility_grid(
                     np.transpose((freq_i * model_box) / n_vis),
                 )
                 spectral_model_A[
-                    ymin_use : ymin_use + psf_dim, xmin_use : xmin_use + psf_dim
+                    xmin_use : xmin_use + psf_dim, ymin_use : ymin_use + psf_dim
                 ] += term_Am_box
 
         if model is not None:
@@ -454,7 +454,7 @@ def visibility_grid(
                 np.transpose(box_matrix_dag), np.transpose(model_box / n_vis)
             )
             model_return[
-                ymin_use : ymin_use + psf_dim, xmin_use : xmin_use + psf_dim
+                xmin_use : xmin_use + psf_dim, ymin_use : ymin_use + psf_dim
             ].flat += box_arr
 
         # Calculate the product of the data vis and the beam kernel
@@ -464,7 +464,7 @@ def visibility_grid(
         vis_box = vis_box.flatten()
         box_arr = np.dot(np.transpose(box_matrix_dag), vis_box / n_vis)
         image_uv[
-            ymin_use : ymin_use + psf_dim, xmin_use : xmin_use + psf_dim
+            xmin_use : xmin_use + psf_dim, ymin_use : ymin_use + psf_dim
         ].flat += box_arr
         del box_arr
 
@@ -475,7 +475,7 @@ def visibility_grid(
                 np.transpose(box_matrix_dag), np.transpose(psf_weight / n_vis)
             )
             weights[
-                ymin_use : ymin_use + psf_dim, xmin_use : xmin_use + psf_dim
+                xmin_use : xmin_use + psf_dim, ymin_use : ymin_use + psf_dim
             ].flat += wts_box
 
         if pyfhd_config["grid_variance"]:
@@ -486,12 +486,12 @@ def visibility_grid(
                 np.transpose(psf_weight / n_vis),
             )
             variance[
-                ymin_use : ymin_use + psf_dim, xmin_use : xmin_use + psf_dim
+                xmin_use : xmin_use + psf_dim, ymin_use : ymin_use + psf_dim
             ].flat += var_box
 
         if uniform_flag:
             uniform_filter[
-                ymin_use : ymin_use + psf_dim, xmin_use : xmin_use + psf_dim
+                xmin_use : xmin_use + psf_dim, ymin_use : ymin_use + psf_dim
             ] += bin_n[bin_i[bi]]
 
         if verbose_logging and (

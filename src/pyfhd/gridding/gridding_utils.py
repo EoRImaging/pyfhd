@@ -45,11 +45,10 @@ def interpolate_kernel(
     kernel: NDArray[np.complex128]
         The interpolated 2D kernel
     """
-    # x_offset and y_offset needed to be swapped around as IDL is column-major, while Python is row-major
-    kernel = kernel_arr[y_offset, x_offset] * dx0dy0
-    kernel += kernel_arr[y_offset, x_offset + 1] * dx1dy0
-    kernel += kernel_arr[y_offset + 1, x_offset] * dx0dy1
-    kernel += kernel_arr[y_offset + 1, x_offset + 1] * dx1dy1
+    kernel = kernel_arr[x_offset, y_offset] * dx0dy0
+    kernel += kernel_arr[x_offset + 1, y_offset] * dx1dy0
+    kernel += kernel_arr[x_offset, y_offset + 1] * dx0dy1
+    kernel += kernel_arr[x_offset + 1, y_offset + 1] * dx1dy1
 
     return kernel
 
@@ -771,7 +770,7 @@ def visibility_count(
         ymin_use = ymin_iter[idx]
         # Please note that due to precision differences, the result will be different compared to IDL FHD
         uniform_filter[
-            ymin_use : ymin_use + psf_dim, xmin_use : xmin_use + psf_dim
+            xmin_use : xmin_use + psf_dim, ymin_use : ymin_use + psf_dim
         ] += bin_n[bin_i[bi]]
 
     if not no_conjugate:

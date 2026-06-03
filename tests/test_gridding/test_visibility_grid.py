@@ -5,7 +5,7 @@ import numpy as np
 from os import environ as env
 from pathlib import Path
 from pyfhd.gridding.visibility_grid import visibility_grid
-from pyfhd.pyfhd_tools.test_utils import get_savs
+from pyfhd.pyfhd_tools.test_utils import get_savs, sav_file_rearrange_psf
 from pyfhd.io.pyfhd_io import save, load
 from logging import Logger
 from scipy.io import readsav
@@ -44,14 +44,53 @@ def before_gridding(data_dir: Path, number: int, request: pytest.FixtureRequest)
         )
     before_gridding = Path(data_dir, f"test_{number}_before_{data_dir.name}.h5")
 
-    if before_gridding.exists():
-        return before_gridding
+    sav_path = data_dir
+    if (
+        not Path(data_dir, f"input_{number}.sav").exists()
+        and env.get("PYFHD_TEST_PATH") is not None
+    ):
+        sav_path = Path(env.get("PYFHD_TEST_PATH"), "gridding", "visibility_grid")
 
-    h5_save_dict = get_savs(data_dir, f"input_{number}.sav")
-    # Subset the beam_ptr so we only take the first index of the baselines
-    # which contains the pointer for the rest of the baselines
-    h5_save_dict["psf"]["beam_ptr"][0] = h5_save_dict["psf"]["beam_ptr"][0].T[:, :, 0]
+    if before_gridding.exists():
+        h5_before = load(before_gridding, lazy_load=True)
+        after_axes_reorder = (
+            "after_axes_reorder" in h5_before.keys() and h5_before["after_axes_reorder"]
+        )
+        h5_before.close()
+        if after_axes_reorder:
+            return before_gridding
+        else:
+            # if the sav file doesn't exist, read in the h5 file and do the
+            # transposes by hand (required when relying only on zenodo test data)
+            if not Path(sav_path, f"input_{number}.sav").exists():
+                h5_before = load(before_gridding)
+                h5_before["psf"]["beam_ptr"] = h5_before["psf"]["beam_ptr"].transpose(
+                    [0, 1, 3, 2, 4]
+                )
+                inp_shape = h5_before["psf"]["beam_ptr"].shape
+                new_shape = tuple(
+                    list(inp_shape[:-1])
+                    + [int(h5_before["psf"]["dim"]), int(h5_before["psf"]["dim"])]
+                )
+                h5_before["psf"]["beam_ptr"] = (
+                    h5_before["psf"]["beam_ptr"]
+                    .reshape(new_shape, order="F")
+                    .reshape(inp_shape)
+                )
+                h5_before["psf"]["id"] = h5_before["psf"]["id"].astype(int).T
+
+                h5_before["after_axes_reorder"] = True
+                save(before_gridding, h5_before, "before_file")
+
+                return before_gridding
+
+    h5_save_dict = get_savs(sav_path, f"input_{number}.sav")
+
+    # fix the psf to be properly arranged
+    h5_save_dict["psf"] = sav_file_rearrange_psf(h5_save_dict["psf"])
+
     h5_save_dict = recarray_to_dict(h5_save_dict)
+
     h5_save_dict["uniform_flag"] = (
         True
         if ("uniform_filter" in h5_save_dict and h5_save_dict["uniform_filter"])
@@ -110,6 +149,8 @@ def before_gridding(data_dir: Path, number: int, request: pytest.FixtureRequest)
     else:
         if not isinstance(h5_save_dict["bi_use"], np.ndarray):
             h5_save_dict["bi_use"] = np.array([h5_save_dict["bi_use"]], dtype=np.int64)
+
+    h5_save_dict["after_axes_reorder"] = True
     save(before_gridding, h5_save_dict, "before_file")
 
     return before_gridding
@@ -123,10 +164,39 @@ def after_gridding(data_dir: Path, number: int, request: pytest.FixtureRequest):
         )
     after_gridding = Path(data_dir, f"test_{number}_after_{data_dir.name}.h5")
 
-    if after_gridding.exists():
-        return after_gridding
+    sav_path = data_dir
+    if (
+        not Path(data_dir, f"output_{number}.sav").exists()
+        and env.get("PYFHD_TEST_PATH") is not None
+    ):
+        sav_path = Path(env.get("PYFHD_TEST_PATH"), "gridding", "visibility_grid")
 
-    outputs = get_savs(data_dir, f"output_{number}.sav")
+    if after_gridding.exists():
+        h5_after = load(after_gridding, lazy_load=True)
+        after_axes_reorder = (
+            "after_axes_reorder" in h5_after.keys() and h5_after["after_axes_reorder"]
+        )
+        h5_after.close()
+        if after_axes_reorder:
+            return after_gridding
+        else:
+            # if the sav file doesn't exist, read in the h5 file and do the
+            # transposes by hand (required when relying only on zenodo test data)
+            if not Path(sav_path, f"input_{number}.sav").exists():
+                h5_after = load(after_gridding)
+                h5_after["image_uv"] = h5_after["image_uv"].T
+                h5_after["weights"] = h5_after["weights"].T
+                h5_after["variance"] = h5_after["variance"].T
+                h5_after["uniform_filter"] = h5_after["uniform_filter"].T
+                if "model_return" in h5_after.keys():
+                    h5_after["model_return"] = h5_after["model_return"].T
+
+                h5_after["after_axes_reorder"] = True
+                save(after_gridding, h5_after, "after_file")
+
+                return after_gridding
+
+    outputs = get_savs(sav_path, f"output_{number}.sav")
     # Delete the psf, we don't need it
     del outputs["psf"]
     del outputs["beam_arr"]
@@ -134,16 +204,17 @@ def after_gridding(data_dir: Path, number: int, request: pytest.FixtureRequest):
     outputs = recarray_to_dict(outputs)
 
     h5_save_dict = {
-        "image_uv": outputs["image_uv"],
-        "weights": outputs["weights"],
-        "variance": outputs["variance"],
-        "uniform_filter": outputs["uniform_filter"],
+        "image_uv": outputs["image_uv"].T,
+        "weights": outputs["weights"].T,
+        "variance": outputs["variance"].T,
+        "uniform_filter": outputs["uniform_filter"].T,
         "nf_vis": outputs["obs"]["nf_vis"],
     }
 
     if "model_return" in outputs:
-        h5_save_dict["model_return"] = outputs["model_return"]
+        h5_save_dict["model_return"] = outputs["model_return"].T
 
+    h5_save_dict["after_axes_reorder"] = True
     save(after_gridding, h5_save_dict, "after_file")
 
     return after_gridding
@@ -161,8 +232,6 @@ def test_visibility_grid(
         after_gridding = Path(data_dir, after_gridding.name)
     h5_before = load(before_gridding)
     h5_after = load(after_gridding)
-
-    h5_before["psf"]["id"] = h5_before["psf"]["id"].T
 
     # Format the indexing arrays if needed
     if h5_before["fi_use"] is not None and h5_before["fi_use"].size == 1:
@@ -226,12 +295,19 @@ def full_before_gridding(data_dir: Path, full_number: int):
     )
 
     if before_gridding.exists():
-        return before_gridding
+        h5_before = load(before_gridding, lazy_load=True)
+        after_axes_reorder = (
+            "after_axes_reorder" in h5_before.keys() and h5_before["after_axes_reorder"]
+        )
+        h5_before.close()
+        if after_axes_reorder:
+            return before_gridding
 
     h5_save_dict = get_savs(data_dir, f"full_size_input_{full_number}.sav")
-    # Subset the beam_ptr so we only take the first index of the baselines
-    # which contains the pointer for the rest of the baselines
-    h5_save_dict["psf"]["beam_ptr"][0] = h5_save_dict["psf"]["beam_ptr"][0].T[:, :, 0]
+
+    # fix the psf to be properly arranged
+    h5_save_dict["psf"] = sav_file_rearrange_psf(h5_save_dict["psf"])
+
     h5_save_dict = recarray_to_dict(h5_save_dict)
     h5_save_dict["uniform_flag"] = (
         True
@@ -293,6 +369,8 @@ def full_before_gridding(data_dir: Path, full_number: int):
     else:
         if not isinstance(h5_save_dict["bi_use"], np.ndarray):
             h5_save_dict["bi_use"] = np.array([h5_save_dict["bi_use"]], dtype=np.int64)
+
+    h5_save_dict["after_axes_reorder"] = True
     save(before_gridding, h5_save_dict, "before_file")
 
     return before_gridding
@@ -305,23 +383,30 @@ def full_after_gridding(data_dir: Path, full_number: int):
     )
 
     if after_gridding.exists():
-        return after_gridding
+        h5_after = load(after_gridding, lazy_load=True)
+        after_axes_reorder = (
+            "after_axes_reorder" in h5_after.keys() and h5_after["after_axes_reorder"]
+        )
+        h5_after.close()
+        if after_axes_reorder:
+            return after_gridding
 
     outputs = recarray_to_dict(
         get_savs(data_dir, f"full_size_output_{full_number}.sav")
     )
 
     h5_save_dict = {
-        "image_uv": outputs["image_uv"],
-        "weights": outputs["weights"],
-        "variance": outputs["variance"],
+        "image_uv": outputs["image_uv"].T,
+        "weights": outputs["weights"].T,
+        "variance": outputs["variance"].T,
         # 'uniform_filter': outputs['uniform_filter'],
         "nf_vis": outputs["obs"]["nf_vis"],
     }
 
     if "model_return" in outputs:
-        h5_save_dict["model_return"] = outputs["model_return"]
+        h5_save_dict["model_return"] = outputs["model_return"].T
 
+    h5_save_dict["after_axes_reorder"] = True
     save(after_gridding, h5_save_dict, "after_file")
 
     return after_gridding
@@ -330,8 +415,6 @@ def full_after_gridding(data_dir: Path, full_number: int):
 def test_full_visibility_grid(full_before_gridding: Path, full_after_gridding: Path):
     h5_before = load(full_before_gridding)
     h5_after = load(full_after_gridding)
-
-    # h5_before["psf"]["id"] = h5_before["psf"]["id"].T
 
     # Format the indexing arrays if needed
     if h5_before["fi_use"] is not None and h5_before["fi_use"].size == 1:
@@ -403,9 +486,53 @@ def before_vis_model_freq_gridding(tag, run, data_dir):
     before_file = Path(
         data_dir, f"{tag}_{run}_before_{data_dir.name}_vis_model_freq_split.h5"
     )
+
+    orig_beam_file = Path(
+        env.get("PYFHD_TEST_PATH"), "beams", "decomp_beam_pointing0.h5"
+    )
+    new_beam_file = Path(
+        env.get("PYFHD_TEST_PATH"), "beams", "decomp_beam_pointing0_transposed.h5"
+    )
+
     # If the h5 file already exists and has been created, return the path to it
-    if before_file.exists():
-        return before_file
+    if before_file.exists() and new_beam_file.exists():
+        h5_before = load(before_file, lazy_load=True)
+        after_axes_reorder = (
+            "after_axes_reorder" in h5_before.keys() and h5_before["after_axes_reorder"]
+        )
+        h5_before.close()
+        if after_axes_reorder:
+            return before_file
+
+    # do needed transpositions & reorderings on beam_ptr that were not originally
+    # done when it was translated to python & h5py
+    if not new_beam_file.exists():
+        psf = load(orig_beam_file, None, lazy_load=True)
+
+        transposed_beam = psf["beam_ptr"][()].transpose([0, 1, 3, 2, 4])
+        inp_shape = transposed_beam.shape
+        new_shape = tuple(
+            list(inp_shape[:-1]) + [int(psf["dim"][0]), int(psf["dim"][0])]
+        )
+        transposed_beam = transposed_beam.reshape(new_shape, order="F").reshape(
+            inp_shape
+        )
+        del psf
+
+        import shutil
+
+        shutil.copy(orig_beam_file, new_beam_file)
+
+        import h5py
+
+        with h5py.File(new_beam_file, "r+") as h5f:
+            del h5f["beam_ptr"]
+            h5f.create_dataset(
+                "beam_ptr",
+                data=transposed_beam,
+                dtype=np.complex128,
+                compression="gzip",
+            )
 
     sav_file = before_file.with_suffix(".sav")
 
@@ -428,11 +555,9 @@ def before_vis_model_freq_gridding(tag, run, data_dir):
     # Transpose the model if it exists
     if "model_ptr" in h5_save_dict and h5_save_dict["model_ptr"] is not None:
         h5_save_dict["model_ptr"] = h5_save_dict["model_ptr"].T
-    psf = load(
-        Path(env.get("PYFHD_TEST_PATH"), "beams", "decomp_beam_pointing0.h5"),
-        None,
-        lazy_load=True,
-    )
+
+    psf = load(new_beam_file, None, lazy_load=True)
+
     h5_save_dict["pyfhd_config"] = {
         "interpolate_kernel": psf["interpolate_kernel"][0],
         "psf_dim": psf["dim"][0],
@@ -484,6 +609,7 @@ def before_vis_model_freq_gridding(tag, run, data_dir):
         if not isinstance(h5_save_dict["bi_use"], np.ndarray):
             h5_save_dict["bi_use"] = np.array([h5_save_dict["bi_use"]], dtype=np.int64)
 
+    h5_save_dict["after_axes_reorder"] = True
     save(before_file, h5_save_dict, "before_file")
 
     return before_file
@@ -498,13 +624,24 @@ def after_vis_model_freq_gridding(tag, run, data_dir):
     )
     # If the h5 file already exists and has been created, return the path to it
     if after_file.exists():
-        return after_file
+        h5_after = load(after_file, lazy_load=True)
+        after_axes_reorder = (
+            "after_axes_reorder" in h5_after.keys() and h5_after["after_axes_reorder"]
+        )
+        h5_after.close()
+        if after_axes_reorder:
+            return after_file
 
     sav_file = after_file.with_suffix(".sav")
-    sav_dict = convert_sav_to_dict(str(sav_file), "faked")
-    sav_dict = recarray_to_dict(sav_dict)
+    h5_save_dict = convert_sav_to_dict(str(sav_file), "faked")
+    h5_save_dict = recarray_to_dict(h5_save_dict)
 
-    save(after_file, sav_dict, "after_file")
+    # transpose uv planes
+    for key in ["dirty_uv", "weights_holo", "variance_holo", "model_return"]:
+        h5_save_dict[key] = h5_save_dict[key].T
+
+    h5_save_dict["after_axes_reorder"] = True
+    save(after_file, h5_save_dict, "after_file")
 
     return after_file
 
@@ -520,7 +657,9 @@ def test_visibility_grid_in_vis_model_freq_split(
     h5_after = load(after_vis_model_freq_gridding)
 
     psf = load(
-        Path(env.get("PYFHD_TEST_PATH"), "beams", "decomp_beam_pointing0.h5"),
+        Path(
+            env.get("PYFHD_TEST_PATH"), "beams", "decomp_beam_pointing0_transposed.h5"
+        ),
         None,
         lazy_load=True,
     )
