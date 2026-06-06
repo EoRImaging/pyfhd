@@ -10,6 +10,7 @@ dependencies:
   - matplotlib>=3.10.3
   - numba>=0.61.2
   - numpy>=2.2.5
+  - pooch>=1.8
   - pyinstrument
   - pyuvdata>=3.2.1
   - pytest>=8.3.5

@@ -120,6 +120,7 @@ def beam_image(
     obs: dict,
     pol_i: int,
     freq_i: int | None = None,
+    dimension: int | None = None,
     abs=False,
     square=False,
 ) -> np.ndarray:
@@ -140,7 +141,11 @@ def beam_image(
     pol_i : int
         Index of the polarization to use
     freq_i : int
-        Index of the frequency to use, by default None
+        Index of the frequency to use, by default averages across all frequencies
+        in obs structure.
+    dimension : int
+        Size of the image returned (image will be dimension x dimension). Defaults
+        to using the dimension of the obs structure.
     abs : bool, optional
         Return the absolute value of the beam image, by default False
     square : bool, optional
@@ -159,8 +164,10 @@ def beam_image(
     elif "fnorm" in psf:
         # handling for older files or imports from IDL FHD
         freq_norm = psf["fnorm"]
-    group_id = psf["id"][pol_i, 0, :]
-    if "beam_gaussian_params" in psf:
+    group_id = (psf["id"][pol_i, 0, :]).astype(int)
+    # IDL psf structures often have "beam_gaussian_params" defined but set to zero
+    # have to test that it's present *and* nonzero
+    if "beam_gaussian_params" in psf and psf["beam_gaussian_params"] != 0:
         beam_gaussian_params = psf["beam_gaussian_params"][:]
     else:
         beam_gaussian_params = None
@@ -169,7 +176,9 @@ def beam_image(
     if isinstance(psf, h5py.File):
         psf_dim = psf_dim[0]
         freq_norm = freq_norm[:]
-    dimension = elements = obs["dimension"]
+    if dimension is None:
+        dimension = obs["dimension"]
+    elements = dimension
     # these should all be integers b/c dimensions are usually even numbers.
     # but they have to be cast to ints to be used in slicing.
     xl = int(dimension / 2 - psf_dim / 2 + 1)
@@ -200,6 +209,7 @@ def beam_image(
     # We assume freq_i is an int when provided (i.e. a single frequency index)
     if freq_i is not None:
         freq_i_use = freq_i
+        freq_i_use = np.atleast_1d(freq_i_use)
 
     if square:
         # Do note freq_i_use could be an integer or an array if freq_i is supplied or not
