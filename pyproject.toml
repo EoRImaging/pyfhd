@@ -37,7 +37,7 @@ dependencies = [
     "matplotlib>=3.10.3",
     "numba>=0.61.2",
     "numpy>=2.2.5",
-    "pyuvdata>=3.2.1",
+    "pyuvdata>=3.2.4",
     "setuptools_scm>=8.1",
     "scipy>=1.15.3",
 ]

@@ -78,6 +78,10 @@ def init_beam(obs: dict, pyfhd_config: dict, logger: Logger) -> dict:
             freq_center[fi] = np.median(frequency_array[fi_i])
 
     antenna_size = {"mwa": 5, "hera": 14}
+    if pyfhd_config["instrument"] in antenna_size:
+        ant_size_m = antenna_size[pyfhd_config["instrument"]]
+    else:
+        ant_size_m = 10
 
     if pyfhd_config["instrument"] == "mwa":
         # Get the antenna coordinates
@@ -99,11 +103,7 @@ def init_beam(obs: dict, pyfhd_config: dict, logger: Logger) -> dict:
     antenna = {
         "n_pol": n_ant_pol,
         "antenna_type": pyfhd_config["instrument"],
-        "size_meters": (
-            antenna_size[pyfhd_config["instrument"]]
-            if pyfhd_config["instrument"] in antenna_size
-            else 10
-        ),
+        "size_meters": ant_size_m,
         "names": ant_names,
         "beam_model_version": pyfhd_config["beam_model_version"],
         "freq": freq_center,
@@ -122,21 +122,19 @@ def init_beam(obs: dict, pyfhd_config: dict, logger: Logger) -> dict:
         "pix_use": None,
     }
 
+    if pyfhd_config["psf_dim"]:
+        psf_dim = pyfhd_config["psf_dim"]
+    else:
+        psf_dim = np.ceil(
+            antenna["size_meters"]
+            * 2
+            * np.max(obs["baseline_info"]["freq"])
+            / (c.value * obs["kpix"])
+        )
+
     # Create the initial psf dict
     psf = {
-        "dim": (
-            pyfhd_config["psf_dim"]
-            if pyfhd_config["psf_dim"]
-            else np.ceil(
-                (
-                    antenna["size_meters"]
-                    * 2
-                    * np.max(obs["baseline_info"]["freq"])
-                    / c.value
-                )
-                / obs["kpix"]
-            )
-        ),
+        "dim": psf_dim,
         "resolution": pyfhd_config["psf_resolution"],
         # This is more of a placeholder, if we want pyfhd to support processing more than one instrument at a time we'll need to edit this to be calculated rather than hardcoded.
         "id": np.zeros(
@@ -238,6 +236,9 @@ def init_beam(obs: dict, pyfhd_config: dict, logger: Logger) -> dict:
         if pyfhd_config["instrument"] == "mwa":
             uvbeam_kwargs["delays"] = obs["delays"]
 
+        if pyfhd_config["uvbeam_zfile_path"] is not None:
+            uvbeam_kwargs["mwa_zfile"] = pyfhd_config["uvbeam_zfile_path"]
+
         if pyfhd_config["uvbeam_freq_buffer"] is not None:
             freq_range = [
                 np.min(obs["baseline_info"]["freq"])
@@ -246,6 +247,10 @@ def init_beam(obs: dict, pyfhd_config: dict, logger: Logger) -> dict:
                 + pyfhd_config["uvbeam_freq_buffer"],
             ]
             uvbeam_kwargs["freq_range"] = freq_range
+
+        uvbeam_kwargs["mwa_include_cross_feed_coupling"] = pyfhd_config[
+            "uvbeam_mwa_include_cross_feed_coupling"
+        ]
 
         # select above the horizon (this only does something for beamfits files)
         # but it saves some memory in that case
@@ -298,7 +303,7 @@ def init_beam(obs: dict, pyfhd_config: dict, logger: Logger) -> dict:
     # remove the initial shallow dimension in aligned_response
     antenna["aligned_response"] = antenna["aligned_response"][0]
 
-    return antenna, psf, beam
+    return antenna, psf
 
 
 def general_jones_matrix(

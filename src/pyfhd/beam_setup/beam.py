@@ -48,7 +48,7 @@ def create_psf(obs: dict, pyfhd_config: dict, logger: Logger) -> dict | File:
         or pyfhd_config["analytic_beam_yaml"] is not None
     ):
         logger.info("pyfhd is using pyuvdata to set up the beam. ")
-        antenna, psf, beam = init_beam(obs, pyfhd_config, logger)
+        antenna, psf = init_beam(obs, pyfhd_config, logger)
         # TODO: we'll see if the +1 is necessary, IDL indexing thing
         n_freq_bin = np.max(obs["baseline_info"]["fbin_i"]) + 1
         # TODO: Double check the shape
@@ -173,17 +173,16 @@ def create_psf(obs: dict, pyfhd_config: dict, logger: Logger) -> dict | File:
                 baseline_group_n = bi_use.size
                 # Calculate power beam from antenna beams
                 psf_base_superres = beam_power(
-                    antenna,
-                    beam,
-                    ant_pol1,
-                    ant_pol2,
-                    freq_i,
-                    psf,
-                    zen_int_x,
-                    zen_int_y,
-                    xvals_uv_superres,
-                    yvals_uv_superres,
-                    pyfhd_config,
+                    antenna=antenna,
+                    ant_pol1=ant_pol1,
+                    ant_pol2=ant_pol2,
+                    freq_i=freq_i,
+                    psf=psf,
+                    zen_int_x=zen_int_x,
+                    zen_int_y=zen_int_y,
+                    xvals_uv_superres=xvals_uv_superres,
+                    yvals_uv_superres=yvals_uv_superres,
+                    pyfhd_config=pyfhd_config,
                 )
 
                 # divide by psf_resolution^2 since the FFT is done at

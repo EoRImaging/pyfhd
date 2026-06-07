@@ -1,6 +1,4 @@
 import numpy as np
-from pyuvdata import UVBeam
-from pyuvdata.analytic_beam import AnalyticBeam
 from pyfhd.pyfhd_tools.pyfhd_utils import histogram, region_grow
 import h5py
 from numpy.typing import NDArray
@@ -119,6 +117,7 @@ def beam_image(
     psf: dict | h5py.File,
     obs: dict,
     pol_i: int,
+    *,
     freq_i: int | None = None,
     dimension: int | None = None,
     abs=False,
@@ -308,8 +307,8 @@ def beam_image(
 
 
 def beam_image_hyperresolved(
+    *,
     antenna: dict,
-    beam: UVBeam | AnalyticBeam,
     ant_pol_1: int,
     ant_pol_2: int,
     freq_i: int,
@@ -331,8 +330,6 @@ def beam_image_hyperresolved(
     ----------
     antenna : dict
         Antenna metadata dictionary
-    beam : UVBeam | AnalyticBeam
-        UVBeam or AnalyticBeam object containing the beam model and metadata.
     ant_pol_1 : int
         Polarization index for the first antenna
     ant_pol_2 : int
@@ -394,8 +391,8 @@ def beam_image_hyperresolved(
 
 
 def beam_power(
+    *,
     antenna: dict,
-    beam: UVBeam | AnalyticBeam,
     ant_pol_1: int,
     ant_pol_2: int,
     freq_i: int,
@@ -416,8 +413,6 @@ def beam_power(
     ----------
     antenna : dict
         Antenna metadata dictionary
-    beam : UVBeam | AnalyticBeam
-       UVBeam or AnalyticBeam object containing the beam model and metadata.
     ant_pol_1 : int
         Polarization index for the first antenna
     ant_pol_2 : int
@@ -444,7 +439,13 @@ def beam_power(
     """
     # For now we will ignore beam_gaussian_decomp and much of the debug keywords
     image_power_beam = beam_image_hyperresolved(
-        antenna, beam, ant_pol_1, ant_pol_2, freq_i, zen_int_x, zen_int_y, psf
+        antenna=antenna,
+        ant_pol_1=ant_pol_1,
+        ant_pol_2=ant_pol_2,
+        freq_i=freq_i,
+        zen_int_x=zen_int_x,
+        zen_int_y=zen_int_y,
+        psf=psf,
     )
     if pyfhd_config.get("kernel_window", False):
         image_power_beam *= antenna["pix_window"]
