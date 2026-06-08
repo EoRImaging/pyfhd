@@ -36,6 +36,8 @@ def test_quick_image_pyramid(tmp_path, pyramid, file_type, file_is_path):
     ytitle = "North (m)"
     cb_title = "Height (m)"
     note = None
+    sigma_clip_level = None
+    percentile_clip_level = None
 
     if not file_is_path:
         savepath = savefile
@@ -57,6 +59,9 @@ def test_quick_image_pyramid(tmp_path, pyramid, file_type, file_is_path):
         xrange = [1, 21]
         yrange = [1, 21]
         missing_value = 0
+        sigma_clip_level = 3
+        percentile_clip_level = 1
+        color_profile = "abs"
     elif file_type == "eps":
         pyramid_max = pyramid.max()
         nonzero_min = np.min(pyramid[pyramid > 0])
@@ -83,6 +88,8 @@ def test_quick_image_pyramid(tmp_path, pyramid, file_type, file_is_path):
         ytitle=ytitle,
         cb_title=cb_title,
         note=note,
+        sigma_clip_level=sigma_clip_level,
+        percentile_clip_level=percentile_clip_level,
         savefile=savefile,
     )
     if not file_is_path:
