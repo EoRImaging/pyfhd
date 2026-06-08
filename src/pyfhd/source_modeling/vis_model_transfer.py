@@ -298,6 +298,7 @@ class _FlaggingInfoCounter(object):
 
 def flag_model_visibilities(
     vis_model_arr: NDArray[np.complex128],
+    *,
     params_data: dict,
     params_model: dict,
     obs_data: dict,
