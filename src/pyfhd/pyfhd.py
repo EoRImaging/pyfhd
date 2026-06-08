@@ -580,6 +580,9 @@ def main():
                     pyfhd_config,
                     model_uv=model_uv,
                     logger=logger,
+                    log=options.log_plots,
+                    sigma_clip_level=options.sigma_clipping,
+                    percentile_clip_level=options.percentile_clipping,
                 )
             if pyfhd_config["save_checkpoints"]:
                 checkpoint = {

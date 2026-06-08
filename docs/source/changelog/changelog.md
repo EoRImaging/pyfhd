@@ -10,6 +10,9 @@ repo and passing None to `beam_file-path`.
 to avoid confusion with the new `uvbeam-file-path` option.
 
 ### New Features
+* Added options to `plotting.image.quick_image` to set the color range to clip
+outliers based on a number of standard deviations (for log colorbars) or a
+percentile range (for linear colorbars).
 * Added an option to `plotting.image.quick_image` to set the colormap to any
 matplotlib colormap or to match the colormap used in the IDL version of `quick_image`.
 * UVBeams are fully and properly integrated. Beam decomposition is implemented
