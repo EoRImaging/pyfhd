@@ -118,6 +118,7 @@ def test_beam_image(before_file, after_file, beam_dir):
     npt.assert_allclose(beam_base, expected_beam_base, atol=1e-8)
 
 
+@pytest.mark.github_actions
 @pytest.mark.parametrize(
     ("square", "abs"), [(False, False), (True, False), (True, True)]
 )

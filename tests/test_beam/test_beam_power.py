@@ -1,4 +1,5 @@
 import numpy as np
+import pytest
 from pyuvdata.datasets import fetch_data as uvdata_fetch
 
 from pyfhd.beam_setup.antenna import init_beam
@@ -8,7 +9,14 @@ from pyfhd.io.pyfhd_io import recarray_to_dict
 from pyfhd.pyfhd_tools.test_utils import get_savs
 
 
+@pytest.mark.github_actions
 def test_beam_power():
+
+    # check to make sure we have the right version of pyuvdata installed
+    from pyuvdata import UVBeam
+
+    assert hasattr(UVBeam, "decompose_feed_aligned_terms")
+
     mwa_aee_jfile = uvdata_fetch("mwa_jmatrix")
     mwa_aee_zfile = uvdata_fetch("mwa_zmatrix")
 
