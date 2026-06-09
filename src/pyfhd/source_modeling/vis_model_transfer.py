@@ -65,7 +65,8 @@ def vis_model_transfer(
 
     if pyfhd_config["flag_model"]:
         vis_model = flag_model_visibilities(
-            vis_model, params, params_model, obs, obs_model, pyfhd_config, logger
+            vis_model, params_data=params, params_model=params_model, obs_data=obs, 
+            obs_model=obs_model, pyfhd_config=pyfhd_config, logger=logger
         )
     else:
         logger.warning(
