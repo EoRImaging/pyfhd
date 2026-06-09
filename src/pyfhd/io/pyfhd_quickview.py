@@ -16,7 +16,7 @@ from pyfhd.pyfhd_tools.pyfhd_utils import (
     crosspol_split_real_imaginary,
 )
 from pyfhd.gridding.gridding_utils import dirty_image_generate
-from pyfhd.plotting.image import plot_fits_image
+from pyfhd.plotting.fits_image import plot_fits_image
 
 
 def get_image_renormalization(
