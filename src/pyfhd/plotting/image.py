@@ -356,6 +356,7 @@ def quick_image(
     xvals: NDArray[np.integer | np.floating] = None,
     yvals: NDArray[np.integer | np.floating] = None,
     *,
+    transpose: bool = True,
     data_range: NDArray[np.integer | np.floating] = None,
     data_min_abs: float = None,
     sigma_clip_level: float | None = None,
@@ -415,6 +416,11 @@ def quick_image(
         An array of x-axis values, by default None
     yvals : NDArray[np.integer | np.floating], optional
         An array of y-axis values, by default None
+    transpose : bool
+        Option to transpose the array before calling imshow. imshow puts the
+        0th axis along the y axis, which is often not what we want. Setting this
+        to True results in the 0th axis being plotted along the x axis.
+        Defaults to True.
     data_range : NDArray[np.integer | np.floating], optional
         Min/max color bar range, by default [np.nanmin(image), np.nanmax(image)]
     data_min_abs : float, optional
@@ -483,6 +489,9 @@ def quick_image(
     if image.ndim != 2:
         print("Image must be 2-dimensional.")
         return
+
+    if transpose:
+        image = image.T
 
     # Handle complex images. Default is to show the real part.
     if np.iscomplexobj(image):
