@@ -338,16 +338,22 @@ def main():
                 logger,
             )
 
-            # Get the vis_model_arr from a UVFITS file or SAV files and flag any issues
-            vis_model_arr_start = time.time()
-            vis_model_arr = vis_model_transfer(pyfhd_config, obs, params, logger)
-            vis_model_arr_end = time.time()
-            _print_time_diff(
-                vis_model_arr_start,
-                vis_model_arr_end,
-                "Model Imported and Flagged From UVFITS",
-                logger,
-            )
+            if (
+                pyfhd_config["calibrate_visibilities"]
+                or pyfhd_config["model_file_path"] is not None
+            ):
+                # Get the vis_model_arr from a UVFITS file or SAV files and flag any issues
+                vis_model_arr_start = time.time()
+                vis_model_arr = vis_model_transfer(pyfhd_config, obs, params, logger)
+                vis_model_arr_end = time.time()
+                _print_time_diff(
+                    vis_model_arr_start,
+                    vis_model_arr_end,
+                    "Model Imported and Flagged From UVFITS",
+                    logger,
+                )
+            else:
+                vis_model_arr = None
 
             # Skipped initializing the cal structure as it mostly just copies values from the obs, params, config and the skymodel from FHD
             # However, there is resulting cal structure for logging and output purposes to store the resulting gain and any other associated
