@@ -2,20 +2,20 @@ API Documentation
 +++++++++++++++++
 
 Usage
-=====
+#####
 
 .. argparse::
    :ref: pyfhd.pyfhd_tools.pyfhd_setup.pyfhd_parser
    :prog: pyfhd
 
 pyfhd Setup
-===========
+###########
 
 .. automodule:: pyfhd.pyfhd_tools.pyfhd_setup
    :members:
 
 Data Setup
-==========
+##########
 
 .. automodule:: pyfhd.data_setup.uvfits
    :members:
@@ -24,7 +24,7 @@ Data Setup
    :members:
 
 Beam Setup
-==========
+##########
 
 .. automodule:: pyfhd.beam_setup.beam
    :members:
@@ -33,13 +33,13 @@ Beam Setup
    :members:
 
 Source Modeling
-================
+################
 
 .. automodule:: pyfhd.source_modeling.vis_model_transfer
    :members:
 
 Calibration
-===========
+###########
 
 calibrate
 ---------
@@ -60,7 +60,7 @@ vis_calibrate_subroutine
    :members:
 
 Gridding
-========
+########
 
 Gridding Utilities
 ------------------
@@ -87,7 +87,7 @@ Visibility Degrid
    :members:
 
 Input & Output
-==============
+##############
 
 .. automodule:: pyfhd.io.pyfhd_io
    :members:
@@ -96,7 +96,7 @@ Input & Output
    :members:
 
 HEALPix
-=======
+#######
 
 .. automodule:: pyfhd.healpix.export
    :members:
@@ -105,7 +105,7 @@ HEALPix
    :members:
 
 Plotting
-========
+########
 
 Calibration Plots
 -----------------
@@ -126,7 +126,7 @@ Plotting Utils and FITS imaging
    :members:
 
 Tools & Utilities
-=================
+#################
 
 .. automodule:: pyfhd.pyfhd_tools.pyfhd_utils
    :members:
@@ -134,7 +134,7 @@ Tools & Utilities
 .. automodule:: pyfhd.pyfhd_tools.unit_conv
 
 Testing Utilities
-=================
+#################
 
 .. automodule:: pyfhd.pyfhd_tools.test_utils
    :members:

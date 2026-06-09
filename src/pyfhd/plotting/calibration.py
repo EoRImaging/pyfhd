@@ -101,7 +101,6 @@ def plot_cals(obs: dict, cal: dict, pyfhd_config: dict):
     # Create calibration solution plots for each page of 128 maximum stations for the specified types
     for type_i in range(n_types):
         for page_i in range(n_pages):
-
             # Calculate number of stations for this page
             if obs["n_tile"] // (n_cols * n_rows * (page_i + 1)) == 0:
                 page_tiles = obs["n_tile"] - (n_cols * n_rows * (page_i + 1))
@@ -119,7 +118,6 @@ def plot_cals(obs: dict, cal: dict, pyfhd_config: dict):
             # Cycle through each row and col on the page and set tick and labels
             for row_i in range(n_rows):
                 for col_i in range(n_cols):
-
                     # Set fontsize maximum number of ticks on xaxis to 2
                     ax_amp[row_i, col_i].xaxis.set_major_locator(ticker.MaxNLocator(2))
                     ax_phase[row_i, col_i].xaxis.set_major_locator(
@@ -151,12 +149,10 @@ def plot_cals(obs: dict, cal: dict, pyfhd_config: dict):
                 row = (tile_i - page_i * (n_cols * n_rows)) // n_cols
 
                 ax_amp[row, col].set_title(
-                    str(obs["baseline_info"]["tile_names"][tile_i]),
-                    fontsize=9,
+                    str(obs["baseline_info"]["tile_names"][tile_i]), fontsize=9
                 )
                 ax_phase[row, col].set_title(
-                    str(obs["baseline_info"]["tile_names"][tile_i]),
-                    fontsize=9,
+                    str(obs["baseline_info"]["tile_names"][tile_i]), fontsize=9
                 )
 
                 for pol_i in range(cal["n_pol"]):

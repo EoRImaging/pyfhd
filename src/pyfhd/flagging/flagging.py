@@ -31,16 +31,16 @@ def vis_flag_tiles(
         A vis_weight_arr where the tiles to flag have been set to 0
     """
     tile_flag_list_use = np.array([], dtype=np.int64)
-    for flag in tiles_to_flag:
-        if type(flag) == str and flag.strip() in obs["baseline_info"]["tile_names"]:
-            logger.info(f"Manually flagging tile {flag}")
-            flag_idx = np.where(obs["baseline_info"]["tile_names"] == flag.strip())[0][
+    for tile in tiles_to_flag:
+        if isinstance(tile, str) and tile.strip() in obs["baseline_info"]["tile_names"]:
+            logger.info(f"Manually flagging tile {tile}")
+            flag_idx = np.where(obs["baseline_info"]["tile_names"] == tile.strip())[0][
                 0
             ]
             tile_flag_list_use.append(flag_idx + 1)
         else:
             logger.warning(
-                f"{flag} wasn't found in obs['baseline_info']['tile_names'], skipping it"
+                f"{tile} wasn't found in obs['baseline_info']['tile_names'], skipping it"
             )
     hist_a, _, ra = histogram(obs["baseline_info"]["tile_a"], min=1)
     hist_b, _, rb = histogram(obs["baseline_info"]["tile_b"], min=1)
@@ -104,7 +104,7 @@ def vis_flag_basic(
 
     if pyfhd_config["flag_freq_start"]:
         logger.info(
-            f'Flagging frequencies less than {pyfhd_config["flag_freq_start"]}MHz'
+            f"Flagging frequencies less than {pyfhd_config['flag_freq_start']}MHz"
         )
         frequency_MHz = freq_arr / 1e6
         freq_start_cut = np.where(frequency_MHz < pyfhd_config["flag_freq_start"])
@@ -112,7 +112,7 @@ def vis_flag_basic(
             vis_weight_arr[:, freq_start_cut, :] = 0
     if pyfhd_config["flag_freq_end"]:
         logger.info(
-            f'Flagging frequencies more than {pyfhd_config["flag_freq_end"]}MHz'
+            f"Flagging frequencies more than {pyfhd_config['flag_freq_end']}MHz"
         )
         frequency_MHz = freq_arr / 1e6
         freq_end_cut = np.where(frequency_MHz > pyfhd_config["flag_freq_end"])
@@ -186,7 +186,6 @@ def vis_flag_basic(
     if np.min(obs["baseline_info"]["time_use"]) <= 0:
         bin_offset = obs["baseline_info"]["bin_offset"]
         bin_offset = np.hstack([bin_offset, np.size(obs["baseline_info"]["tile_a"])])
-        time_bin = np.zeros(np.size(obs["baseline_info"]["tile_a"]))
         for ti in range(obs["n_time"]):
             if obs["baseline_info"]["time_use"][ti] <= 0:
                 vis_weight_arr[:, :, bin_offset[ti] : bin_offset[ti + 1] - 1] = 0

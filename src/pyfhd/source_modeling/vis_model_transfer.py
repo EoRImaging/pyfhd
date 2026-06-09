@@ -83,10 +83,7 @@ def vis_model_transfer(
         model_dir = Path(pyfhd_config["output_dir"], "model")
         model_dir.mkdir(parents=True, exist_ok=True)
         model_file = Path(model_dir, f"{pyfhd_config['obs_id']}_vis_model.h5")
-        model = {
-            "vis_model_arr": vis_model,
-            "params": params_model,
-        }
+        model = {"vis_model_arr": vis_model, "params": params_model}
         save(model_file, model, "vis_model", logger=logger)
 
     return vis_model
@@ -122,11 +119,7 @@ def import_vis_model_from_sav(
         The observation dictionary of the input model
     """
 
-    fhd_subdirs = {
-        "params": "metadata",
-        "obs": "metadata",
-        "vis": "vis_data",
-    }
+    fhd_subdirs = {"params": "metadata", "obs": "metadata", "vis": "vis_data"}
 
     try:
         path = Path(
@@ -194,7 +187,7 @@ def import_vis_model_from_sav(
             if curr_vis_model.size == 1:
                 curr_vis_model = curr_vis_model[0]
             vis_model_arr[pol_i] = curr_vis_model.transpose().astype(np.complex128)
-    except FileNotFoundError as e:
+    except FileNotFoundError:
         logger.error(
             f"pyfhd failed to load in the model visibilities and metadata from filepath: {path}"
         )
@@ -444,7 +437,6 @@ def flag_model_visibilities(
     # we should have a pyuvdata input in this case as a tile name is greater
     # than the number of tiles
     if np.max(flaginfo_data.ant_names) > len(obs_data["baseline_info"]["tile_names"]):
-
         # Loop over all possible antenna (tile) names, and if they're not in the
         # list of antennas in this data set, append to flag_indexes
         for ant_ind, ant_name in enumerate(obs_data["baseline_info"]["tile_names"]):
@@ -501,7 +493,6 @@ def flag_model_visibilities(
     # For each time step that matches the data, copy across any visibilities
     # that aren't to be flagged
     for t_data_ind, t_model_ind in enumerate(model_times_to_use):
-
         # Subset of cross-corrs from flagged model to select for this time step
         t_flag_inds = (
             t_data_ind * flaginfo_data.num_visi_per_time_step + data_include_per_time
@@ -552,9 +543,7 @@ def convert_vis_model_arr_to_sav(
     )
 
     with h5py.File(f"{model_vis_dir}/{pyfhd_config['obs_id']}_vis_model.h5", "w") as hf:
-
         for pol, pol_name in enumerate(pol_names[:n_pol]):
-
             hf.create_dataset(
                 f"{pyfhd_config['obs_id']}_vis_model_{pol_name}",
                 data=vis_model_arr[pol].transpose(),

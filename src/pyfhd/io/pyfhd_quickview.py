@@ -398,53 +398,32 @@ def quickview(
             f"{pyfhd_config['obs_id']}_{filter_name}_dirty_{pol_names[pol_i]}"
         )
         fits_file_apparent.writeto(
-            Path(
-                fits_output,
-                f"{instr_dirty_name}.fits",
-            ),
-            overwrite=True,
+            Path(fits_output, f"{instr_dirty_name}.fits"), overwrite=True
         )
         fits_file_apparent.data = instr_model
         instr_model_name = (
             f"{pyfhd_config['obs_id']}_{filter_name}_model_{pol_names[pol_i]}"
         )
         fits_file_apparent.writeto(
-            Path(
-                fits_output,
-                f"{instr_model_name}.fits",
-            ),
-            overwrite=True,
+            Path(fits_output, f"{instr_model_name}.fits"), overwrite=True
         )
         fits_file_apparent.data = instr_residual
         instr_residual_name = (
             f"{pyfhd_config['obs_id']}_{filter_name}_residual_{pol_names[pol_i]}"
         )
         fits_file_apparent.writeto(
-            Path(
-                fits_output,
-                f"{instr_residual_name}.fits",
-            ),
-            overwrite=True,
+            Path(fits_output, f"{instr_residual_name}.fits"), overwrite=True
         )
         fits_file.data = beam_use
         beam_name = f"{pyfhd_config['obs_id']}_beam_{pol_names[pol_i]}"
-        fits_file.writeto(
-            Path(fits_output, f"{beam_name}.fits"),
-            overwrite=True,
-        )
+        fits_file.writeto(Path(fits_output, f"{beam_name}.fits"), overwrite=True)
         fits_file_uv.data = np.abs(weights_uv) * obs["n_vis"]
         weights_name = f"{pyfhd_config['obs_id']}_uv_weights_{pol_names[pol_i]}"
-        fits_file_uv.writeto(
-            Path(
-                fits_output,
-                f"{weights_name}.fits",
-            ),
-            overwrite=True,
-        )
+        fits_file_uv.writeto(Path(fits_output, f"{weights_name}.fits"), overwrite=True)
 
         if pyfhd_config["image_plots"]:
             logger.info(
-                f"Plotting the continuum images for polarization {pol_names[pol_i]} into {pyfhd_config['output_dir']/'plots'/'images'}"
+                f"Plotting the continuum images for polarization {pol_names[pol_i]} into {pyfhd_config['output_dir'] / 'plots' / 'images'}"
             )
             plot_fits_image(
                 Path(fits_output, f"{instr_dirty_name}.fits"),

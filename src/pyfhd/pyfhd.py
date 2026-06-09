@@ -28,9 +28,7 @@ from pyfhd.pyfhd_tools.pyfhd_utils import (
     vis_noise_calc,
     vis_weights_update,
 )
-from pyfhd.source_modeling.vis_model_transfer import (
-    vis_model_transfer,
-)
+from pyfhd.source_modeling.vis_model_transfer import vis_model_transfer
 from pyfhd.io.pyfhd_io import save, load
 from pyfhd.io.pyfhd_quickview import quickview
 from pyfhd.healpix.export import healpix_snapshot_cube_generate
@@ -58,10 +56,10 @@ def _print_time_diff(
         logger.info(f"{description} completed in: {runtime}")
     elif runtime < 1:
         logger.info(
-            f"{description} completed in: {round(runtime * 1000,5)} milliseconds"
+            f"{description} completed in: {round(runtime * 1000, 5)} milliseconds"
         )
     else:
-        logger.info(f"{description} completed in: {round(runtime,5)} seconds")
+        logger.info(f"{description} completed in: {round(runtime, 5)} seconds")
 
 
 def finish_pyfhd(
@@ -85,7 +83,7 @@ def finish_pyfhd(
             logger=logger,
         )
     logger.info(
-        f'pyfhd Run Completed for {pyfhd_config["obs_id"]}\nTotal Runtime (Days:Hours:Minutes:Seconds.Millseconds): {runtime}'
+        f"pyfhd Run Completed for {pyfhd_config['obs_id']}\nTotal Runtime (Days:Hours:Minutes:Seconds.Millseconds): {runtime}"
     )
     # Close the handlers in the log
     for handler in logger.handlers:
@@ -149,8 +147,7 @@ def main():
             pyfhd_config["checkpoint_dir"].mkdir(exist_ok=True)
 
             obs_checkpoint_file = Path(
-                pyfhd_config["checkpoint_dir"],
-                f"{checkpoint_name}_obs_checkpoint.h5",
+                pyfhd_config["checkpoint_dir"], f"{checkpoint_name}_obs_checkpoint.h5"
             )
             if pyfhd_config["obs_checkpoint"] and not obs_checkpoint_file.exists():
                 logger.warning(
@@ -260,12 +257,7 @@ def main():
                     "vis_arr": vis_arr,
                     "vis_weights": vis_weights,
                 }
-                save(
-                    obs_checkpoint_file,
-                    checkpoint,
-                    "obs_checkpoint",
-                    logger=logger,
-                )
+                save(obs_checkpoint_file, checkpoint, "obs_checkpoint", logger=logger)
                 del checkpoint
                 logger.info(
                     f"Checkpoint Saved: Uncalibrated visibility parameters, array and weights and the observation metadata dictionary saved into {Path(pyfhd_config['output_dir'], 'obs_checkpoint.h5')}"
@@ -570,7 +562,7 @@ def main():
                 # TODO: move this after the checkpointing so an error in plotting
                 # doesn't require rerunning gridding.
                 logger.info(
-                    f"Plotting the continuum gridding outputs into {pyfhd_config['output_dir']/'plots'/'gridding'}"
+                    f"Plotting the continuum gridding outputs into {pyfhd_config['output_dir'] / 'plots' / 'gridding'}"
                 )
                 plot_gridding(
                     obs,
@@ -654,8 +646,7 @@ def main():
         finish_pyfhd(pyfhd_start, logger, psf, pyfhd_config)
     except Exception as e:
         logger.exception(
-            f"An error occurred in pyfhd: {e}\n\tExiting pyfhd.",
-            exc_info=True,
+            f"An error occurred in pyfhd: {e}\n\tExiting pyfhd.", exc_info=True
         )
         pyfhd_successful = False
     finally:
@@ -668,7 +659,7 @@ def main():
             if "psf" in locals() and isinstance(psf, h5py.File):
                 psf.close()
             logger.info(
-                f'pyfhd Run Unsuccessful for {pyfhd_config["obs_id"]}\nTotal Runtime (Days:Hours:Minutes:Seconds.Millseconds): {runtime}'
+                f"pyfhd Run Unsuccessful for {pyfhd_config['obs_id']}\nTotal Runtime (Days:Hours:Minutes:Seconds.Millseconds): {runtime}"
             )
             # Close the handlers in the log
             for handler in logger.handlers:

@@ -21,6 +21,4 @@ def branch_scheme(version):
             return version_str
 
 
-setup(
-    use_scm_version={"local_scheme": branch_scheme},
-)
+setup(use_scm_version={"local_scheme": branch_scheme})

@@ -1,11 +1,7 @@
 from pyfhd.io.pyfhd_io import recarray_to_dict
 import pytest
-from os import environ as env
 from pathlib import Path
-from pyfhd.pyfhd_tools.test_utils import get_data_items, get_data_sav
-from pyfhd.calibration.calibration_utils import (
-    vis_calibration_flag,
-)
+from pyfhd.calibration.calibration_utils import vis_calibration_flag
 from pyfhd.io.pyfhd_io import convert_sav_to_dict
 from pyfhd.pyfhd_tools.test_utils import sav_file_vis_arr_swap_axes
 import numpy as np
@@ -100,7 +96,7 @@ def after_file(tag, run, data_dir):
 def test_vis_calibration_flag(before_file, after_file):
     """Runs the test on `vis_calibration_flag` - reads in the data in before_file and after_file,
     and then calls `vis_calibration_flag`, checking the outputs match expectations"""
-    if before_file == None or after_file == None:
+    if before_file is None or after_file is None:
         pytest.skip(f"""This test has been skipped because the test was listed in the
                     skipped tests due to FHD not outputting them: {skip_tests}. The reason
                     for skipping point_offzenith_run3 is due to the difference of NumPy median
@@ -125,10 +121,6 @@ def test_vis_calibration_flag(before_file, after_file):
     assert np.array_equal(
         result_obs["baseline_info"]["freq_use"],
         expected_obs["baseline_info"]["freq_use"],
-    )
-    differences = np.nonzero(
-        expected_obs["baseline_info"]["tile_use"]
-        - result_obs["baseline_info"]["tile_use"]
     )
     assert np.array_equal(
         result_obs["baseline_info"]["tile_use"],

@@ -53,7 +53,7 @@ pyfhd = "pyfhd.pyfhd:main"
 
 [dependency-groups]
 dev = [
-    "black>=25.1.0",
+    "ruff>=0.15",
     "ipykernel>=6.29.5",
     "myst-parser>=4.0.1",
     "pip>=25.1.1",
@@ -79,3 +79,6 @@ build-backend = "setuptools.build_meta"
 markers = [
     "github_actions",
 ]
+
+[tool.ruff.format]
+skip-magic-trailing-comma = true

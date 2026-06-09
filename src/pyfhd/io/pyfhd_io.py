@@ -141,13 +141,13 @@ def format_array(array: NDArray[Any]) -> NDArray[Any]:
     if np.any(_is_string(array)):
         # This avoids the np.where deprecation warning
         # Also replaces any None values in place, no copies of the array are made
-        array[array == None] = ""
+        array[array is None] = ""
         array = array.astype(bytes)
     else:
         try:
             if array.dtype == object:
                 # Replace any Nones with NaN's in place, no copies made
-                array[array == None] = np.nan
+                array[array is None] = np.nan
                 if np.any(_is_complex(array)):
                     # Set the type to complex128 to be sure its double precision complex
                     array = array.astype(np.complex128)
@@ -586,23 +586,30 @@ def recarray_to_dict(data: np.recarray | dict) -> dict:
         A potentially nested dictionaries of dictionaries
     """
     # Convert the original record array into a dictionary
-    if type(data) == np.recarray:
+    if isinstance(data, np.recarray):
         data = {name.lower(): data[name] for name in data.dtype.names}
     # For every key, if it's a record array, recursively call the function
     for key in data:
         # Every now and then you do get object arrays that contain only one element or arrays that contain only one element
         # These are not useful so I will extract the element out
-        if type(data[key]) == np.ndarray and data[key].size == 1:
+        if (
+            isinstance(data[key], np.ndarray)
+            and not isinstance(data[key], np.recarray)
+            and data[key].size == 1
+        ):
             data[key] = data[key][0]
         # Sometimes the recarray is in a standard numpy object array and other times its not for some reason...
-        if type(data[key]) == np.recarray:
+        if isinstance(data[key], np.recarray):
             data[key] = recarray_to_dict(data[key])
-        elif type(data[key]) == np.ndarray and type(data[key][0]) == np.recarray:
+        elif isinstance(data[key], np.ndarray) and isinstance(
+            data[key][0], np.recarray
+        ):
             data[key] = recarray_to_dict(data[key][0])
         # We found a single array with only None
-        elif type(data[key]) == np.ndarray and isinstance(data[key][0], type(None)):
+        elif isinstance(data[key], np.ndarray) and data[key][0] is None:
             # Get all the None values and turn them into NaNs
-            none_values = np.where(data[key] == None)
+            # have to use == because this is an object array with Nones inside
+            none_values = np.where(data[key] == None)  # noqa: E711
             if np.size(none_values) > 0:
                 data[key][none_values] = np.nan
             # If all of the values were None, then set the array dtype to float64
@@ -610,7 +617,7 @@ def recarray_to_dict(data: np.recarray | dict) -> dict:
             if np.size(none_values) == np.size(data[key]):
                 data[key] = data[key].astype(np.float64)
         # Assume we found a string array since it's bytes, convert to a string list
-        elif type(data[key]) == np.ndarray and isinstance(data[key].flat[0], bytes):
+        elif isinstance(data[key], np.ndarray) and isinstance(data[key].flat[0], bytes):
             data[key] = [x.decode().strip() for x in data[key]]
         # Found only bytes, assume it's a string, convert the string
         elif isinstance(data[key], bytes):
@@ -620,9 +627,9 @@ def recarray_to_dict(data: np.recarray | dict) -> dict:
         # being different types or not of the same size then it will convert the numpy object array
         # into a list of objects instead.
         elif (
-            type(data[key]) == np.ndarray
+            isinstance(data[key], np.ndarray)
             and data[key].dtype == object
-            and type(data[key][0]) == np.ndarray
+            and isinstance(data[key][0], np.ndarray)
         ):
             try:
                 # Get all the None values and turn them into NaNs

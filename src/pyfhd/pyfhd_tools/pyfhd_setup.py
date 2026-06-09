@@ -185,7 +185,7 @@ def pyfhd_parser():
 
     Documentation: https://pyfhd.readthedocs.io/en/latest/
 
-    Version: {version('pyfhd')}
+    Version: {version("pyfhd")}
 
     Git Commit Hash: {commit_str}
     """
@@ -837,7 +837,7 @@ def pyfhd_parser():
         default="filter_uv_uniform",
         type=str,
         choices=[
-            "filter_uv_uniform",
+            "filter_uv_uniform"
             # the following are not implemented yet. So the code just uses
             # uniform but names the files to match the selection (so it lies)
             # commenting these out as options to prevent confusion.
@@ -867,13 +867,13 @@ def pyfhd_parser():
         default=False,
         action=OrderedBooleanOptionalAction,
         help="Grid the variance for the uv plane",
-    ),
+    )
     gridding.add_argument(
         "--grid-uniform",
         default=False,
         action=OrderedBooleanOptionalAction,
         help="Grid uniformally by applying a uniform weighted filter to all uv-planes",
-    ),
+    )
     gridding.add_argument(
         "--grid-spectral",
         default=False,
@@ -1354,15 +1354,15 @@ def write_collated_yaml_config(
                 pass
             else:
                 yaml_key = key.replace("_", "-")
-                if pyfhd_config[key] == None:
+                if pyfhd_config[key] is None:
                     outfile.write(f"{yaml_key} : ~\n")
-                elif type(pyfhd_config[key]) == float or type(pyfhd_config[key]) == int:
+                elif isinstance(pyfhd_config[key], float | int):
                     outfile.write(f"{yaml_key} : {pyfhd_config[key]}\n")
-                elif type(pyfhd_config[key]) == bool:
+                elif isinstance(pyfhd_config[key], bool):
                     outfile.write(f"{yaml_key} : {pyfhd_config[key]}\n")
                 # If it's a list, write it out as a list of strings
                 # (Unless it's empty)
-                elif type(pyfhd_config[key]) == list:
+                elif isinstance(pyfhd_config[key], list):
                     if len(pyfhd_config[key]) == 0:
                         pass
                     else:
@@ -1463,7 +1463,7 @@ def pyfhd_logger(pyfhd_config: dict) -> Tuple[logging.Logger, Path]:
 
         Documentation: https://pyfhd.readthedocs.io/en/latest/
 
-        Version: {version('pyfhd')}
+        Version: {version("pyfhd")}
 
         Git Commit Hash: {commit_str}
 
@@ -1746,7 +1746,9 @@ def pyfhd_setup(options: argparse.Namespace) -> Tuple[dict, logging.Logger]:
         else (
             0 + 1
             if pyfhd_config["cal_reflection_mode_delay"]
-            else 0 + 1 if pyfhd_config["cal_reflection_mode_theory"] else 0
+            else 0 + 1
+            if pyfhd_config["cal_reflection_mode_theory"]
+            else 0
         )
     )
     if logic_test > 1:
@@ -1760,7 +1762,7 @@ def pyfhd_setup(options: argparse.Namespace) -> Tuple[dict, logging.Logger]:
         pyfhd_config["cal_reflection_mode_theory"] = True
 
     # cal_adaptive_calibration_gain impacts cal_base_gain if cal_base_gain isn't set
-    if pyfhd_config["cal_base_gain"] == None:
+    if pyfhd_config["cal_base_gain"] is None:
         """
         Is set to 0.75 by default, confusingly the FHD code implies if
         use_adaptive_calibration_gain isn't active then base gain is 1.0
@@ -1847,7 +1849,7 @@ def pyfhd_setup(options: argparse.Namespace) -> Tuple[dict, logging.Logger]:
             logger.warning(
                 "You have more files than expected for the number of polarizations "
                 f"you set, you set {pyfhd_config['n_pol']} polarizations but "
-                f"found {len(matching_files)- 1} polarization files. You can most "
+                f"found {len(matching_files) - 1} polarization files. You can most "
                 "likely ignore this warning. Here is the list of found sav files: "
                 f"{matching_files}."
             )

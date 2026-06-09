@@ -1,13 +1,8 @@
 from pyfhd.io.pyfhd_io import recarray_to_dict
 import pytest
-import numpy as np
 from os import environ as env
 from pathlib import Path
-from pyfhd.pyfhd_tools.test_utils import (
-    get_data,
-    get_data_items,
-    sav_file_vis_arr_swap_axes,
-)
+from pyfhd.pyfhd_tools.test_utils import get_data, get_data_items
 from pyfhd.gridding.gridding_utils import visibility_count
 from pyfhd.io.pyfhd_io import save, load
 from logging import Logger
@@ -40,10 +35,7 @@ def vis_count_before(data_dir, number):
         return vis_count_before
 
     # First put values from psf into pyfhd_config
-    psf = get_data(
-        data_dir,
-        f"input_psf_{number}.npy",
-    )
+    psf = get_data(data_dir, f"input_psf_{number}.npy")
     psf[0]["beam_ptr"] = psf[0]["beam_ptr"][0, :, :].T
     psf = recarray_to_dict(psf)
     # Take the required parameters
@@ -90,10 +82,7 @@ def vis_count_after(data_dir, number):
 
     if vis_count_after.exists():
         return vis_count_after
-    uniform_filter = get_data_items(
-        data_dir,
-        f"output_uniform_filter_{number}.npy",
-    )
+    uniform_filter = get_data_items(data_dir, f"output_uniform_filter_{number}.npy")
 
     h5_save_dict = {"uniform_filter": uniform_filter}
 

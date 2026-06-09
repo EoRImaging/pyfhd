@@ -512,7 +512,7 @@ def after_vis_model_freq_gridding(tag, run, data_dir):
 def test_visibility_grid_in_vis_model_freq_split(
     before_vis_model_freq_gridding, after_vis_model_freq_gridding
 ):
-    if before_vis_model_freq_gridding == None or after_vis_model_freq_gridding == None:
+    if before_vis_model_freq_gridding is None or after_vis_model_freq_gridding is None:
         pytest.skip(
             f"This test has been skipped because the test was listed in the skipped tests due to FHD not outputting them: {vis_model_skip_tests}"
         )

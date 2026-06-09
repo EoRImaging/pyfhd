@@ -2,7 +2,6 @@ from pyfhd.io.pyfhd_io import recarray_to_dict
 import pytest
 from os import environ as env
 from pathlib import Path
-from pyfhd.pyfhd_tools.test_utils import get_data_items, get_data_sav
 from pyfhd.calibration.calibration_utils import vis_calibration_apply
 from pyfhd.io.pyfhd_io import convert_sav_to_dict
 from pyfhd.pyfhd_tools.test_utils import sav_file_vis_arr_swap_axes
@@ -71,7 +70,7 @@ def before_file(tag, run, data_dir):
 
         # You can get a IDL pointer to two empty arrays here, so check if
         # anything exists inside the array as well as it being an array
-        if type(iskey) == np.ndarray and type(iskey[0]) == np.ndarray:
+        if isinstance(iskey, np.ndarray) and isinstance(iskey[0], np.ndarray):
             h5_save_dict[key] = sav_file_vis_arr_swap_axes(sav_dict[key])
         else:
             h5_save_dict[key] = None
@@ -118,7 +117,7 @@ def test_vis_calibration_apply(before_file, after_file):
     Runs the test on `vis_calibration_apply` - reads in the data in before_file and after_file,
     and then calls `vis_calibration_apply`, checking the outputs match
     """
-    if before_file == None or after_file == None:
+    if before_file is None or after_file is None:
         pytest.skip(
             f"This test has been skipped because the test was listed in the skipped tests due to FHD not outputting them: {skip_tests}"
         )
@@ -152,7 +151,6 @@ def test_vis_calibration_apply(before_file, after_file):
     )
 
     if vis_ptr.shape[0] == 4:
-
         npt.assert_allclose(
             h5_after["cal"]["cross_phase"],
             return_cal["cross_phase"],

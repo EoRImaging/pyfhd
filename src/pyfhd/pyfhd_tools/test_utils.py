@@ -272,22 +272,22 @@ def print_types(dictionary: dict, dict_name: str, indent_level: int = 1) -> None
     """
     for key in dictionary.keys():
         # Print this if it's a NumPy array
-        if type(dictionary[key]) == np.ndarray:
+        if isinstance(dictionary[key], np.ndarray):
             print(
                 f"{dict_name}[{key}] : {dictionary[key].dtype} {dictionary[key].shape}\n{indent_level * 2 * ' '}Inside Type: {type(dictionary[key][0])}"
             )
-            if type(dictionary[key][0]) == np.ndarray:
+            if isinstance(dictionary[key][0], np.ndarray):
                 print(
                     f"{indent_level * 2 * ' '}NumPy Array Dtype: {dictionary[key][0].dtype}"
                 )
         # Recursively call the function on another sub dict
-        elif type(dictionary[key]) == dict:
+        elif isinstance(dictionary[key], dict):
             print(f"{dict_name}[{key}]  : {type(dictionary[key])}")
             print_types(
                 dictionary[key], dict_name=f"  {key}", indent_level=indent_level + 2
             )
         # If it's an object, might be useful to print the value
-        elif type(dictionary[key]) == object:
+        elif isinstance(dictionary[key], object):
             print(f"{dict_name}[{key}]  : {type(dictionary[key])}")
             print(dictionary[key])
         # Otherwise just print it out

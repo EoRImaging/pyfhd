@@ -31,21 +31,21 @@ def test_save_and_load():
         if isinstance(sample_data[key], dict):
             # For dictionaries, check if all keys match
             for subkey in sample_data[key].keys():
-                assert (
-                    subkey in loaded_data[key]
-                ), f"Subkey {subkey} not found in loaded data[{key}]"
-                assert (
-                    loaded_data[key][subkey] == sample_data[key][subkey]
-                ), f"Value for subkey {subkey} does not match in loaded data[{key}]"
+                assert subkey in loaded_data[key], (
+                    f"Subkey {subkey} not found in loaded data[{key}]"
+                )
+                assert loaded_data[key][subkey] == sample_data[key][subkey], (
+                    f"Value for subkey {subkey} does not match in loaded data[{key}]"
+                )
         elif isinstance(sample_data[key], list):
             # For lists, check if they match
-            assert np.array_equal(
-                loaded_data[key], sample_data[key]
-            ), f"List for key {key} does not match"
+            assert np.array_equal(loaded_data[key], sample_data[key]), (
+                f"List for key {key} does not match"
+            )
         else:
-            assert (
-                loaded_data[key] == sample_data[key]
-            ), f"Value for key {key} does not match"
+            assert loaded_data[key] == sample_data[key], (
+                f"Value for key {key} does not match"
+            )
 
     Path("test_data.h5").unlink()  # Clean up the test file
 
@@ -91,17 +91,17 @@ def test_lazy_load():
     # Load the data lazily
     lazy_loaded_data = load("lazy_data.h5", lazy_load=True)
 
-    assert isinstance(
-        lazy_loaded_data, File
-    ), "Lazy loaded data is not an h5py File object"
+    assert isinstance(lazy_loaded_data, File), (
+        "Lazy loaded data is not an h5py File object"
+    )
 
     assert isinstance(lazy_loaded_data["key1"], Dataset)
-    assert np.array_equal(
-        lazy_loaded_data["key1"][:], sample_data["key1"]
-    ), "Lazy loaded data for key1 does not match"
+    assert np.array_equal(lazy_loaded_data["key1"][:], sample_data["key1"]), (
+        "Lazy loaded data for key1 does not match"
+    )
 
-    assert isinstance(
-        lazy_loaded_data["key2"], Group
-    ), "Lazy loaded data does not contain the expected group"
+    assert isinstance(lazy_loaded_data["key2"], Group), (
+        "Lazy loaded data does not contain the expected group"
+    )
 
     Path("lazy_data.h5").unlink()  # Clean up the test file

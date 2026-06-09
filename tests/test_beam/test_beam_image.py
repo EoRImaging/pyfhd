@@ -1,9 +1,7 @@
 from os import environ as env
 from pathlib import Path
-import numpy as np
 import numpy.testing as npt
 import pytest
-from logging import Logger
 from pyfhd.io.pyfhd_io import convert_sav_to_dict, load, recarray_to_dict, save
 from pyfhd.beam_setup.beam_utils import beam_image
 
@@ -92,7 +90,7 @@ def after_file(tag, run, quickview, data_dir):
 
 
 def test_beam_image(before_file, after_file, beam_dir):
-    if before_file == None or after_file == None:
+    if before_file is None or after_file is None:
         pytest.skip(
             f"This test has been skipped because the test was listed in the skipped tests due to FHD not outputting them: {skip_tests}"
         )

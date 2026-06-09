@@ -76,7 +76,7 @@ def after_file(tag, run, data_dir):
 
 
 def test_beam_image_cube(before_file, after_file, beam_dir):
-    if before_file == None or after_file == None:
+    if before_file is None or after_file is None:
         pytest.skip(
             f"This test has been skipped because the test was listed in the skipped tests due to FHD not outputting them: {skip_tests}"
         )

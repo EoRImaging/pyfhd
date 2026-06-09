@@ -178,8 +178,7 @@ def healpix_snapshot_cube_generate(
             for freq_i in range(n_freq_use):
                 nf_vis_use[freq_i] = np.sum(
                     nf_vis[
-                        freq_i
-                        * pyfhd_config["n_avg"] : (freq_i + 1)
+                        freq_i * pyfhd_config["n_avg"] : (freq_i + 1)
                         * pyfhd_config["n_avg"]
                     ]
                 )

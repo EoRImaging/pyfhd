@@ -2,7 +2,6 @@ import importlib_resources
 from logging import Logger
 from typing import Literal
 
-import astropy
 import numpy as np
 from astropy.constants import c
 from astropy.coordinates import SkyCoord, EarthLocation
@@ -61,7 +60,9 @@ def init_beam(obs: dict, pyfhd_config: dict, logger: Logger) -> dict:
     nfreq_bin = int(np.max(freq_bin_i)) + 1
     tile_a = obs["baseline_info"]["tile_a"]
     tile_b = obs["baseline_info"]["tile_b"]
-    ant_names = np.unique(tile_a[: obs["n_baselines"]])
+    ant_names = np.unique(
+        np.concatenate(tile_a[: obs["n_baselines"]], tile_b[: obs["n_baselines"]])
+    )
     if pyfhd_config["beam_offset_time"] is not None:
         jdate_use = obs["jd0"] + pyfhd_config["beam_offset_time"] / 24 / 3600
     else:
@@ -76,10 +77,7 @@ def init_beam(obs: dict, pyfhd_config: dict, logger: Logger) -> dict:
         else:
             freq_center[fi] = np.median(frequency_array[fi_i])
 
-    antenna_size = {
-        "mwa": 5,
-        "hera": 14,
-    }
+    antenna_size = {"mwa": 5, "hera": 14}
 
     if pyfhd_config["instrument"] == "mwa":
         # Get the antenna coordinates
@@ -173,8 +171,7 @@ def init_beam(obs: dict, pyfhd_config: dict, logger: Logger) -> dict:
 
     # Get the zenith angle and azimuth angle arrays
     xvals_celestial, yvals_celestial = np.meshgrid(
-        np.arange(psf["image_dim"]),
-        np.arange(psf["image_dim"]),
+        np.arange(psf["image_dim"]), np.arange(psf["image_dim"])
     )
     xvals_celestial = (
         xvals_celestial * psf["scale"]

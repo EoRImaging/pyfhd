@@ -4,7 +4,6 @@ import numpy as np
 from os import environ as env
 from pathlib import Path
 from pyfhd.calibration.vis_calibrate_subroutine import vis_calibrate_subroutine
-from glob import glob
 from logging import Logger
 from pyfhd.pyfhd_tools.test_utils import get_data_items, sav_file_vis_arr_swap_axes
 from pyfhd.io.pyfhd_io import convert_sav_to_dict
@@ -118,7 +117,7 @@ def after_file(tag, run, data_dir, request: pytest.FixtureRequest):
 
 
 def test_points(before_file, after_file):
-    if before_file == None or after_file == None:
+    if before_file is None or after_file is None:
         pytest.skip(
             f"This test has been skipped because the test was listed in the skipped tests due to FHD not outputting them: {skip_tests}"
         )

@@ -4,7 +4,6 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 import h5py
-from logging import Logger
 from pyfhd.io.pyfhd_io import convert_sav_to_dict, load, recarray_to_dict, save
 from pyfhd.healpix.healpix_utils import healpix_cnv_apply
 import importlib_resources
@@ -73,10 +72,7 @@ def before_file(tag, run, array_type, data_dir, request):
     sav_dict["hpx_cnv"]["sa"] = np.array(sav_dict["hpx_cnv"]["sa"], dtype=object)
     sav_dict["hpx_cnv"]["i_use"] = sav_dict["hpx_cnv"]["i_use"].astype(np.int64)
 
-    h5_save = {
-        "hpx_cnv": sav_dict["hpx_cnv"],
-        "image": sav_dict["image"],
-    }
+    h5_save = {"hpx_cnv": sav_dict["hpx_cnv"], "image": sav_dict["image"]}
 
     variable_lengths = {
         "ija": h5py.vlen_dtype(np.int64),
@@ -112,7 +108,7 @@ def after_file(tag, run, array_type, data_dir, request):
 
 
 def test_healpix_cnv_apply(before_file, after_file, request):
-    if before_file == None or after_file == None:
+    if before_file is None or after_file is None:
         pytest.skip(
             f"This test has been skipped because the test was listed in the skipped tests due to FHD not outputting them: {skip_tests}"
         )

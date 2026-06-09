@@ -479,9 +479,7 @@ def transfer_bandpass(
                             :,
                             max(
                                 channel_i * freq_factor - np.floor(freq_factor / 2), 0
-                            ) : channel_i
-                            * freq_factor
-                            + np.floor(freq_factor / 2.0),
+                            ) : channel_i * freq_factor + np.floor(freq_factor / 2.0),
                             :,
                             :,
                             :,
@@ -673,7 +671,7 @@ def transfer_bandpass(
             data_array[:, :, 0, 0 : obs["n_pol"], 0]
         ) + 1j * np.squeeze(data_array[:, :, 0, 0 : obs["n_pol"], 1])
         logger.info("Calfits File has been read and cal_bandpass has been created")
-    except FileNotFoundError as e:
+    except FileNotFoundError:
         logger.error(
             f"{pyfhd_config['cal_bp_transfer']} file wasn't found, skipping calibration bandpass transfer"
         )
@@ -717,7 +715,6 @@ def vis_cal_bandpass(
     """
     freq_use = np.nonzero(obs["baseline_info"]["freq_use"])[0]
     tile_use = np.nonzero(obs["baseline_info"]["tile_use"])[0]
-    n_pol = cal["gain"].shape[0]
     # Set a flag for global bandpass, will turn true if too many tiles are flagged
     global_bandpass = False
 
@@ -1354,9 +1351,9 @@ def vis_cal_auto_fit(
             # I assume the IDL equiv function just masks them?
             # or maybe we need to do a catch for NaNs here, and abandon all
             # hope for a fit if there are NaNs?
-            notnan = np.where(
-                (np.isnan(gain_auto_single[freq_i_use]) != True)
-                & (np.isnan(gain_cross_single[freq_i_use]) != True)
+            notnan = np.nonzero(
+                (~np.isnan(gain_auto_single[freq_i_use]))
+                & (~np.isnan(gain_cross_single[freq_i_use]))
             )
             gain_auto_single_fit = gain_auto_single[freq_i_use][notnan]
             gain_cross_single_fit = gain_cross_single[freq_i_use][notnan]
@@ -1434,10 +1431,7 @@ def vis_calibration_apply(
     # `rebin`, which will make 2D indexing arrays, so we can directly leave
     # the gain arrays in the correct shape and index the directly. Using `rebin`
     # means we have to flatten them
-    (
-        inds_a_baseline,
-        inds_a_freqs,
-    ) = np.meshgrid(tile_a_i, np.arange(obs["n_freq"]))
+    inds_a_baseline, inds_a_freqs = np.meshgrid(tile_a_i, np.arange(obs["n_freq"]))
     inds_b_baseline, inds_b_freqs = np.meshgrid(tile_b_i, np.arange(obs["n_freq"]))
 
     for pol_i in range(n_pol_vis):
@@ -1453,7 +1447,9 @@ def vis_calibration_apply(
     # We haven't run FHD in a way that uses 4 pols yet so this is all
     # untested
     if n_pol_vis == 4:
-        if type(vis_model_arr) == np.ndarray and type(vis_weights) == np.ndarray:
+        if isinstance(vis_model_arr, np.ndarray) and isinstance(
+            vis_weights, np.ndarray
+        ):
             # This if statement replaces vis_calibrate_crosspol_phase
             # as this was the only place where the function was used
             # Note inside vis_calibrate_crosspol_phase there is a

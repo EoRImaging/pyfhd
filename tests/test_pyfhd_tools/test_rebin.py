@@ -293,7 +293,6 @@ def test_rebin_twoD_50_columns(large_data_dir):
     """Testing a 2D array only increasing columns by a factor of 2"""
     input, expected = get_data(large_data_dir, "data.npy", "data_50c.npy")
     result = rebin(input, (4, 50))
-    threshold = 2
     assert np.max(result - expected) <= 2
 
 

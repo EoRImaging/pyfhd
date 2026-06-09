@@ -1,6 +1,5 @@
 from pyfhd.io.pyfhd_io import recarray_to_dict
 import pytest
-from os import environ as env
 from pathlib import Path
 from pyfhd.calibration.calibration_utils import vis_cal_bandpass
 from pyfhd.io.pyfhd_io import convert_sav_to_dict
@@ -130,7 +129,7 @@ def after_file(tag, run, data_dir):
 def test_vis_cal_bandpass(before_file, after_file):
     """Runs the test on `vis_cal_bandpass` - reads in the data in `data_loc`,
     and then calls `vis_cal_bandpass`, checking the outputs match expectations"""
-    if before_file == None or after_file == None:
+    if before_file is None or after_file is None:
         pytest.skip(
             f"This test has been skipped because the test was listed in the skipped tests due to FHD not outputting them: {skip_tests}"
         )
@@ -157,13 +156,13 @@ def test_vis_cal_bandpass(before_file, after_file):
     # the NaNs correctly, check both results for NaNs and assert they are
     # in the same place
 
-    expec_nan_inds = np.where(np.isnan(expected_cal_remainder["gain"]) == True)
-    result_nan_inds = np.where(np.isnan(expected_cal_remainder["gain"]) == True)
+    expec_nan_inds = np.where(np.isnan(expected_cal_remainder["gain"]))
+    result_nan_inds = np.where(np.isnan(expected_cal_remainder["gain"]))
 
     npt.assert_array_equal(expec_nan_inds, result_nan_inds)
 
     # find where things are not NaN and check they are close
-    test_inds = np.where(np.isnan(expected_cal_remainder["gain"]) == False)
+    test_inds = np.where(~np.isnan(expected_cal_remainder["gain"]))
 
     rtol = 5e-5
     atol = 1e-8

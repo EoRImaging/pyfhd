@@ -1,5 +1,4 @@
 from numpy.testing import assert_allclose
-from os import environ as env
 from pathlib import Path
 import pytest
 from pyfhd.gridding.gridding_utils import interpolate_kernel
