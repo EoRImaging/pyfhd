@@ -467,55 +467,56 @@ converted to HDF5 for faster and easier reading in the future for the same test.
 For creating a test in `pyfhd` we have utilised the pytest framework which is a
 powerful testing framework that searches for any function and/or directory that
 has the word `test` at the start or end of the function name or directory name.
-A useful feature of pytest are `fixtures` which are heavily used throughout the
-testing of pyfhd. Fixtures allow you to make functions which perform routines
-needed for a function, in the case of `test_histogram.py` I used a fixture to
-spread the data directory across all functions without having to contunally copy
-and paste the path. When making a test for `pyfhd` the `numpy.testing` package
-was particularly useful as it contains functions like `np.testing.assert_allclose`
-which allow you to test the differences between arrays upto an absolute and/or
-relative precision. See below for a test made for the histogram function which
-utilises a pytest fixture:
+When making a test for `pyfhd` the `numpy.testing` package was particularly
+useful as it contains functions like `np.testing.assert_allclose` which allow
+you to test the differences between arrays upto an absolute and/or relative
+precision. See below for a test made for the beam_image function:
 
 ```python
-import pytest
 import numpy as np
-from os import environ as env
-from pathlib import Path
-from pyfhd.pyfhd_tools.pyfhd_utils import histogram
-from pyfhd.pyfhd_tools.test_utils import get_data, get_data_items
+import pytest
+
+from pyfhd.io.pyfhd_io import recarray_to_dict
+from pyfhd.pyfhd_tools.test_utils import get_savs, sav_file_rearrange_psf
+from pyfhd.beam_setup.beam_utils import beam_image
+from pyfhd.data.datasets import fetch_data
 
 
-@pytest.fixture
-def data_dir():
-    # The files can be found here PYFHD_TEST_PATH/pyfhd_tools/<function_name_being_tested>
-    # Files could be sav or npy or h5 depending on how you got the test data
-    return Path(env.get("PYFHD_TEST_PATH"), "pyfhd_tools", "histogram")
+@pytest.mark.github_actions
+def test_idl_example():
+    obs_file = fetch_data("2013_zenith_obs")
+    psf_cut_file = fetch_data("2013_zenith_psf_small")
+    expected_beam_file = fetch_data("2013_zenith_beam_image")
 
+    obs_sav_dict = get_savs(obs_file, "")
+    obs_sav_dict = recarray_to_dict(obs_sav_dict)
+    obs = obs_sav_dict["obs"]
+    psf_sav_dict = get_savs(psf_cut_file, "")
+    # fix the psf to be properly arranged
+    psf = sav_file_rearrange_psf(psf_sav_dict["psf"])
+    beam_image_dict = get_savs(expected_beam_file, "")
+    beam_image_dict = recarray_to_dict(beam_image_dict)
+    expected_beam = beam_image_dict["beam_image_arr"].T
 
-@pytest.fixture
-def full_data_dir():
-    return Path(
-        env.get("PYFHD_TEST_PATH"), "pyfhd_tools", "histogram", "full_size_histogram"
-    )
-
-
-def test_idl_example(data_dir: Path):
-    """
-    This test is based on the example from the IDL documentation.
-    This ensures we get the same behaviour as an example everybody can see.
-    """
-    # Setup the test from the histogram data file
-    data, expected_hist, expected_indices = get_data(
-        data_dir, "idl_hist_example.npy", "idl_example_hist.npy", "idl_example_inds.npy"
-    )
-    # Now that we're using numba it doesn't support every type, set it to more
-    # standard NumPy or Python types
-    data = data.astype(int)
-    hist, _, indices = histogram(data)
-    assert np.array_equal(hist, expected_hist)
-    assert np.array_equal(indices, expected_indices)
+    dimension = 256
+    for pol_i in [0, 1]:
+        beam_out = beam_image(psf, obs, pol_i, freq_i=0, dimension=dimension)
+        comp_beam = expected_beam[pol_i]
+        np.testing.assert_allclose(beam_out, comp_beam, rtol=0, atol=1e-9)
 ```
+
+Our test data is saved in the `pyfhd datasets repo <https://github.com/EoRImaging/pyfhd-datasets/>`__.
+We use pooch via the :func:`pyuvdata.datasets.fetch_data` function to download and
+cache the test data in our tests. See [Adding New Test Data](#adding-new-test-data)
+for details on how to add new test data if needed.
+
+Pytest has many powerful and useful features. One feature we use heavily are
+`fixtures`. Fixtures allow you to make functions which perform routines
+needed for a function, in the case of `test_histogram.py` I used a fixture to
+spread the data directory across all functions without having to contunally copy
+and paste the path. Another very useful pytest feature is `parametrize` which
+allows you to run the same test with different sets of inputs. See
+`test_beam_image_psf_cut` for an example of using `parametrize`
 
 Pytest fixtures have the ability to group other fixtures too, take
 `test_cal_auto_ratio_divide` as an example, `test_cal_auto_ratio_divide` was set
@@ -716,6 +717,38 @@ actually does the same things as `FHD` and even in some cases detect bugs on the
 `FHD` side. If you want to learn more about testing check out the numpy testing
 functions [here](https://numpy.org/doc/stable/reference/routines.testing.html)
 and also check out pytest [here](https://docs.pytest.org/en/7.4.x/).
+
+#### Adding New Test Data
+
+- First make sure your test data files are not too large. This is critical! Do
+  not even push a branch with a large data file because even if that large file is
+  not merged to main it can slow downloads of the repo for everyone. Data files
+  should generally not be much larger than 1-3 MB, although this is a negotiable
+  if really needed. It can be challenging to figure out how to cut down test data
+  files while still ensuring that they provide good testing. Ask us for help in
+  a pyfhd issue, discussion or on Slack, we'll be happy to help you!
+
+- Make a PR on the pyfhd-datasets repo adding the test data. Make sure to update
+  the readme in the folder to give some provenance information for the test data
+  that you are adding. If your dataset has multiple files that are always needed
+  together, the files should be tarred and gzipped into one file.
+
+- Once the PR is merged, we need to make a new release of that repo in order to
+  be able to use it in tests. Update ``pyfhd.data.datasets.py`` with the new
+  version number for the pyfhd-datasets repo.
+
+- Add the new test file information to the ``test_data_registry.txt`` and
+  ``test_data.yaml`` files in the ``src/pyfhd/data`` folder. The registry file
+  requires a checksum which can be calculated with ``sha256sum <your_new_file>``.
+  The yaml maps the test file to a nickname used in our tests. The nickname
+  should include the telescope name and descriptive information about the dataset.
+
+- Call :func:`pyfhd.data.datasets.fetch_data` with the nickname in any test
+  requiring your new dataset to get the path to the dataset on disk. We strongly
+  suggest setting up fixtures for new datasets, particularly if there are multiple
+  tests that use them. Please avoid calling ``fetch_data`` in pytest.parametrize
+  decorators to avoid invoking it during test setup, instead call it inside a
+  fixture or test function.
 
 (testing-subset)=
 #### Testing a subset of the pyfhd functions
