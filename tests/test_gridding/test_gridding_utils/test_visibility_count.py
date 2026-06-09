@@ -81,13 +81,23 @@ def vis_count_after(data_dir, number):
     vis_count_after = Path(data_dir, f"test_{number}_after_{data_dir.name}.h5")
 
     if vis_count_after.exists():
-        return vis_count_after
+        h5_after = load(vis_count_after, lazy_load=True)
+        after_axes_reorder = (
+            "after_axes_reorder" in h5_after.keys() and h5_after["after_axes_reorder"]
+        )
+        h5_after.close()
+        if after_axes_reorder:
+            return vis_count_after
+
     uniform_filter = get_data_items(data_dir, f"output_uniform_filter_{number}.npy")
 
-    h5_save_dict = {"uniform_filter": uniform_filter}
+    # transpose uniform_filter as it was saved before the axis reordering to
+    # match IDL FHD
+    h5_save_dict = {"uniform_filter": uniform_filter.T}
 
     save(vis_count_after, h5_save_dict, "after_file")
 
+    h5_save_dict["after_axes_reorder"] = True
     return vis_count_after
 
 

@@ -255,6 +255,39 @@ def sav_file_vis_arr_swap_axes(sav_file_vis_arr: NDArray) -> NDArray:
     return vis_arr
 
 
+def sav_file_rearrange_psf(sav_psf):
+    """Reading in IDL psf structures via scipy.io.readsav results in rearranged
+    axes and badly sorted flattened arrays. Use this function to get fix them
+    for pyfhd.
+
+    Parameters
+    ----------
+    sav_psf : recarray
+        recarray as read in by scipy.io.readsav
+
+    Returns
+    -------
+    dict
+        Returns a psf dict with properly arranged arrays.
+    """
+    # do this first to drop beam_ptr size (for only 1 antenna type)
+    sav_psf["beam_ptr"][0] = sav_psf["beam_ptr"][0].T[:, :, 0]
+    sav_psf = recarray_to_dict(sav_psf)
+
+    # need to transpose the offset axes
+    sav_psf["beam_ptr"] = sav_psf["beam_ptr"].transpose([0, 1, 3, 2, 4])
+    # # finally need to reorder the last (flat) from f order to c order
+    inp_shape = sav_psf["beam_ptr"].shape
+    new_shape = tuple(list(inp_shape[:-1]) + [int(sav_psf["dim"]), int(sav_psf["dim"])])
+    sav_psf["beam_ptr"] = (
+        sav_psf["beam_ptr"].reshape(new_shape, order="F").reshape(inp_shape)
+    )
+
+    sav_psf["id"] = sav_psf["id"].astype(int).T
+
+    return sav_psf
+
+
 def print_types(dictionary: dict, dict_name: str, indent_level: int = 1) -> None:
     """
     When generating the tests, Sometimes I'd find it useful to see the types of all the keys and value pairs inside

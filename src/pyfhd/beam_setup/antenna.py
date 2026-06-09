@@ -61,7 +61,7 @@ def init_beam(obs: dict, pyfhd_config: dict, logger: Logger) -> dict:
     tile_a = obs["baseline_info"]["tile_a"]
     tile_b = obs["baseline_info"]["tile_b"]
     ant_names = np.unique(
-        np.concatenate(tile_a[: obs["n_baselines"]], tile_b[: obs["n_baselines"]])
+        np.concatenate((tile_a[: obs["n_baselines"]], tile_b[: obs["n_baselines"]]))
     )
     if pyfhd_config["beam_offset_time"] is not None:
         jdate_use = obs["jd0"] + pyfhd_config["beam_offset_time"] / 24 / 3600
