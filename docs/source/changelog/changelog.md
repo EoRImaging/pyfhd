@@ -3,6 +3,9 @@
 ## Unreleased
 
 ### Breaking Changes!
+* uv plane and image axes have been transposed to put the x axis before the y axis.
+This should be transparent to most users, but could cause inconsistencies with
+partial re-running of pyfhd jobs from before this change.
 * UVBeam files must now be passed using the `uvbeam-file-path` option, which
 can take any path on the computer, rather than placing them in a folder in the
 repo and passing None to `beam_file-path`.
@@ -10,6 +13,9 @@ repo and passing None to `beam_file-path`.
 to avoid confusion with the new `uvbeam-file-path` option.
 
 ### New Features
+* Set up a new test data repo (https://github.com/EoRImaging/pyfhd-datasets),
+use pooch to download and cache the test data in testing and in tutorials.
+* Added pooch as a testing dependency.
 * Added options to `plotting.image.quick_image` to set the color range to clip
 outliers based on a number of standard deviations (for log colorbars) or a
 percentile range (for linear colorbars).
@@ -23,6 +29,8 @@ the new `analytic-beam-yaml` option to configure them.
 * Added handling for `~` in paths in config yamls.
 
 ### Bug Fixes
+* Fixed a couple of bugs in beam and psf setup where the FFT direction or
+normalization convention was wrong.
 * Fixed a couple small bugs in `plotting.image.quick_image` that caused the
 linear scaling to be wrong and the image to be flipped vertically.
 * The telescope location is now extracted from the uvfits antenna table, rather
