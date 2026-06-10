@@ -130,12 +130,12 @@ def create_psf(obs: dict, pyfhd_config: dict, logger: Logger) -> dict | File:
         bi_max = np.max(bi_list)
         pol_arr = np.array([[0, 0], [1, 1], [0, 1], [1, 0]], dtype=np.int8)
         for pol_i in range(obs["n_pol"]):
-            ant_pol1 = pol_arr[0, pol_i]
-            ant_pol2 = pol_arr[1, pol_i]
+            ant_pol_1 = pol_arr[0, pol_i]
+            ant_pol_2 = pol_arr[1, pol_i]
 
             # Group IDs label unique beams across the array (should be all 0s as theres only one group)
-            group1 = antenna["group_id"][ant_pol1]
-            group2 = antenna["group_id"][ant_pol2]
+            group1 = antenna["group_id"][ant_pol_1]
+            group2 = antenna["group_id"][ant_pol_2]
 
             # Histogram group IDs, get reverse indicies, and calculate number of unique beams (again that should be 1)
             hgroup1, _, gri1 = histogram(group1, min=0)
@@ -174,8 +174,8 @@ def create_psf(obs: dict, pyfhd_config: dict, logger: Logger) -> dict | File:
                 # Calculate power beam from antenna beams
                 psf_base_superres = beam_power(
                     antenna=antenna,
-                    ant_pol1=ant_pol1,
-                    ant_pol2=ant_pol2,
+                    ant_pol_1=ant_pol_1,
+                    ant_pol_2=ant_pol_2,
                     freq_i=freq_i,
                     psf=psf,
                     zen_int_x=zen_int_x,
