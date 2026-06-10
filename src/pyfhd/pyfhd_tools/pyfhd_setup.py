@@ -199,12 +199,10 @@ def pyfhd_parser():
         "uvfits replace file_path_vis from FHD",
     )
     parser.add_argument(
-        "-i",
-        "--input-path",
+        "input-path",
         type=Path,
         help="Directory for the uvfits files and other inputs, by default it "
         "looks for a directory called input in the working directory",
-        default="./input/",
     )
     parser.add_argument(
         "--get-sample-data",
@@ -1101,12 +1099,12 @@ def pyfhd_parser():
     )
     model.add_argument(
         "--model-file-path",
-        default="./input",
+        default=None,
         type=Path,
-        help="In the case you chose sav for model-file-type then this will be a "
+        help="In the case you chose 'sav' for model-file-type then this will be a "
         "directory containing all the <obs_id>_params and "
         "<obs_id>_vis_model_<pol_name> sav files.\n"
-        "In the case you chose uvfits, then the path is to a uvfits file, in "
+        "In the case you chose 'uvfits', then the path is to a uvfits file, in "
         "which case make sure the phase centre of model data must match the 'RA' "
         "and 'DEC' values in the metafits file (NOT the 'RAPHASE' and 'DECPHASE').",
     )
