@@ -199,10 +199,12 @@ def pyfhd_parser():
         "uvfits replace file_path_vis from FHD",
     )
     parser.add_argument(
-        "input-path",
+        "-i",
+        "--input-path",
         type=Path,
         help="Directory for the uvfits files and other inputs, by default it "
         "looks for a directory called input in the working directory",
+        default=None,
     )
     parser.add_argument(
         "--get-sample-data",
