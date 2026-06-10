@@ -715,6 +715,25 @@ def pyfhd_parser():
         "one of these three should be set to specify the beam.",
     )
     beam.add_argument(
+        "--uvbeam-zfile-path",
+        type=Path,
+        default=None,
+        help="The path to an MWA AEE beam Z matrix file required by pyuvdata.UVBeam "
+        "for MWA AEE beams. Should only be set if  `uvbeam-file-path` is set. "
+        "Cannot be used with `saved-beam-file-path` or `analytic-beam-yaml`, "
+        "one of these three should be set to specify the beam.",
+    )
+    beam.add_argument(
+        "--uvbeam-mwa-include-cross-feed-coupling",
+        type=Path,
+        default=True,
+        help="For AEE beams only. Option to include the couplings between the "
+        "different feed directions (i.e. couplings between x and y feeds). "
+        "Including these couplings is more correct, but they are excluded in the "
+        "default IDL FHD beam so option is supplied to enable matching with "
+        "that. Default is True.",
+    )
+    beam.add_argument(
         "--uvbeam-freq-buffer",
         type=float,
         default=None,
@@ -1680,6 +1699,22 @@ def pyfhd_setup(options: argparse.Namespace) -> Tuple[dict, logging.Logger]:
         if not Path(pyfhd_config["uvbeam_file_path"]).exists():
             logger.error(
                 f"UVBeam file {pyfhd_config['uvbeam_file_path']} does not exist, "
+                "please check your input path"
+            )
+            errors += 1
+
+    # If the user has set a uvbeam z file, check it exists (Error)
+    if pyfhd_config["uvbeam_zfile_path"] is not None:
+        if pyfhd_config["uvbeam_file_path"] is None:
+            logger.error(
+                "uvbeam_zfile_path is set but uvbeam_file_path is not. Please "
+                "specify a uvbeam_file_path."
+            )
+            errors += 1
+
+        if not Path(pyfhd_config["uvbeam_zfile_path"]).exists():
+            logger.error(
+                f"UVBeam z file {pyfhd_config['uvbeam_zfile_path']} does not exist, "
                 "please check your input path"
             )
             errors += 1

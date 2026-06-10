@@ -1,0 +1,4 @@
+2013_zenith_obs: fhd_extracts/MWA/std_1061316296/1061316296_obs.sav
+2013_zenith_psf_small: fhd_extracts/MWA/std_1061316296/cut_down_psf.sav
+2013_zenith_beam_image: fhd_extracts/MWA/std_1061316296/beam_image.sav
+2013_zenith_psf_superres: fhd_extracts/MWA/std_1061316296/psf_base_superres.sav

@@ -1,6 +1,4 @@
 import numpy as np
-from pyuvdata import UVBeam
-from pyuvdata.analytic_beam import AnalyticBeam
 from pyfhd.pyfhd_tools.pyfhd_utils import histogram, region_grow
 import h5py
 from numpy.typing import NDArray
@@ -119,7 +117,9 @@ def beam_image(
     psf: dict | h5py.File,
     obs: dict,
     pol_i: int,
+    *,
     freq_i: int | None = None,
+    dimension: int | None = None,
     abs=False,
     square=False,
 ) -> np.ndarray:
@@ -140,7 +140,11 @@ def beam_image(
     pol_i : int
         Index of the polarization to use
     freq_i : int
-        Index of the frequency to use, by default None
+        Index of the frequency to use, by default averages across all frequencies
+        in obs structure.
+    dimension : int
+        Size of the image returned (image will be dimension x dimension). Defaults
+        to using the dimension of the obs structure.
     abs : bool, optional
         Return the absolute value of the beam image, by default False
     square : bool, optional
@@ -159,9 +163,10 @@ def beam_image(
     elif "fnorm" in psf:
         # handling for older files or imports from IDL FHD
         freq_norm = psf["fnorm"]
-    pix_horizon = psf["pix_horizon"]
-    group_id = psf["id"][pol_i, 0, :]
-    if "beam_gaussian_params" in psf:
+    group_id = (psf["id"][pol_i, 0, :]).astype(int)
+    # IDL psf structures often have "beam_gaussian_params" defined but set to zero
+    # have to test that it's present *and* nonzero
+    if "beam_gaussian_params" in psf and psf["beam_gaussian_params"] != 0:
         beam_gaussian_params = psf["beam_gaussian_params"][:]
     else:
         beam_gaussian_params = None
@@ -170,8 +175,9 @@ def beam_image(
     if isinstance(psf, h5py.File):
         psf_dim = psf_dim[0]
         freq_norm = freq_norm[:]
-        pix_horizon = pix_horizon[0]
-    dimension = elements = obs["dimension"]
+    if dimension is None:
+        dimension = obs["dimension"]
+    elements = dimension
     # these should all be integers b/c dimensions are usually even numbers.
     # but they have to be cast to ints to be used in slicing.
     xl = int(dimension / 2 - psf_dim / 2 + 1)
@@ -185,6 +191,9 @@ def beam_image(
     n_groups = np.count_nonzero(group_n)
 
     if beam_gaussian_params is not None:
+        pix_horizon = psf["pix_horizon"]
+        if isinstance(psf, h5py.File):
+            pix_horizon = pix_horizon[0]
         # 1.3 is the padding factor for the gaussian fitting procedure
         # (2.*obs.kpix) is the ratio of full sky (2 in l,m) to the analysis range (1/obs.kpix)
         # (2.*obs.kpix*dimension/psf.pix_horizon) is the scale factor between the psf pixels-to-horizon and the
@@ -199,6 +208,7 @@ def beam_image(
     # We assume freq_i is an int when provided (i.e. a single frequency index)
     if freq_i is not None:
         freq_i_use = freq_i
+        freq_i_use = np.atleast_1d(freq_i_use)
 
     if square:
         # Do note freq_i_use could be an integer or an array if freq_i is supplied or not
@@ -234,7 +244,7 @@ def beam_image(
             else:
                 for gi in range(n_groups):
                     beam_single += (
-                        psf["beam_ptr"][0, fbin, rbin, rbin] * group_n[gi_use[gi]]
+                        psf["beam_ptr"][pol_i, fbin, rbin, rbin] * group_n[gi_use[gi]]
                     ).reshape([psf_dim, psf_dim])
                 beam_single /= np.sum(group_n[gi_use])
                 if abs:
@@ -242,7 +252,7 @@ def beam_image(
                 beam_base_uv1 = np.zeros([dimension, elements], np.complex128)
                 beam_base_uv1[xl : xh + 1, yl : yh + 1] = beam_single
                 beam_base_single = np.fft.fftshift(
-                    np.fft.fftn(np.fft.fftshift(beam_base_uv1))
+                    np.fft.ifftn(np.fft.fftshift(beam_base_uv1), norm="forward")
                 )
                 beam_base += (
                     nf_bin * (beam_base_single * np.conjugate(beam_base_single)).real
@@ -277,7 +287,7 @@ def beam_image(
             else:
                 for gi in range(n_groups):
                     beam_single += (
-                        psf["beam_ptr"][0, fbin, rbin, rbin] * group_n[gi_use[gi]]
+                        psf["beam_ptr"][pol_i, fbin, rbin, rbin] * group_n[gi_use[gi]]
                     ).reshape([psf_dim, psf_dim])
             beam_single /= np.sum(group_n[gi_use])
             beam_base_uv += beam_single
@@ -286,7 +296,10 @@ def beam_image(
         if beam_gaussian_params is None:
             beam_base_uv1 = np.zeros([dimension, elements], dtype=np.complex128)
             beam_base_uv1[xl : xh + 1, yl : yh + 1] = beam_base_uv
-            beam_base = np.fft.fftshift(np.fft.fftn(np.fft.fftshift(beam_base_uv1)))
+            # norm chosen to match FHD when starting from a psf saved from FHD
+            beam_base = np.fft.fftshift(
+                np.fft.ifftn(np.fft.fftshift(beam_base_uv1), norm="forward")
+            )
         else:
             beam_base = beam_base_uv
     beam_base /= n_bin_use
@@ -294,8 +307,8 @@ def beam_image(
 
 
 def beam_image_hyperresolved(
+    *,
     antenna: dict,
-    beam: UVBeam | AnalyticBeam,
     ant_pol_1: int,
     ant_pol_2: int,
     freq_i: int,
@@ -317,8 +330,6 @@ def beam_image_hyperresolved(
     ----------
     antenna : dict
         Antenna metadata dictionary
-    beam : UVBeam | AnalyticBeam
-        UVBeam or AnalyticBeam object containing the beam model and metadata.
     ant_pol_1 : int
         Polarization index for the first antenna
     ant_pol_2 : int
@@ -380,8 +391,8 @@ def beam_image_hyperresolved(
 
 
 def beam_power(
+    *,
     antenna: dict,
-    beam: UVBeam | AnalyticBeam,
     ant_pol_1: int,
     ant_pol_2: int,
     freq_i: int,
@@ -402,8 +413,6 @@ def beam_power(
     ----------
     antenna : dict
         Antenna metadata dictionary
-    beam : UVBeam | AnalyticBeam
-       UVBeam or AnalyticBeam object containing the beam model and metadata.
     ant_pol_1 : int
         Polarization index for the first antenna
     ant_pol_2 : int
@@ -430,11 +439,20 @@ def beam_power(
     """
     # For now we will ignore beam_gaussian_decomp and much of the debug keywords
     image_power_beam = beam_image_hyperresolved(
-        antenna, beam, ant_pol_1, ant_pol_2, freq_i, zen_int_x, zen_int_y, psf
+        antenna=antenna,
+        ant_pol_1=ant_pol_1,
+        ant_pol_2=ant_pol_2,
+        freq_i=freq_i,
+        zen_int_x=zen_int_x,
+        zen_int_y=zen_int_y,
+        psf=psf,
     )
     if pyfhd_config.get("kernel_window", False):
         image_power_beam *= antenna["pix_window"]
-    psf_base_single = np.fft.fftshift(np.fft.ifftn(np.fft.fftshift(image_power_beam)))
+    # norm chosen to match default IDL FFT
+    psf_base_single = np.fft.fftshift(
+        np.fft.fftn(np.fft.fftshift(image_power_beam), norm="forward")
+    )
     # TODO: Same cubic problem as in beam_image_hyperresolved here
     # Map Coordinates isn't the same as IDL Interpolate
     # But its closish, more of a placeholder for now.

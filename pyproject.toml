@@ -37,7 +37,7 @@ dependencies = [
     "matplotlib>=3.10.3",
     "numba>=0.61.2",
     "numpy>=2.2.5",
-    "pyuvdata>=3.2.1",
+    "pyuvdata>=3.2.4",
     "setuptools_scm>=8.1",
     "scipy>=1.15.3",
 ]
@@ -57,6 +57,7 @@ dev = [
     "ipykernel>=6.29.5",
     "myst-parser>=4.0.1",
     "pip>=25.1.1",
+    "pooch>=1.8",
     "pre-commit>=4.2.0",
     "pyinstrument>=5.0.2",
     "pytest>=8.3.5",

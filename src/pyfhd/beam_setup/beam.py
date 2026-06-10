@@ -48,7 +48,7 @@ def create_psf(obs: dict, pyfhd_config: dict, logger: Logger) -> dict | File:
         or pyfhd_config["analytic_beam_yaml"] is not None
     ):
         logger.info("pyfhd is using pyuvdata to set up the beam. ")
-        antenna, psf, beam = init_beam(obs, pyfhd_config, logger)
+        antenna, psf = init_beam(obs, pyfhd_config, logger)
         # TODO: we'll see if the +1 is necessary, IDL indexing thing
         n_freq_bin = np.max(obs["baseline_info"]["fbin_i"]) + 1
         # TODO: Double check the shape
@@ -130,12 +130,12 @@ def create_psf(obs: dict, pyfhd_config: dict, logger: Logger) -> dict | File:
         bi_max = np.max(bi_list)
         pol_arr = np.array([[0, 0], [1, 1], [0, 1], [1, 0]], dtype=np.int8)
         for pol_i in range(obs["n_pol"]):
-            ant_pol1 = pol_arr[0, pol_i]
-            ant_pol2 = pol_arr[1, pol_i]
+            ant_pol_1 = pol_arr[0, pol_i]
+            ant_pol_2 = pol_arr[1, pol_i]
 
             # Group IDs label unique beams across the array (should be all 0s as theres only one group)
-            group1 = antenna["group_id"][ant_pol1]
-            group2 = antenna["group_id"][ant_pol2]
+            group1 = antenna["group_id"][ant_pol_1]
+            group2 = antenna["group_id"][ant_pol_2]
 
             # Histogram group IDs, get reverse indicies, and calculate number of unique beams (again that should be 1)
             hgroup1, _, gri1 = histogram(group1, min=0)
@@ -173,17 +173,16 @@ def create_psf(obs: dict, pyfhd_config: dict, logger: Logger) -> dict | File:
                 baseline_group_n = bi_use.size
                 # Calculate power beam from antenna beams
                 psf_base_superres = beam_power(
-                    antenna,
-                    beam,
-                    ant_pol1,
-                    ant_pol2,
-                    freq_i,
-                    psf,
-                    zen_int_x,
-                    zen_int_y,
-                    xvals_uv_superres,
-                    yvals_uv_superres,
-                    pyfhd_config,
+                    antenna=antenna,
+                    ant_pol_1=ant_pol_1,
+                    ant_pol_2=ant_pol_2,
+                    freq_i=freq_i,
+                    psf=psf,
+                    zen_int_x=zen_int_x,
+                    zen_int_y=zen_int_y,
+                    xvals_uv_superres=xvals_uv_superres,
+                    yvals_uv_superres=yvals_uv_superres,
+                    pyfhd_config=pyfhd_config,
                 )
 
                 # divide by psf_resolution^2 since the FFT is done at

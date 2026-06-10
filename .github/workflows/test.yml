@@ -35,6 +35,13 @@ jobs:
       - name: Install the project
         run: uv sync ${{ matrix.uv-options }} --all-extras --dev
 
+      - name: Install pyuvdata fhd_beam_decompose branch
+        run: |
+          cd ../
+          git clone -b fhd_beam_decompose https://github.com/RadioAstronomySoftwareGroup/pyuvdata.git
+          cd pyfhd
+          uv pip install --no-deps ../pyuvdata
+
       - name: Environment Info
         run: |
           uv pip list
@@ -58,8 +65,8 @@ jobs:
 
       - name: Run tests
         run: |
-          uv run ${{ matrix.uv-options }} coverage run --branch --source=pyfhd -m pytest -m github_actions --html=pyfhd_report.html --self-contained-html
-          uv run ${{ matrix.uv-options }} coverage xml  -o ./coverage.xml
+          uv run --no-sync coverage run --branch --source=pyfhd -m pytest -m github_actions --html=pyfhd_report.html --self-contained-html
+          uv run --no-sync coverage xml  -o ./coverage.xml
 
       - name: check coverage report
         run: |
