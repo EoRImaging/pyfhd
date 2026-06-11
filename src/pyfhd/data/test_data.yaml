@@ -1,4 +1,6 @@
+gleam_rlb2019_cut: fhd_extracts/fhd_catalogs/gleam_v2_rlb2019_cut.sav
 2013_zenith_obs: fhd_extracts/MWA/std_1061316296/1061316296_obs.sav
 2013_zenith_psf_small: fhd_extracts/MWA/std_1061316296/cut_down_psf.sav
 2013_zenith_beam_image: fhd_extracts/MWA/std_1061316296/beam_image.sav
 2013_zenith_psf_superres: fhd_extracts/MWA/std_1061316296/psf_base_superres.sav
+2013_zenith_gleam_sources: fhd_extracts/MWA/std_1061316296/gleam_v2_rlb2019_cut_cal_src_list.sav

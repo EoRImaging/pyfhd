@@ -1,6 +1,7 @@
 import logging
 from pathlib import Path
 
+from astropy import units
 import numpy as np
 from pyuvdata.utils.types import BoolArray, FloatArray
 from pyradiosky import SkyModel
@@ -29,7 +30,7 @@ def create_skymodel(
     spectral_index: float | None = None,
     preserve_zero_spectral_indices: bool = False,
     flatten_spectrum: bool = False,
-    refraction: bool = True,
+    refraction: str | None = None,
 ) -> SkyModel:
     """
     Make the SkyModel object with the sources needed for visibility modeling.
@@ -93,8 +94,12 @@ def create_skymodel(
         Option to flatten the spectrum by the average spectral index (calculated
         as a flux-weighted average).
     refraction : bool
-        Option to account for refraction in earth's atmosphere when computing
-        the pixel locations (and therefore when calculating beam values).
+        Option for what refraction algorithm to use to account for refraction in
+        earth's atmosphere when computing the pixel locations (and therefore
+        when calculating beam values). Allowed values are None (for no refraction
+        correction), "idl" to use the refraction algorithm from the IDL astrolib
+        or "astropy" to use astropy's refraction algorithm with temperatures and
+        pressures estimated using the IDL astrolib algorithm. Default is None.
 
     Returns
     -------
@@ -122,8 +127,6 @@ def create_skymodel(
     fov = (180 / np.pi) / obs["kpix"]
 
     freq_use = obs["freq_center"]
-    if freq_use > 1e5:
-        freq_use /= 1e6
     n_pol = obs["n_pol"]
 
     if beam is None:
@@ -155,7 +158,7 @@ def create_skymodel(
         logger.warning(
             f"beam_threshold was set to {beam_threshold}, which is greater than "
             "half the maximum beam value. Using half the maximum beam value for "
-            f"the threshold. New beam_threshold is: {np.max(beam)/2.}"
+            f"the threshold. New beam_threshold is: {np.max(beam) / 2.0}"
         )
         beam_threshold = np.max(beam) / 2.0
 
@@ -442,7 +445,14 @@ def create_skymodel(
 
                 # remove the extra columns just used internally
                 skymodel.remove_extra_columns(
-                    ["ra_deg_use", "dec_deg_use", "x_use", "y_use", "flux_I_use"]
+                    [
+                        "ra_deg_use",
+                        "dec_deg_use",
+                        "x_use",
+                        "y_use",
+                        "flux_I_use",
+                        "beam_I",
+                    ]
                 )
 
                 # sort from max to min apparent flux
@@ -512,5 +522,8 @@ def create_skymodel(
         )
         obs["alpha_avg"] = alpha_avg
         skymodel.spectral_index -= alpha_avg
+
+    # call `at_frequencies` method to get it at the central obs freq:
+    skymodel.at_frequencies(np.atleast_1d(freq_use) * units.Hz)
 
     return skymodel
