@@ -8,6 +8,7 @@ from pyfhd.pyfhd_tools.test_utils import get_savs, sav_file_rearrange_psf
 from pyfhd.source_modeling.source_utils import create_skymodel
 
 
+@pytest.mark.github_actions
 @pytest.mark.filterwarnings("ignore:Some Stokes values are NaNs.")
 @pytest.mark.filterwarnings("ignore:Some Stokes I values are negative.")
 @pytest.mark.parametrize("refraction", [None, "astropy", "idl"])
