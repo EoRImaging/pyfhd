@@ -32,6 +32,12 @@ def test_create_skymodel(refraction):
         idl_cal_sources_file, extra_columns={"x": "image_x", "y": "image_y"}
     )
 
+    # take this out once pyradiosky fix is in:
+    if expected_sky.extended_model_group is not None:
+        extended_comps = np.nonzero(expected_sky.extended_model_group != "")[0]
+        if extended_comps.size == 0:
+            expected_sky.extended_model_group = None
+
     expected_sky.at_frequencies(np.atleast_1d(expected_sky.reference_frequency[0]))
 
     # obs dimension should be an int
