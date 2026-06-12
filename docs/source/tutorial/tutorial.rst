@@ -649,7 +649,7 @@ Checkpointing
 -------------
 The checkpointing system in ``pyfhd`` is designed to save the state of the
 pipeline after important, potentially long running steps. The checkpoints are
-stored in the ``checkpoints`` directory and they are saved at the fopllowing points:
+stored in the ``checkpoints`` directory and they are saved at the following points:
 
 - ``obs_checkpoint`` - ``obs`` dict creation, reading of visibilities and weights,
   creation of the ``params`` dict
