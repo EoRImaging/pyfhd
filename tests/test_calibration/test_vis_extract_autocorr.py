@@ -1,12 +1,11 @@
-import pytest
 from os import environ as env
 from pathlib import Path
-from pyfhd.io.pyfhd_io import save, load
+
 import numpy as np
+import pytest
 
 from pyfhd.calibration.calibration_utils import vis_extract_autocorr
-from pyfhd.io.pyfhd_io import convert_sav_to_dict
-from pyfhd.io.pyfhd_io import recarray_to_dict
+from pyfhd.io.pyfhd_io import convert_sav_to_dict, load, recarray_to_dict, save
 
 
 @pytest.fixture

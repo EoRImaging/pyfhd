@@ -1,13 +1,14 @@
-import pytest
-from pathlib import Path
 from os import environ as env
-from pyfhd.data_setup.uvfits import extract_header, create_params, create_layout
-from pyfhd.data_setup.obs import create_obs
-from pyfhd.io.pyfhd_io import recarray_to_dict
-from pyfhd.io.pyfhd_io import save, load
-import numpy.testing as npt
+from pathlib import Path
+
 import numpy as np
+import numpy.testing as npt
+import pytest
 from scipy.io import readsav
+
+from pyfhd.data_setup.obs import create_obs
+from pyfhd.data_setup.uvfits import create_layout, create_params, extract_header
+from pyfhd.io.pyfhd_io import load, recarray_to_dict, save
 
 
 @pytest.fixture(

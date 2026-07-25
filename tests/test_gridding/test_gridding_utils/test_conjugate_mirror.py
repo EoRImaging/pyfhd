@@ -1,10 +1,12 @@
-import pytest
-import numpy as np
 from os import environ as env
 from pathlib import Path
+
+import numpy as np
+import pytest
+
 from pyfhd.gridding.gridding_utils import conjugate_mirror
+from pyfhd.io.pyfhd_io import load, save
 from pyfhd.pyfhd_tools.test_utils import get_data_items
-from pyfhd.io.pyfhd_io import save, load
 
 
 @pytest.fixture

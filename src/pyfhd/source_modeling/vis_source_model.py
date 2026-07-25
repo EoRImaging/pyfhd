@@ -1,16 +1,16 @@
-from pathlib import Path
 import copy
 import logging
 import time
+from pathlib import Path
 
 import numpy as np
 from pyradiosky import SkyModel
 
-from .source_utils import source_dft_model, vis_delay_filter
 from ..gridding.visibility_degrid import visibility_degrid
-from ..pyfhd_tools.types import BoolArray, ComplexArray, FloatArray
-from ..pyfhd_tools.pyfhd_utils import _print_time_diff
 from ..io.pyfhd_io import save
+from ..pyfhd_tools.pyfhd_utils import _print_time_diff
+from ..pyfhd_tools.types import BoolArray, ComplexArray, FloatArray
+from .source_utils import source_dft_model, vis_delay_filter
 
 logger = logging.getLogger(__name__)
 

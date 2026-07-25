@@ -1,8 +1,8 @@
-from astropy.coordinates import SkyCoord, EarthLocation, AltAz
-from astropy.wcs import WCS
-from astropy.time import Time
-from astropy import units as u
 import numpy as np
+from astropy import units as u
+from astropy.coordinates import AltAz, EarthLocation, SkyCoord
+from astropy.time import Time
+from astropy.wcs import WCS
 
 from .types import FloatArray
 

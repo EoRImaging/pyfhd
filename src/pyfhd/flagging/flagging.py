@@ -1,9 +1,9 @@
 import logging
 
 import numpy as np
-from numpy.typing import NDArray, ArrayLike
+from numpy.typing import ArrayLike, NDArray
 
-from pyfhd.pyfhd_tools.pyfhd_utils import idl_median, histogram
+from ..pyfhd_tools.pyfhd_utils import histogram, idl_median
 
 logger = logging.getLogger(__name__)
 

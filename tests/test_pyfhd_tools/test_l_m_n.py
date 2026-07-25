@@ -1,10 +1,12 @@
-from pyfhd.io.pyfhd_io import recarray_to_dict
-import pytest
-import numpy.testing as npt
 from os import environ as env
 from pathlib import Path
-from pyfhd.pyfhd_tools.test_utils import get_data, get_data_items
+
+import numpy.testing as npt
+import pytest
+
+from pyfhd.io.pyfhd_io import recarray_to_dict
 from pyfhd.pyfhd_tools.pyfhd_utils import l_m_n
+from pyfhd.pyfhd_tools.test_utils import get_data, get_data_items
 
 
 @pytest.fixture

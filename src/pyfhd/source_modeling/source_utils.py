@@ -3,8 +3,8 @@ import time
 from datetime import timedelta
 from pathlib import Path
 
-from astropy import units
 import numpy as np
+from astropy import units
 from pyradiosky import SkyModel
 
 from ..beam_setup.beam_utils import beam_image
@@ -15,8 +15,8 @@ from ..pyfhd_tools.pyfhd_utils import (
     spectral_window,
     weight_invert,
 )
-from ..pyfhd_tools.unit_conv import pixel_to_radec, radec_to_pixel
 from ..pyfhd_tools.types import BoolArray, ComplexArray, FloatArray, IntArray
+from ..pyfhd_tools.unit_conv import pixel_to_radec, radec_to_pixel
 
 logger = logging.getLogger(__name__)
 

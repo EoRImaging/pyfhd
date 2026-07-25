@@ -1,9 +1,10 @@
 import logging
+from pathlib import Path
 
 import numpy as np
 from numpy.typing import NDArray
-from pathlib import Path
-from pyfhd.plotting.image import quick_image
+
+from .image import quick_image
 
 logger = logging.getLogger(__name__)
 

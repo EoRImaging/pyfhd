@@ -11,8 +11,8 @@ from astropy import units as u
 from astropy.coordinates import SkyCoord
 from numba import njit
 from numpy.typing import ArrayLike, NDArray
-from scipy.ndimage import label, median_filter
 from scipy import special
+from scipy.ndimage import label, median_filter
 
 
 def _print_time_diff(start: float, end: float, description: str):

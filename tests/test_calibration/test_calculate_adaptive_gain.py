@@ -1,11 +1,12 @@
-import pytest
 from pathlib import Path
-from pyfhd.pyfhd_tools.test_utils import get_data_items
-from pyfhd.calibration.calibration_utils import calculate_adaptive_gain
-from pyfhd.io.pyfhd_io import convert_sav_to_dict
-from pyfhd.io.pyfhd_io import save, load
-import numpy.testing as npt
+
 import importlib_resources
+import numpy.testing as npt
+import pytest
+
+from pyfhd.calibration.calibration_utils import calculate_adaptive_gain
+from pyfhd.io.pyfhd_io import convert_sav_to_dict, load, save
+from pyfhd.pyfhd_tools.test_utils import get_data_items
 
 
 @pytest.fixture

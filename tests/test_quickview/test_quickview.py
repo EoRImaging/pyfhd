@@ -1,8 +1,10 @@
 from os import environ as env
 from pathlib import Path
+
+import astropy
 import numpy as np
 import pytest
-import astropy
+
 from pyfhd.io.pyfhd_io import convert_sav_to_dict, load, recarray_to_dict, save
 from pyfhd.io.pyfhd_quickview import quickview
 

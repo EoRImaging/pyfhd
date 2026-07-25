@@ -6,7 +6,7 @@ from typing import Any
 import h5py
 import numpy as np
 import yaml
-from numpy.typing import NDArray, DTypeLike
+from numpy.typing import DTypeLike, NDArray
 from scipy.io import readsav
 
 logger = logging.getLogger(__name__)

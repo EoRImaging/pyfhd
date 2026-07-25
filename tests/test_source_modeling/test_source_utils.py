@@ -3,21 +3,21 @@ import copy
 import numpy as np
 import pytest
 from astropy import units
-from astropy.coordinates import Longitude, Latitude
+from astropy.coordinates import Latitude, Longitude
 from pyradiosky import SkyModel
 
 from pyfhd.data.datasets import fetch_data
 from pyfhd.io.pyfhd_io import recarray_to_dict
-from pyfhd.source_modeling.source_utils import (
-    generate_source_cal_skymodel,
-    stokes_cnv,
-    source_dft,
-    vis_delay_filter,
-    _setup_uv_vals,
-)
-from pyfhd.source_modeling.vis_source_model import vis_source_model
 from pyfhd.pyfhd_tools.test_utils import get_savs
 from pyfhd.pyfhd_tools.unit_conv import altaz_to_radec, radec_to_pixel
+from pyfhd.source_modeling.source_utils import (
+    _setup_uv_vals,
+    generate_source_cal_skymodel,
+    source_dft,
+    stokes_cnv,
+    vis_delay_filter,
+)
+from pyfhd.source_modeling.vis_source_model import vis_source_model
 
 
 @pytest.fixture(scope="session")

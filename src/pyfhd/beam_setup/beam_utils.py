@@ -1,8 +1,9 @@
-import numpy as np
-from pyfhd.pyfhd_tools.pyfhd_utils import histogram, region_grow
 import h5py
+import numpy as np
 from numpy.typing import NDArray
 from scipy.ndimage import map_coordinates
+
+from ..pyfhd_tools.pyfhd_utils import histogram, region_grow
 
 
 def gaussian_decomp(

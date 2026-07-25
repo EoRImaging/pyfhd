@@ -1,16 +1,18 @@
-import pytest
 from pathlib import Path
+
+import importlib_resources
+import numpy as np
+import numpy.testing as npt
+import pytest
+
+from pyfhd.data_setup.obs import create_obs
 from pyfhd.data_setup.uvfits import (
-    extract_header,
-    create_params,
     create_layout,
+    create_params,
+    extract_header,
     extract_visibilities,
 )
-from pyfhd.data_setup.obs import create_obs
 from pyfhd.io.pyfhd_io import load
-import numpy.testing as npt
-import numpy as np
-import importlib_resources
 from pyfhd.source_modeling.vis_model_transfer import vis_model_transfer
 
 

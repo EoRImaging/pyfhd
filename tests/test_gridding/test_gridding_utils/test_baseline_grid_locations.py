@@ -1,12 +1,13 @@
-from pyfhd.io.pyfhd_io import recarray_to_dict
-import pytest
-import numpy as np
-import numpy.testing as npt
 from os import environ as env
 from pathlib import Path
-from pyfhd.pyfhd_tools.test_utils import get_data, get_data_items
+
+import numpy as np
+import numpy.testing as npt
+import pytest
+
 from pyfhd.gridding.gridding_utils import baseline_grid_locations
-from pyfhd.io.pyfhd_io import save, load
+from pyfhd.io.pyfhd_io import load, recarray_to_dict, save
+from pyfhd.pyfhd_tools.test_utils import get_data, get_data_items
 
 
 @pytest.fixture
