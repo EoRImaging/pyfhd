@@ -94,6 +94,7 @@ select = [
     "B", # flake8-bugbear
     "A", # flake8-builtins
     "C4", # flake8-comprehensions
+    "N", # pep8-naming
     "I", # isort
 ]
 ignore = [

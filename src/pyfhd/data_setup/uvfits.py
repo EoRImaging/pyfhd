@@ -289,10 +289,10 @@ def create_params(pyfhd_header: dict, params_data: np.recarray) -> dict:
             baseline_min = np.min(params["baseline_arr"])
             exponent = np.log(np.min(baseline_min)) / np.log(2)
             antenna_mod_index = 2 ** np.floor(exponent)
-            tile_B_test = np.min(baseline_min) % antenna_mod_index
-            if tile_B_test > 1:
+            tile_b_test = np.min(baseline_min) % antenna_mod_index
+            if tile_b_test > 1:
                 if baseline_min % 2 == 1:
-                    antenna_mod_index /= 2 ** np.floor(np.log(tile_B_test) / np.log(2))
+                    antenna_mod_index /= 2 ** np.floor(np.log(tile_b_test) / np.log(2))
             # antenna numbers start from 1
             params["antenna1"] = np.floor(params["baseline_arr"] / antenna_mod_index)
             params["antenna2"] = np.fix(params["baseline_arr"] % antenna_mod_index)

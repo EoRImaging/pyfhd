@@ -249,11 +249,11 @@ def visibility_grid(
     arr_type = init_arr.dtype
     if pyfhd_config["grid_spectral"]:
         # Spectral B and Spectral D shouldn't reference each other just in case
-        spectral_A = np.zeros([dimension, elements], dtype=np.complex128)
-        spectral_B = np.zeros([dimension, elements])
-        spectral_D = np.zeros([dimension, elements])
+        spectral_a = np.zeros([dimension, elements], dtype=np.complex128)
+        spectral_b = np.zeros([dimension, elements])
+        spectral_d = np.zeros([dimension, elements])
         if model is not None:
-            spectral_model_A = np.zeros([dimension, elements], dtype=np.complex128)
+            spectral_model_a = np.zeros([dimension, elements], dtype=np.complex128)
 
     frequency_cache: dict[int, np.ndarray] = {}
 
@@ -440,33 +440,33 @@ def visibility_grid(
         box_matrix_dag = np.conj(box_matrix)
 
         if pyfhd_config["grid_spectral"]:
-            term_A_box = np.dot(
+            term_a_box = np.dot(
                 np.transpose(box_matrix_dag), np.transpose((freq_i * vis_box) / n_vis)
             )
-            term_B_box = np.dot(
+            term_b_box = np.dot(
                 np.transpose(box_matrix_dag), np.transpose(freq_i / n_vis)
             )
-            term_D_box = np.dot(
+            term_d_box = np.dot(
                 np.transpose(box_matrix_dag), np.transpose(freq_i**2 / n_vis)
             )
-            spectral_A[
+            spectral_a[
                 xmin_use : xmin_use + psf_dim, ymin_use : ymin_use + psf_dim
-            ].flat += term_A_box
-            spectral_B[
+            ].flat += term_a_box
+            spectral_b[
                 xmin_use : xmin_use + psf_dim, ymin_use : ymin_use + psf_dim
-            ].flat += term_B_box.real
-            spectral_D[
+            ].flat += term_b_box.real
+            spectral_d[
                 xmin_use : xmin_use + psf_dim, ymin_use : ymin_use + psf_dim
-            ].flat += term_D_box.real
+            ].flat += term_d_box.real
             # del(term_A_box, term_B_box, term_D_box)
             if model is not None:
-                term_Am_box = np.dot(
+                term_a_m_box = np.dot(
                     np.transpose(box_matrix_dag),
                     np.transpose((freq_i * model_box) / n_vis),
                 )
-                spectral_model_A[
+                spectral_a[
                     xmin_use : xmin_use + psf_dim, ymin_use : ymin_use + psf_dim
-                ] += term_Am_box
+                ] += term_a_m_box
 
         if model is not None:
             # If model visibilities are being gridded, calculate the product of
@@ -553,13 +553,13 @@ def visibility_grid(
 
     # Option to use spectral index information to scale the uv-plane
     if pyfhd_config["grid_spectral"]:
-        spectral_uv = (spectral_A - n_vis * spectral_B * image_uv) * weight_invert(
-            spectral_D - spectral_B**2
+        spectral_uv = (spectral_a - n_vis * spectral_b * image_uv) * weight_invert(
+            spectral_d - spectral_b**2
         )
         if model is not None:
             spectral_model_uv = (
-                spectral_model_A - n_vis * spectral_B * model_return
-            ) * weight_invert(spectral_D - spectral_B**2)
+                spectral_model_a - n_vis * spectral_b * model_return
+            ) * weight_invert(spectral_d - spectral_b**2)
         if not no_conjugate:
             spectral_uv = (spectral_uv + conjugate_mirror(spectral_uv)) / 2
             if model is not None:

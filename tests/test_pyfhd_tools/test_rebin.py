@@ -24,42 +24,42 @@ def large_data_dir():
 
 
 @pytest.mark.github_actions
-def test_rebin_oneD_up(small_data_dir):
+def test_rebin_1d_up(small_data_dir):
     """Testing rebin with using a 1D array and expanding it"""
     input_array, expected = get_data(small_data_dir, "test.npy", "test_1r_8c.npy")
     assert np.array_equal(rebin(input_array, (1, 8)), expected)
 
 
 @pytest.mark.github_actions
-def test_rebin_oneD_up2(small_data_dir):
+def test_rebin_1d_up2(small_data_dir):
     """Test with expanding to multiple rows and columns"""
     input_array, expected = get_data(small_data_dir, "test.npy", "test_2r_8c.npy")
     assert np.array_equal(rebin(input_array, (2, 8)), expected)
 
 
 @pytest.mark.github_actions
-def test_rebin_oneD_down(small_data_dir):
+def test_rebin_1d_down(small_data_dir):
     """Testing rebin with using a 1D array and downscaling it"""
     input_array, expected = get_data(small_data_dir, "test.npy", "test_2c_1r.npy")
     assert np.array_equal(rebin(input_array, (1, 2)), expected)
 
 
 @pytest.mark.github_actions
-def test_rebin_oneD_down_up(small_data_dir):
+def test_rebin_1d_down_up(small_data_dir):
     """Testing same 1D but increasing in rows, going down in columns"""
     input_array, expected = get_data(small_data_dir, "test.npy", "test_2r_2c.npy")
     assert np.array_equal(rebin(input_array, (2, 2)), expected)
 
 
 @pytest.mark.github_actions
-def test_rebin_oneD_extreme_down(small_data_dir):
+def test_rebin_1d_extreme_down(small_data_dir):
     """testing same 1D but only wanting a single value"""
     input_array, expected = get_data(small_data_dir, "test.npy", "test_1r_1c.npy")
     assert np.array_equal(rebin(input_array, (1, 1)), expected)
 
 
 @pytest.mark.github_actions
-def test_rebin_oneD_same(small_data_dir):
+def test_rebin_1d_same(small_data_dir):
     """testing same 1D but only wanting a single value"""
     input_array, expected = get_data(small_data_dir, "test.npy", "test_same.npy")
     assert np.array_equal(rebin(input_array, (1, 4)), expected)
@@ -111,13 +111,13 @@ def test_rebin_vertical_array_same(small_data_dir):
     assert np.array_equal(rebin(input_array, (4, 1)), expected)
 
 
-def test_rebin_twoD_up_1_by_2(large_data_dir):
+def test_rebin_2d_up_1_by_2(large_data_dir):
     """Testing a 2D array only increasing columns by a factor of 2"""
     input_array, expected = get_data(large_data_dir, "data.npy", "data_4r_10c.npy")
     assert np.array_equal(rebin(input_array, (4, 10)), expected)
 
 
-def test_rebin_twoD_up_1_by_3(large_data_dir):
+def test_rebin_2d_up_1_by_3(large_data_dir):
     """Testing a 2D array only increasing columns by a factor of 3"""
     input_array, expected = get_data(large_data_dir, "data.npy", "data_4r_15c.npy")
     assert np.array_equal(rebin(input_array, (4, 15)), expected)
@@ -150,51 +150,51 @@ def test_rebin_basic():
     assert np.array_equal(rebin(input_array, (4, 4)), expected)
 
 
-def test_rebin_twoD_up_2_by_2(large_data_dir):
+def test_rebin_2d_up_2_by_2(large_data_dir):
     """Testing a 2D array increasing both rows and columns by factors of 2"""
     input_array, expected = get_data(large_data_dir, "data.npy", "data_8r_10c.npy")
     assert np.array_equal(rebin(input_array, (8, 10)), expected)
 
 
-def test_rebin_twoD_up_3_by_2(large_data_dir):
+def test_rebin_2d_up_3_by_2(large_data_dir):
     """Testing a 2D array increasing rows and columns by factors of 3 and 2
     respectively"""
     input_array, expected = get_data(large_data_dir, "data.npy", "data_12r_10c.npy")
     assert np.array_equal(rebin(input_array, (12, 10)), expected)
 
 
-def test_rebin_twoD_up_2_by_3(large_data_dir):
+def test_rebin_2d_up_2_by_3(large_data_dir):
     """Testing a 2D array increasing rows and columns by factors of 2 and 3
     respectively"""
     input_array, expected = get_data(large_data_dir, "data.npy", "data_8r_15c.npy")
     assert np.array_equal(rebin(input_array, (8, 15)), expected)
 
 
-def test_rebin_twoD_same(large_data_dir):
+def test_rebin_2d_same(large_data_dir):
     """Testing a 2D array by giving the same"""
     input_array, expected = get_data(large_data_dir, "data.npy", "data_same.npy")
     assert np.array_equal(rebin(input_array, (4, 5)), expected)
 
 
-def test_rebin_twoD_down_2_by_3(large_data_dir):
+def test_rebin_2d_down_2_by_3(large_data_dir):
     """Testing a 2D Array but downscaling by a factor of 2 now"""
     input_array, expected = get_data(large_data_dir, "data2.npy", "data2_2r_3c.npy")
     assert np.array_equal(rebin(input_array, (2, 3)), expected)
 
 
-def test_rebin_twoD_down_2_by_2(large_data_dir):
+def test_rebin_2d_down_2_by_2(large_data_dir):
     """Testing a 2D array downscaling to a small square"""
     input_array, expected = get_data(large_data_dir, "data2.npy", "data2_2r_2c.npy")
     assert np.array_equal(rebin(input_array, (2, 2)), expected)
 
 
-def test_rebin_twoD_down_in_half(large_data_dir):
+def test_rebin_2d_down_in_half(large_data_dir):
     """Taking a 4x4aray and going to a square"""
     input_array, expected = get_data(large_data_dir, "data3.npy", "data3_2r_2c.npy")
     assert np.array_equal(rebin(input_array, (2, 2)), expected)
 
 
-def test_rebin_twoD_down_extreme(large_data_dir):
+def test_rebin_2d_down_extreme(large_data_dir):
     """2D array into 1 value"""
     input_array, expected = get_data(large_data_dir, "data3.npy", "data3_1r_1c.npy")
     assert np.array_equal(rebin(input_array, (1, 1)), expected)
@@ -284,32 +284,32 @@ precision as well.
 # EXPANDING
 
 
-def test_rebin_twoD_20_rows(large_data_dir):
+def test_rebin_2d_20_rows(large_data_dir):
     """Testing a 2D array only increasing columns by a factor of 2"""
     input_array, expected = get_data(large_data_dir, "data.npy", "data_20r.npy")
     assert np.array_equal(rebin(input_array, (20, 5)), expected)
 
 
-def test_rebin_twoD_20_columns(large_data_dir):
+def test_rebin_2d_20_columns(large_data_dir):
     """Testing a 2D array only increasing columns by a factor of 2"""
     input_array, expected = get_data(large_data_dir, "data.npy", "data_20c.npy")
     assert np.array_equal(rebin(input_array, (4, 20)), expected)
 
 
-def test_rebin_twoD_20_rows_20_columns(large_data_dir):
+def test_rebin_2d_20_rows_20_columns(large_data_dir):
     """Testing a 2D array only increasing columns by a factor of 2"""
     input_array, expected = get_data(large_data_dir, "data.npy", "data_20r_20c.npy")
     assert np.array_equal(rebin(input_array, (20, 20)), expected)
 
 
-def test_rebin_twoD_50_columns(large_data_dir):
+def test_rebin_2d_50_columns(large_data_dir):
     """Testing a 2D array only increasing columns by a factor of 2"""
     input_array, expected = get_data(large_data_dir, "data.npy", "data_50c.npy")
     result = rebin(input_array, (4, 50))
     assert np.max(result - expected) <= 2
 
 
-def test_rebin_twoD_40_rows(large_data_dir):
+def test_rebin_2d_40_rows(large_data_dir):
     """Testing a 2D array only increasing columns by a factor of 2"""
     input_array, expected = get_data(large_data_dir, "data.npy", "data_40r.npy")
     result = rebin(input_array, (40, 5))
@@ -317,7 +317,7 @@ def test_rebin_twoD_40_rows(large_data_dir):
     assert np.max(result - expected) <= threshold
 
 
-def test_rebin_twoD_2000(large_data_dir):
+def test_rebin_2d_2000(large_data_dir):
     """Testing a 2D array only increasing columns by a factor of 2"""
     input_array, expected = get_data(large_data_dir, "data.npy", "data_2000.npy")
     result = rebin(input_array, (40, 50))

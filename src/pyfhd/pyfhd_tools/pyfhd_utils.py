@@ -1162,10 +1162,10 @@ def resistant_mean(
     # This compensates Sigma for truncation
     # Calculate the standard deviation of the rela and imag separately
     sigma = np.std(no_outliers.real) + np.std(no_outliers.imag) * 1j
-    # Set the deviationsX to 1.0 if it's less than 1
-    deviationsX = max(deviations, 1.0)
-    if deviationsX <= 4.5:
-        sigma = sigma / np.polyval(sigma_coeff, deviationsX)
+    # Set the deviations_x to 1.0 if it's less than 1
+    deviations_x = max(deviations, 1.0)
+    if deviations_x <= 4.5:
+        sigma = sigma / np.polyval(sigma_coeff, deviations_x)
     sigma_threshold = sigma * deviations
     # Use the sigma threshold to again remove outliers from the array
     # Also take the absolute value of sigma_threshold to get the same behaviour
@@ -1555,7 +1555,7 @@ def reshape_and_average_in_time(
 
 def region_grow(
     image: NDArray[np.integer | np.floating | np.complexfloating],
-    roiPixels: NDArray[np.integer],
+    roi_pixels: NDArray[np.integer],
     low: int | float | None = None,
     high: int | float | None = None,
 ) -> NDArray[np.integer | np.floating | np.complexfloating] | None:
@@ -1575,7 +1575,7 @@ def region_grow(
     ----------
     image : NDArray[np.integer | np.floating | np.complexfloating]
         A 2D array of pixels
-    roiPixels : NDArray[np.integer]
+    roi_pixels : NDArray[np.integer]
         The region of interest given as FLAT indexes i.e. array.flat
     low : int | float | None, optional
         The low threshold, any number below this is considered background,
@@ -1588,7 +1588,7 @@ def region_grow(
 
     Returns
     -------
-    growROIPixels: NDArray[np.integer | np.floating | np.complexfloating] | None
+    grow_roi_pixels: NDArray[np.integer | np.floating | np.complexfloating] | None
         The grown region of interest that has connected neighbours by using the
         threshold
 
@@ -1602,7 +1602,7 @@ def region_grow(
     https://scikit-image.org/docs/stable/auto_examples/features_detection/plot_blob.html
     """
     # Get the roi and set the low and high thresholds if they haven't been so already.
-    roi = image.flat[roiPixels]
+    roi = image.flat[roi_pixels]
     if low is None:
         low = np.min(roi)
     if high is None:
@@ -1611,64 +1611,64 @@ def region_grow(
     nans = np.isnan(image)
     image[nans] = 0
     # Get all the values that are within the threshold
-    threshArray = np.zeros_like(image)
-    threshArray[np.where((image >= low) & (image <= high))] = 1
-    threshArray[nans] = 0
+    thresh_array = np.zeros_like(image)
+    thresh_array[np.where((image >= low) & (image <= high))] = 1
+    thresh_array[nans] = 0
     # Do binary blob detection with the label function
-    labelArray, _ = label(threshArray)
+    label_array, _ = label(thresh_array)
     # Make the edges background as the Region grow IDL does not do the edges
     # of an array
-    if labelArray.ndim == 2:
-        labelArray[0, :] = 0
-        labelArray[:, 0] = 0
-        labelArray[-1, :] = 0
-        labelArray[:, -1] = 0
+    if label_array.ndim == 2:
+        label_array[0, :] = 0
+        label_array[:, 0] = 0
+        label_array[-1, :] = 0
+        label_array[:, -1] = 0
     else:
-        labelArray[0] = 0
-        labelArray[-1] = 0
+        label_array[0] = 0
+        label_array[-1] = 0
     # Get the histogram of the labels to ascertain the neighbours we will be
     # interested in
-    if np.size(roiPixels) > 1:
-        labels, _, _ = histogram(labelArray.flat[roiPixels], min_val=0)
+    if np.size(roi_pixels) > 1:
+        labels, _, _ = histogram(label_array.flat[roi_pixels], min_val=0)
         labels = np.nonzero(labels != 0)[0]
-        nLabels = labels.size
+        n_label = labels.size
     else:
-        nLabels = 1
-        labels = labelArray.flat[roiPixels]
+        n_label = 1
+        labels = label_array.flat[roi_pixels]
         if not isinstance(labels, np.ndarray):
-            labels = np.array([labels], dtype=labelArray.dtype)
+            labels = np.array([labels], dtype=label_array.dtype)
     # Ignore the first label if it's 0 as it's the background
     if labels[0] == 0:
-        nLabels -= 1
-        if nLabels > 0:
+        n_label -= 1
+        if n_label > 0:
             labels = labels[1:]
     # The histogram will have a minimum of 1 so we need to take 1 off the labels
-    if nLabels:
+    if n_label:
         labels -= 1
     # Get a histogram of all the labels
-    labelHist, _, revInd = histogram(labelArray, min_val=1)
+    label_hist, _, rev_ind = histogram(label_array, min_val=1)
     # Get the number of pixels we will be growing to
-    nPixels = np.sum(labelHist[labels]) if nLabels else 0
+    n_pixels = np.sum(label_hist[labels]) if n_label else 0
     # If we have any pixels to grow, then grow
-    if nPixels > 0:
+    if n_pixels > 0:
         # Only one label
-        if nLabels == 1:
-            growROIPixels = revInd[revInd[labels[0]] : revInd[labels[0] + 1]]
+        if n_label == 1:
+            grow_roi_pixels = rev_ind[rev_ind[labels[0]] : rev_ind[labels[0] + 1]]
         else:
             # Take in all the labels and save all the flat indexes
-            growROIPixels = np.empty(nPixels, dtype=np.int64)
+            grow_roi_pixels = np.empty(n_pixels, dtype=np.int64)
             j = 0
-            for i in range(nLabels):
-                if revInd[labels[i] + 1] <= revInd.size:
-                    growROIPixels[j : j + labelHist[labels[i]]] = revInd[
-                        revInd[labels[i]] : revInd[labels[i] + 1]
+            for i in range(n_label):
+                if rev_ind[labels[i] + 1] <= rev_ind.size:
+                    grow_roi_pixels[j : j + label_hist[labels[i]]] = rev_ind[
+                        rev_ind[labels[i]] : rev_ind[labels[i] + 1]
                     ]
-                    j = j + labelHist[labels[i]]
+                    j = j + label_hist[labels[i]]
     else:
         # Return None if we didn't have anywhere to grow
-        growROIPixels = None
+        grow_roi_pixels = None
     # Return the flat indexes
-    return growROIPixels
+    return grow_roi_pixels
 
 
 def crosspol_split_real_imaginary(
