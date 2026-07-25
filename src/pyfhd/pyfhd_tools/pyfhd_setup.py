@@ -1751,18 +1751,14 @@ def pyfhd_setup(pyfhd_config: dict, run_time: float, output_dir_exists: bool) ->
     pyfhd_config["input_path"] = Path(pyfhd_config["input_path"]).expanduser().resolve()
     if not pyfhd_config["input_path"].exists():
         logger.error(
-            "{} doesn't exist, please check your input path".format(
-                pyfhd_config["input_path"]
-            )
+            f"{pyfhd_config["input_path"]} doesn't exist, please check your input path"
         )
         errors += 1
     obs_uvfits_path = Path(
         pyfhd_config["input_path"], pyfhd_config["obs_id"] + ".uvfits"
     )
     if not obs_uvfits_path.exists():
-        logger.error(
-            "{} doesn't exist, please check your input path".format(obs_uvfits_path)
-        )
+        logger.error(f"{obs_uvfits_path} doesn't exist, please check your input path")
         errors += 1
     if pyfhd_config["instrument"] == "mwa":
         obs_metafits_path = Path(
@@ -1770,9 +1766,7 @@ def pyfhd_setup(pyfhd_config: dict, run_time: float, output_dir_exists: bool) ->
         )
         if not obs_metafits_path.exists():
             logger.error(
-                "{} doesn't exist, please check your input path".format(
-                    obs_metafits_path
-                )
+                f"{obs_metafits_path} doesn't exist, please check your input path"
             )
             errors += 1
 

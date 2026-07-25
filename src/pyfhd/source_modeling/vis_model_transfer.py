@@ -244,7 +244,7 @@ def import_vis_model_from_uvfits(
     return vis_model_arr, params_model, obs_model
 
 
-class _FlaggingInfoCounter(object):
+class _FlaggingInfoCounter:
     """Something to count and hold numbers to do with baselines"""
 
     def __init__(self, params: dict, obs: dict):
