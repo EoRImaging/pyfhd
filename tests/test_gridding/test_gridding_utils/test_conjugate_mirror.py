@@ -24,13 +24,13 @@ def conjugate_file(data_dir, number):
     if conjugate_file.exists():
         return conjugate_file
 
-    input, conj_mirror_image = get_data_items(
+    input_array, conj_mirror_image = get_data_items(
         data_dir,
         f"visibility_grid_input_{number}.npy",
         f"visibility_grid_output_{number}.npy",
     )
 
-    h5_save_dict = {"input": input, "conj_mirror_image": conj_mirror_image}
+    h5_save_dict = {"input": input_array, "conj_mirror_image": conj_mirror_image}
 
     save(conjugate_file, h5_save_dict, "file")
 

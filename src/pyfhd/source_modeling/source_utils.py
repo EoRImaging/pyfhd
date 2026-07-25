@@ -1180,7 +1180,7 @@ def vis_delay_filter(
     del uu, vv, ww
 
     # Apply window function
-    window = spectral_window(nfreq, type="Blackman-Harris", periodic=True)
+    window = spectral_window(nfreq, window_type="Blackman-Harris", periodic=True)
     norm_factor = np.sqrt(nfreq / np.sum(window**2.0))
     window = window * norm_factor
     window_expand = np.repeat(

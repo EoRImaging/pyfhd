@@ -121,9 +121,9 @@ def test_beam_image(before_file, after_file, beam_dir):
 
 @pytest.mark.github_actions
 @pytest.mark.parametrize(
-    ("square", "abs"), [(False, False), (True, False), (True, True)]
+    ("square", "use_abs"), [(False, False), (True, False), (True, True)]
 )
-def test_beam_image_psf_cut(zenith_obs_2013, zenith_psf_2013_cut, square, abs):
+def test_beam_image_psf_cut(zenith_obs_2013, zenith_psf_2013_cut, square, use_abs):
     psf = zenith_psf_2013_cut
     obs = zenith_obs_2013
 
@@ -136,7 +136,13 @@ def test_beam_image_psf_cut(zenith_obs_2013, zenith_psf_2013_cut, square, abs):
     dimension = 256
     for pol_i in [0, 1]:
         beam_out = beam_image(
-            psf, obs, pol_i, freq_i=0, dimension=dimension, square=square, abs=abs
+            psf,
+            obs,
+            pol_i,
+            freq_i=0,
+            dimension=dimension,
+            square=square,
+            use_abs=use_abs,
         )
 
         if square:
@@ -147,7 +153,7 @@ def test_beam_image_psf_cut(zenith_obs_2013, zenith_psf_2013_cut, square, abs):
             beam_single = (
                 psf["beam_ptr"][pol_i, 0].reshape([psf["dim"], psf["dim"]])
             ).astype(np.complex128)
-            if abs:
+            if use_abs:
                 beam_single = np.abs(beam_single)
             beam_base_uv[low_ind : high_ind + 1, low_ind : high_ind + 1] = beam_single
             beam_base = np.fft.fftshift(

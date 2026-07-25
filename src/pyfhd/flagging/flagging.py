@@ -42,9 +42,9 @@ def vis_flag_tiles(
                 f"{tile} wasn't found in obs['baseline_info']['tile_names'], "
                 "skipping it"
             )
-    hist_a, _, ra = histogram(obs["baseline_info"]["tile_a"], min=1)
-    hist_b, _, rb = histogram(obs["baseline_info"]["tile_b"], min=1)
-    hist_c, _, _ = histogram(tile_flag_list_use, min=1)
+    hist_a, _, ra = histogram(obs["baseline_info"]["tile_a"], min_val=1)
+    hist_b, _, rb = histogram(obs["baseline_info"]["tile_b"], min_val=1)
+    hist_c, _, _ = histogram(tile_flag_list_use, min_val=1)
     # hist_A and hist_b should be the same size
     hist_ab = hist_a + hist_b
     n_bin = min(np.size(hist_ab), np.size(hist_c))
