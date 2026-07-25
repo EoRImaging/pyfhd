@@ -47,7 +47,7 @@ def before_file(tag, run, data_dir, model_dir):
     del h5_save_dict["model_transfer"]
     # For point_zenith let's test the uvfits we have
     h5_save_dict["pyfhd_config"] = {
-        "flag_model": False if "skip_model_flagging" in h5_save_dict["extra"] else True,
+        "flag_model": "skip_model_flagging" not in h5_save_dict["extra"],
         "model_file_type": "uvfits" if tag == "point_zenith" else "sav",
         "model_file_path": (
             str(Path(model_dir, f"{tag}.uvfits"))

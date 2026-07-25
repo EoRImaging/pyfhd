@@ -377,15 +377,15 @@ def transfer_bandpass(obs: dict, cal: dict, pyfhd_config: dict) -> tuple[dict, d
             )
         data_types = np.array(data_types)
         # Get the indexes for the FITS standard checks
-        data_index = np.nonzero("narrays" == data_types)[0][0]
-        ant_index = np.nonzero("antaxis" == data_types)[0][0]
-        freq_index = np.nonzero("freqs" == data_types)[0][0]
-        time_index = np.nonzero("time" == data_types)[0][0]
-        jones_index = np.nonzero("jones" == data_types)[0][0]
+        data_index = np.nonzero(data_types == "narrays")[0][0]
+        ant_index = np.nonzero(data_types == "antaxis")[0][0]
+        freq_index = np.nonzero(data_types == "freqs")[0][0]
+        time_index = np.nonzero(data_types == "time")[0][0]
+        jones_index = np.nonzero(data_types == "jones")[0][0]
         # Deal with spec_wind_index separately as default highband file doesn't
         # have this in
         # May cause issues with other fits files, adjust the code then.
-        spec_wind_index = np.nonzero("if" == data_types)[0]
+        spec_wind_index = np.nonzero(data_types == "if")[0]
         if spec_wind_index.size == 0:
             spec_wind_index = -1
 
@@ -744,7 +744,7 @@ def vis_cal_bandpass(obs: dict, cal: dict, pyfhd_config: dict) -> tuple[dict, di
     # has been set (fits only supported right now)
     if pyfhd_config["cal_bp_transfer"] is not None:
         cal_bandpass, cal_remainder = transfer_bandpass(obs, cal, pyfhd_config)
-        if len(cal_bandpass.keys()) != 0 and len(cal_remainder.keys()) != 0:
+        if len(cal_bandpass) != 0 and len(cal_remainder) != 0:
             logger.info(
                 f"Calibration Bandpass FITS file {pyfhd_config['cal_bp_transfer']} "
                 "transferred in for cal_bandpass and cal_remainder"

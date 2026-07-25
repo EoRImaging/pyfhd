@@ -538,15 +538,18 @@ def quick_image(
         missing_color = None
 
     # Validate that 2-value inputs are only 2 values
-    if data_range is not None:
-        if not isinstance(data_range, np.ndarray | list) or len(data_range) != 2:
-            raise ValueError("data_range must be an array with exactly two values.")
-    if xrange is not None:
-        if not isinstance(xrange, np.ndarray | list) or len(xrange) != 2:
-            raise ValueError("xrange must be an array with exactly two values.")
-    if yrange is not None:
-        if not isinstance(yrange, np.ndarray | list) or len(yrange) != 2:
-            raise ValueError("yrange must be an array with exactly two values.")
+    if data_range is not None and (
+        not isinstance(data_range, np.ndarray | list) or len(data_range) != 2
+    ):
+        raise ValueError("data_range must be an array with exactly two values.")
+    if xrange is not None and (
+        not isinstance(xrange, np.ndarray | list) or len(xrange) != 2
+    ):
+        raise ValueError("xrange must be an array with exactly two values.")
+    if yrange is not None and (
+        not isinstance(yrange, np.ndarray | list) or len(yrange) != 2
+    ):
+        raise ValueError("yrange must be an array with exactly two values.")
 
     # Apply logarithmic scaling if set. This modifies the image input directly
     # to be logarithmically scaled in the color bar range.
@@ -757,20 +760,19 @@ def _save_or_display(
 
     # Handle file extension and output format
     if pub:
-        if not (png or eps or pdf):
-            if savefile:
-                # Convert savefile to a Path object if it's a string
-                savefile = Path(savefile) if isinstance(savefile, str) else savefile
-                extension = savefile.suffix.lower()
-                if extension == ".eps":
-                    eps = True
-                elif extension == ".png":
-                    png = True
-                elif extension == ".pdf":
-                    pdf = True
-                else:
-                    logger.warning("Unrecognized extension, using PNG")
-                    png = True
+        if savefile and not (png or eps or pdf):
+            # Convert savefile to a Path object if it's a string
+            savefile = Path(savefile) if isinstance(savefile, str) else savefile
+            extension = savefile.suffix.lower()
+            if extension == ".eps":
+                eps = True
+            elif extension == ".png":
+                png = True
+            elif extension == ".pdf":
+                pdf = True
+            else:
+                logger.warning("Unrecognized extension, using PNG")
+                png = True
 
         # Set default savefile if not provided
         if not savefile:

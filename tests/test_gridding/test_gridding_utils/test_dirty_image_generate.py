@@ -45,9 +45,7 @@ def dirty_before(data_dir, number):
         "resize": get_file(data_dir, f"input_resize_{number}.npy"),
         "width_smooth": get_file(data_dir, f"input_width_smooth_{number}.npy"),
         "degpix": get_file(data_dir, f"input_degpix_{number}.npy"),
-        "not_real": (
-            True if get_file(data_dir, f"input_no_real_{number}.npy") else False
-        ),
+        "not_real": (bool(get_file(data_dir, f"input_no_real_{number}.npy"))),
         "pad_uv_image": get_file(data_dir, f"input_pad_uv_image_{number}.npy"),
         "weights": get_file(data_dir, f"input_weights_{number}.npy"),
         "filter": get_file(data_dir, f"input_filter_{number}.npy"),

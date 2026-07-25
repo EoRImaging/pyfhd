@@ -159,9 +159,7 @@ def test_2_pol_obs_creation(obs_id, data_dir, obs_dir):
     )
     npt.assert_array_equal(
         obs["baseline_info"]["tile_names"],
-        np.char.strip((obs_fhd["baseline_info"]["tile_names"].astype("str"))).astype(
-            int
-        ),
+        np.char.strip(obs_fhd["baseline_info"]["tile_names"].astype("str")).astype(int),
     )
 
     # Check healpix
@@ -266,9 +264,7 @@ def test_4_pol_obs_creation(obs_id, data_dir, obs_dir):
     )
     npt.assert_array_equal(
         obs["baseline_info"]["tile_names"],
-        np.char.strip((obs_fhd["baseline_info"]["tile_names"].astype("str"))).astype(
-            int
-        ),
+        np.char.strip(obs_fhd["baseline_info"]["tile_names"].astype("str")).astype(int),
     )
 
     # Check healpix

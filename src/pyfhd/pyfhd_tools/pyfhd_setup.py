@@ -1485,7 +1485,7 @@ def write_collated_yaml_config(
         outfile.write(
             "# git dirty status for this run: {}\n".format(pyfhd_config["dirty_flag"])
         )
-        for key in pyfhd_config.keys():
+        for key in pyfhd_config:
             # These either a direct argument or are variables set internally to
             # each run,so should not appear in the yaml
             if key in [
@@ -1501,9 +1501,7 @@ def write_collated_yaml_config(
                 yaml_key = key.replace("_", "-")
                 if pyfhd_config[key] is None:
                     outfile.write(f"{yaml_key} : ~\n")
-                elif isinstance(pyfhd_config[key], float | int):
-                    outfile.write(f"{yaml_key} : {pyfhd_config[key]}\n")
-                elif isinstance(pyfhd_config[key], bool):
+                elif isinstance(pyfhd_config[key], float | int | bool):
                     outfile.write(f"{yaml_key} : {pyfhd_config[key]}\n")
                 # If it's a list, write it out as a list of strings
                 # (Unless it's empty)
@@ -1801,10 +1799,9 @@ def pyfhd_setup(pyfhd_config: dict, run_time: float, output_dir_exists: bool) ->
         warnings += 1
 
     # require psf_dim to be a multiple of 2
-    if pyfhd_config["psf_dim"] is not None:
-        if pyfhd_config["psf_dim"] % 2 != 0:
-            logger.error("If set, psf-dim must be a multiple of 2.")
-            errors += 1
+    if pyfhd_config["psf_dim"] and pyfhd_config["psf_dim"] % 2 != 0:
+        logger.error("If set, psf-dim must be a multiple of 2.")
+        errors += 1
 
     if pyfhd_config["beam_offset_time"] < 0:
         pyfhd_config["beam_offset_time"] = 0
