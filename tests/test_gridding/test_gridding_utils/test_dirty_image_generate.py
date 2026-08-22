@@ -5,7 +5,6 @@ from pyfhd.gridding.gridding_utils import dirty_image_generate
 from pyfhd.pyfhd_tools.test_utils import get_data_items
 from numpy.testing import assert_allclose
 from pyfhd.io.pyfhd_io import save, load
-from logging import Logger
 
 
 @pytest.fixture
@@ -81,7 +80,6 @@ def test_dirty_image_generate(dirty_before: Path, dirty_after: Path):
     dirty_image, _, normalization = dirty_image_generate(
         h5_before["dirty_image_uv"],
         h5_before["pyfhd_config"],
-        Logger(1),
         mask=h5_before["mask"],
         baseline_threshold=h5_before["baseline_threshold"],
         normalization=h5_before["normalization"],

@@ -1,8 +1,9 @@
+from pathlib import Path
+
+import h5py
 import numpy as np
 from numpy.typing import NDArray
-from logging import Logger
-import h5py
-from pathlib import Path
+
 from pyfhd.io.pyfhd_io import save
 from pyfhd.data_setup.obs import update_obs
 from pyfhd.healpix.healpix_utils import (
@@ -28,7 +29,6 @@ def healpix_snapshot_cube_generate(
     vis_model_arr: NDArray[np.complex128],
     vis_weights: NDArray[np.float64],
     pyfhd_config: dict,
-    logger: Logger,
 ) -> None:
     """
     Generate and save HEALPix images per polarization and per frequency channel for
@@ -55,10 +55,8 @@ def healpix_snapshot_cube_generate(
         The visibility weights
     pyfhd_config : dict
         pyfhd configuration settings
-    logger : Logger
-        pyfhd's Logger
-    """
 
+    """
     if pyfhd_config["split_ps_export"]:
         cube_name = ["hpx_even", "hpx_odd"]
     else:
@@ -110,7 +108,6 @@ def healpix_snapshot_cube_generate(
     beam_arr, beam_mask = beam_image_cube(
         obs_out,
         psf,
-        logger,
         square=True,
         beam_threshold=pyfhd_config["ps_beam_threshold"],
         n_freq_bin=n_freq_use,
@@ -119,13 +116,13 @@ def healpix_snapshot_cube_generate(
     hpx_radius = fov_use / np.sqrt(2)
 
     hpx_cnv, obs_out = healpix_cnv_generate(
-        obs_out, beam_mask, hpx_radius, pyfhd_config, logger, nside=nside
+        obs_out, beam_mask, hpx_radius, pyfhd_config, nside=nside
     )
     hpx_inds = hpx_cnv["inds"]
 
     if len(pyfhd_config["ps_tile_flag_list"]) > 0:
         vis_weights = vis_flag_tiles(
-            obs_out, vis_weights, pyfhd_config["ps_tile_flag_list"], logger
+            obs_out, vis_weights, pyfhd_config["ps_tile_flag_list"]
         )
 
     vis_weights, obs_out = vis_weights_update(vis_weights, obs_out, psf, params)
@@ -166,7 +163,6 @@ def healpix_snapshot_cube_generate(
                 vis_arr,
                 pol_i,
                 pyfhd_config,
-                logger,
                 uvf_name=uvf_name[iter],
                 bi_use=bi_use[iter],
             )
@@ -225,5 +221,4 @@ def healpix_snapshot_cube_generate(
                 f"{obs['pol_names'][pol_i]}.h5",
                 healpix_pol_dict,
                 f"{pyfhd_config['obs_id']}_{cube_name[iter]}_{obs['pol_names'][pol_i]}",
-                logger=logger,
             )

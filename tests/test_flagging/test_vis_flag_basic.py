@@ -1,6 +1,5 @@
 from pyfhd.io.pyfhd_io import recarray_to_dict
 import pytest
-from logging import Logger
 from pathlib import Path
 from os import environ as env
 from pyfhd.io.pyfhd_io import convert_sav_to_dict
@@ -80,8 +79,6 @@ def test_many_points(before_file, after_file):
             f"required FHD output. It was listed in the skipped tests: {skip_tests}"
         )
 
-    logger = Logger(1)
-
     h5_before = load(before_file)
     h5_after = load(after_file)
 
@@ -99,7 +96,7 @@ def test_many_points(before_file, after_file):
     faked_vis_arr = np.zeros(vis_weight_arr.shape, dtype=vis_weight_arr.dtype)
 
     vis_weights_result, obs_result = vis_flag_basic(
-        vis_weight_arr, faked_vis_arr, obs, pyfhd_config, logger
+        vis_weight_arr, faked_vis_arr, obs, pyfhd_config
     )
 
     npt.assert_allclose(vis_weights_result, h5_after["vis_weights"])

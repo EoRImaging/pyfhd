@@ -6,7 +6,6 @@ from pyfhd.flagging.flagging import vis_flag
 from pyfhd.io.pyfhd_io import convert_sav_to_dict
 from pyfhd.pyfhd_tools.test_utils import sav_file_vis_arr_swap_axes
 from pyfhd.io.pyfhd_io import save, load
-from logging import Logger
 import numpy.testing as npt
 
 
@@ -101,14 +100,10 @@ def test_zenith_offzenith(before_file, after_file):
     expected_obs = h5_after["obs"]
     expected_vis_weight_ptr = h5_after["vis_weight_ptr"]
 
-    logger = Logger(1)
-
-    result_vis_weights, result_obs = vis_flag(
-        vis_arr, vis_weight_ptr, obs, params, logger
-    )
+    result_vis_weights, result_obs = vis_flag(vis_arr, vis_weight_ptr, obs, params)
     # There's differences in the tile flags due to precision differences in
-    # point_zenith data
-    # from calculating std deviations of small numbers, makes checking this tricky
+    # point_zenith data from calculating std deviations of small numbers, makes
+    # checking this tricky
     npt.assert_array_equal(
         result_obs["baseline_info"]["tile_use"],
         expected_obs["baseline_info"]["tile_use"],

@@ -7,7 +7,6 @@ from pathlib import Path
 from pyfhd.gridding.visibility_grid import visibility_grid
 from pyfhd.pyfhd_tools.test_utils import get_savs, sav_file_rearrange_psf
 from pyfhd.io.pyfhd_io import save, load
-from logging import Logger
 from scipy.io import readsav
 import importlib_resources
 
@@ -259,7 +258,6 @@ def test_visibility_grid(
         h5_before["params"],
         h5_before["polarization"],
         h5_before["pyfhd_config"],
-        Logger(1),
         calculate_uniform_filter=h5_before["calculate_uniform_filter"],
         no_conjugate=h5_before["no_conjugate"],
         model=h5_before["model_ptr"],
@@ -441,7 +439,6 @@ def test_full_visibility_grid(full_before_gridding: Path, full_after_gridding: P
         h5_before["params"],
         h5_before["polarization"],
         h5_before["pyfhd_config"],
-        Logger(1),
         calculate_uniform_filter=h5_before["calculate_uniform_filter"],
         no_conjugate=h5_before["no_conjugate"],
         model=h5_before["model_ptr"],
@@ -507,7 +504,7 @@ def before_vis_model_freq_gridding(tag, run, data_dir):
     # do needed transpositions & reorderings on beam_ptr that were not originally
     # done when it was translated to python & h5py
     if not new_beam_file.exists():
-        psf = load(orig_beam_file, None, lazy_load=True)
+        psf = load(orig_beam_file, lazy_load=True)
 
         transposed_beam = psf["beam_ptr"][()].transpose([0, 1, 3, 2, 4])
         inp_shape = transposed_beam.shape
@@ -556,7 +553,7 @@ def before_vis_model_freq_gridding(tag, run, data_dir):
     if "model_ptr" in h5_save_dict and h5_save_dict["model_ptr"] is not None:
         h5_save_dict["model_ptr"] = h5_save_dict["model_ptr"].T
 
-    psf = load(new_beam_file, None, lazy_load=True)
+    psf = load(new_beam_file, lazy_load=True)
 
     h5_save_dict["pyfhd_config"] = {
         "interpolate_kernel": psf["interpolate_kernel"][0],
@@ -662,7 +659,6 @@ def test_visibility_grid_in_vis_model_freq_split(
         Path(
             env.get("PYFHD_TEST_PATH"), "beams", "decomp_beam_pointing0_transposed.h5"
         ),
-        None,
         lazy_load=True,
     )
 
@@ -685,7 +681,6 @@ def test_visibility_grid_in_vis_model_freq_split(
         h5_before["params"],
         0,
         h5_before["pyfhd_config"],
-        Logger(1),
         calculate_uniform_filter=h5_before["calculate_uniform_filter"],
         no_conjugate=h5_before["no_conjugate"],
         model=h5_before["model_ptr"],

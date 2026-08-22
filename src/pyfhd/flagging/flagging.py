@@ -1,14 +1,15 @@
+import logging
+
 import numpy as np
 from numpy.typing import NDArray, ArrayLike
-from logging import Logger
+
 from pyfhd.pyfhd_tools.pyfhd_utils import idl_median, histogram
+
+logger = logging.getLogger(__name__)
 
 
 def vis_flag_tiles(
-    obs: dict,
-    vis_weight_arr: NDArray[np.float64],
-    tiles_to_flag: ArrayLike,
-    logger: Logger,
+    obs: dict, vis_weight_arr: NDArray[np.float64], tiles_to_flag: ArrayLike
 ) -> np.ndarray:
     """
     Flag tiles in the visibility weights array with a given array or list of
@@ -22,8 +23,6 @@ def vis_flag_tiles(
         The visibility weight array
     tiles_to_flag : ArrayLike
         The tiles to flag
-    logger : Logger
-        pyfhd's Logger
 
     Returns
     -------
@@ -67,7 +66,6 @@ def vis_flag_basic(
     vis_arr: NDArray[np.complex128],
     obs: dict,
     pyfhd_config: dict,
-    logger: Logger,
 ) -> tuple[np.ndarray, dict]:
     """
     Do some basic flagging on frequencies and tiles based on the configuration
@@ -89,8 +87,6 @@ def vis_flag_basic(
         _description_
     pyfhd_config : dict
         pyfhd's configuration dictionary
-    logger : Logger
-        pyfhd's logger
 
     Returns
     -------
@@ -123,9 +119,7 @@ def vis_flag_basic(
             vis_weight_arr[:, freq_end_cut, :] = 0
     # This section replaces the function vis_flag_tile
     if len(pyfhd_config["flag_tiles"]) > 0:
-        vis_weight_arr = vis_flag_tiles(
-            obs, vis_weight_arr, pyfhd_config["flag_tiles"], logger
-        )
+        vis_weight_arr = vis_flag_tiles(obs, vis_weight_arr, pyfhd_config["flag_tiles"])
     # Here I'm going to assume the mwa data you're using is more than 32 tiles
     # If you wish to implement flagging for mwa when it had 32 tiles, do that here
     # Flagging based on channel width
@@ -217,7 +211,6 @@ def vis_flag(
     vis_weights: NDArray[np.float64],
     obs: dict,
     params: dict,
-    logger: Logger,
 ) -> tuple[np.ndarray, dict]:
     """
     Flag frequencies, times, and tiles which are 3 sigma away from the median
@@ -234,8 +227,6 @@ def vis_flag(
         The observation dictionary
     params : dict
         The dictionary containing uu, vv, ww
-    logger : Logger
-        pyfhd's Logger
 
     Returns
     -------

@@ -4,7 +4,6 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 import h5py
-from logging import Logger
 from pyfhd.io.pyfhd_io import convert_sav_to_dict, load, recarray_to_dict, save
 from pyfhd.healpix.healpix_utils import healpix_cnv_generate
 import importlib_resources
@@ -134,7 +133,6 @@ def test_healpix_cnv_generate(before_file, after_file, request):
         h5_before["mask"],
         h5_before["hpx_radius"],
         h5_before["pyfhd_config"],
-        Logger(1),
         nside=int(h5_before["nside"]) if "nside" in h5_before else None,
     )
     assert obs["healpix"]["nside"] == hpx_cnv["nside"]

@@ -1,5 +1,4 @@
 import pytest
-from logging import Logger
 from pathlib import Path
 from os import environ as env
 from pyfhd.data_setup.uvfits import extract_header, create_params, create_layout
@@ -78,7 +77,6 @@ def test_2_pol_obs_creation(obs_id, data_dir, obs_dir):
     # If this test passes then it essentially means that the dictionaries are almost
     # identical to that of the IDL structures in the ways that matter for a pyfhd run.
     # In this case we're only going to test the obs structure from run1 of each test.
-    logger = Logger(1)
     pyfhd_config = {
         "obs_id": obs_id,
         "input_path": data_dir,
@@ -110,11 +108,11 @@ def test_2_pol_obs_creation(obs_id, data_dir, obs_dir):
     else:
         pyfhd_config["input_path"] = Path(data_dir, obs_id)
     pyfhd_header, params_data, antenna_header, antenna_data = extract_header(
-        pyfhd_config, logger
+        pyfhd_config
     )
-    params = create_params(pyfhd_header, params_data, logger)
-    layout = create_layout(antenna_header, antenna_data, pyfhd_config, logger)
-    obs = create_obs(pyfhd_header, params, layout, pyfhd_config, logger)
+    params = create_params(pyfhd_header, params_data)
+    layout = create_layout(antenna_header, antenna_data, pyfhd_config)
+    obs = create_obs(pyfhd_header, params, layout, pyfhd_config)
 
     Path(pyfhd_config["output_dir"], "layout.h5").unlink()
 
@@ -182,7 +180,6 @@ def test_4_pol_obs_creation(obs_id, data_dir, obs_dir):
     # In this case we're only going to test the obs structure from run1 of each test.
     if obs_id == "1088716296":
         pytest.skip("1088716296 hasn't been prepared to do 4 polarizations")
-    logger = Logger(1)
     pyfhd_config = {
         "obs_id": obs_id,
         "input_path": data_dir,
@@ -214,11 +211,11 @@ def test_4_pol_obs_creation(obs_id, data_dir, obs_dir):
     else:
         pyfhd_config["input_path"] = Path(data_dir, obs_id)
     pyfhd_header, params_data, antenna_header, antenna_data = extract_header(
-        pyfhd_config, logger
+        pyfhd_config
     )
-    params = create_params(pyfhd_header, params_data, logger)
-    layout = create_layout(antenna_header, antenna_data, pyfhd_config, logger)
-    obs = create_obs(pyfhd_header, params, layout, pyfhd_config, logger)
+    params = create_params(pyfhd_header, params_data)
+    layout = create_layout(antenna_header, antenna_data, pyfhd_config)
+    obs = create_obs(pyfhd_header, params, layout, pyfhd_config)
 
     Path(pyfhd_config["output_dir"], "layout.h5").unlink()
 

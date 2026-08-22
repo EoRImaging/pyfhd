@@ -1,13 +1,16 @@
+import logging
+
 import numpy as np
 import matplotlib.pyplot as plt
 from astropy.wcs import WCS
 from astropy.io import fits
 from astropy import units as u
-from logging import Logger
+
+logger = logging.getLogger(__name__)
 
 
 def plot_fits_image(
-    fits_file: str, output_path: str, logger: Logger, title: str = "FITS Image"
+    fits_file: str, output_path: str, title: str = "FITS Image"
 ) -> None:
     """
     Plot a FITS image using Astropy and save it to the specified output directory.
@@ -20,8 +23,6 @@ def plot_fits_image(
         Path to output image file.
     title : str, optional
         Title of the plot, by default "FITS Image".
-    logger : Logger
-        PyFHD's logger for displaying errors and info to the log files
 
     Returns
     -------

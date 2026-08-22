@@ -5,12 +5,37 @@ import re
 import sys
 import time
 from glob import glob
+from contextlib import contextmanager
 from importlib.metadata import version
 from pathlib import Path
-from typing import Tuple
 
 import configargparse
 import yaml
+
+logger = logging.getLogger(__name__)
+
+INTRO = """
+    ________________________________________________________________________
+    |    ooooooooo.               oooooooooooo ooooo   ooooo oooooooooo.    |
+    |    8888   `Y88.             8888       8 8888    888   888     Y8b    |
+    |    888   .d88' oooo    ooo  888          888     888   888      888   |
+    |    888ooo88P'   `88.  .8'   888oooo8     888ooooo888   888      888   |
+    |    888           `88..8'    888          888     888   888      888   |
+    |    888            `888'     888          888     888   888     d88'   |
+    |    o888o            .8'     o888o        o888o   o888o o888bood8P'    |
+    |                 .o..P'                                                |
+    |                `Y8P'                                                  |
+    |_______________________________________________________________________|
+
+    Python Fast Holographic Deconvolution
+
+    Translated from IDL to Python as a collaboration between Astronomy Data and
+    Computing Services (ADACS) and the Epoch of Reionisation (EoR) Team.
+
+    Repository: https://github.com/EoRImaging/pyfhd
+
+    Documentation: https://pyfhd.readthedocs.io/en/latest/
+"""
 
 
 class OrderedBooleanOptionalAction(argparse.BooleanOptionalAction):
@@ -74,7 +99,25 @@ def git_info():
     else:
         branch = None
 
-    return tag, commit, branch, dirty_flag
+    commit_str = ""
+    if commit is not None:
+        commit_str += f" {commit}"
+        if branch is not None:
+            commit_str += f" (branch: {branch})"
+        if dirty_flag:
+            commit_str += " DIRTY (uncommitted changes)"
+    else:
+        commit_str = tag
+
+    version_info = {
+        "version": version_str,
+        "tag": tag,
+        "commit": commit,
+        "commit_str": commit_str,
+        "branch": branch,
+        "dirty_flag": dirty_flag,
+    }
+    return version_info
 
 
 def pyfhd_parser():
@@ -137,43 +180,17 @@ def pyfhd_parser():
     healpix = parser.add_argument_group("HEALPIX", "Adjust the HEALPIX output")
 
     # Version Argument
-    tag, commit, branch, dirty_flag = git_info()
-    commit_str = ""
-    if commit is not None:
-        commit_str += f" {commit}"
-        if branch is not None:
-            commit_str += f" (branch: {branch})"
-        if dirty_flag:
-            commit_str += " DIRTY (uncommitted changes)"
-    else:
-        commit_str = tag
+    version_info = git_info()
 
-    version_string = f"""\
-    ________________________________________________________________________
-    |    ooooooooo.               oooooooooooo ooooo   ooooo oooooooooo.    |
-    |    8888   `Y88.             8888       8 8888    888   888     Y8b    |
-    |    888   .d88' oooo    ooo  888          888     888   888      888   |
-    |    888ooo88P'   `88.  .8'   888oooo8     888ooooo888   888      888   |
-    |    888           `88..8'    888          888     888   888      888   |
-    |    888            `888'     888          888     888   888     d88'   |
-    |    o888o            .8'     o888o        o888o   o888o o888bood8P'    |
-    |                 .o..P'                                                |
-    |                `Y8P'                                                  |
-    |_______________________________________________________________________|
+    version_string = (
+        INTRO
+        + "\n"
+        + f"""
+    Version: {version_info["version"]}
 
-    Python Fast Holographic Deconvolution
-
-    Translated from IDL to Python as a collaboration between Astronomy Data and
-    Computing Services (ADACS) and the Epoch of Reionisation (EoR) Team.
-
-    Repository: https://github.com/EoRImaging/pyfhd
-
-    Documentation: https://pyfhd.readthedocs.io/en/latest/
-
-    Version: {version("pyfhd")}
-
-    Git Commit Hash: {commit_str}
+    Git Commit Hash: {version_info["commit_str"]}
     """
+    )
     parser.add_argument("-v", "--version", action="version", version=version_string)
 
     # General Defaults
@@ -1521,166 +1538,60 @@ def write_collated_yaml_config(
                         outfile.write(f"{yaml_key} : '{pyfhd_config[key]}'\n")
 
 
-def pyfhd_logger(pyfhd_config: dict) -> Tuple[logging.Logger, Path]:
+@contextmanager
+def pyfhd_logger(pyfhd_config: dict):
     """
-    Creates the the logger for pyfhd. If silent is True in the pyfhd_config then
-    the StreamHandler won't be added to logger meaning there will be no terminal
-    output even if logger is called later.
+    Create the logger for pyfhd.
+
+    If silent is True in the pyfhd_config then the StreamHandler won't be added
+    to logger meaning there will be no terminal output even if logger is called
+    later.
 
     Parameters
     ----------
     pyfhd_config : dict
-        The options from the argparse in a dictionary
+        The pyfhd config options dict.
 
-    Returns
-    -------
-    logger : logging.Logger
-        The logger with the appropriate handlers added.
-    output_dir : str
-        Where the log and FHD outputs are being written to
+    Yields
+    ------
+    logging.Logger
+        The pyfhd logger
+
     """
-    # Get the time, Git commit and setup the name of the output directory
-    run_time = time.localtime()
-    stdout_time = time.strftime("%c", run_time)
-    log_time = time.strftime("%Y_%m_%d_%H_%M_%S", run_time)
-
-    if pyfhd_config["description"] is None:
-        log_name = "pyfhd_" + log_time
-    else:
-        log_name = (
-            "pyfhd_" + pyfhd_config["description"].replace(" ", "_") + "_" + log_time
-        )
-
-    tag, commit, branch, dirty_flag = git_info()
-    commit_str = ""
-    if commit is not None:
-        commit_str += f" {commit}"
-        if branch is not None:
-            commit_str += f" (branch: {branch})"
-        if dirty_flag:
-            commit_str += " DIRTY (uncommitted changes)"
-    else:
-        commit_str = tag
-
-    pyfhd_config["version"] = version("pyfhd")
-    pyfhd_config["commit"] = commit
-    pyfhd_config["branch"] = branch
-    pyfhd_config["dirty_flag"] = dirty_flag
-    pyfhd_config["log_name"] = log_name
-    pyfhd_config["log_time"] = log_time
-    # Format the starting string for logging
-    start_string = f"""\
-    ________________________________________________________________________
-    |    ooooooooo.               oooooooooooo ooooo   ooooo oooooooooo.    |
-    |    8888   `Y88.             8888       8 8888    888   888     Y8b    |
-    |    888   .d88' oooo    ooo  888          888     888   888      888   |
-    |    888ooo88P'   `88.  .8'   888oooo8     888ooooo888   888      888   |
-    |    888           `88..8'    888          888     888   888      888   |
-    |    888            `888'     888          888     888   888     d88'   |
-    |    o888o            .8'     o888o        o888o   o888o o888bood8P'    |
-    |                 .o..P'                                                |
-    |                `Y8P'                                                  |
-    |_______________________________________________________________________|
-        Python Fast Holographic Deconvolution
-
-        Translated from IDL to Python as a collaboration between Astronomy Data
-        and Computing Services (ADACS) and the Epoch of Reionisation (EoR) Team.
-
-        Repository: https://github.com/EoRImaging/pyfhd
-
-        Documentation: https://pyfhd.readthedocs.io/en/latest/
-
-        Version: {version("pyfhd")}
-
-        Git Commit Hash: {commit_str}
-
-        pyfhd Run Started At: {stdout_time}
-
-        Observation ID: {pyfhd_config["obs_id"]}
-
-        Confifuration File: {pyfhd_config["config"]}
-
-        Validating your input..."""
-
-    # Setup logging
-    log_string = ""
-    for line in start_string.split("\n"):
-        log_string += (
-            line.lstrip().replace("_", " ").replace("|    ", "").replace("|", "") + "\n"
-        )
-    # Start the pyfhd run
-    logger = logging.getLogger()
-    logger.setLevel(logging.INFO)
-    # Also capture Python Warnings and put it into the log as well
+    log = logging.getLogger("pyfhd")
+    warn_log = logging.getLogger("py.warnings")  # for captureWarnings
+    log.setLevel(logging.INFO)
     logging.captureWarnings(True)
-    # Create the logging for the temrinal
+
+    handlers = []
+
     if not pyfhd_config["silent"]:
-        log_terminal = logging.StreamHandler()
-        log_terminal.setFormatter(logging.Formatter("%(message)s"))
-        logger.addHandler(log_terminal)
-
-    # Create the output directory path. If the user has selected a description,
-    # don't use the time in the name - that gets used for the log
-    if pyfhd_config["description"] is None:
-        dir_name = "pyfhd_" + log_time
-    else:
-        dir_name = "pyfhd_" + pyfhd_config["description"].replace(" ", "_")
-    if pyfhd_config["get_sample_data"]:
-        output_dir = Path(pyfhd_config["output_path"])
-    else:
-        pyfhd_config["output_path"] = (
-            Path(pyfhd_config["output_path"]).expanduser().resolve()
-        )
-        output_dir = Path(pyfhd_config["output_path"], dir_name)
-    if Path.is_dir(output_dir):
-        output_dir_exists = True
-    else:
-        output_dir_exists = False
-        Path.mkdir(output_dir, parents=True, exist_ok=True)
-
-    # Create the logger for the file
+        handlers.append(logging.StreamHandler())
     if pyfhd_config["log_file"]:
-        log_file = logging.FileHandler(Path(output_dir, log_name + ".log"))
-        log_file.setFormatter(logging.Formatter("%(message)s"))
-        logger.addHandler(log_file)
-
-    # Show the start message in the terminal and/or log file, unless both are
-    # turned off.
-    logger.info(log_string)
-    if not pyfhd_config["silent"]:
-        log_terminal.setFormatter(
-            logging.Formatter(
-                "%(asctime)s - %(levelname)s:\n\t%(message)s",
-                datefmt="%Y-%m-%d %H:%M:%S",
-            )
-        )
-    if pyfhd_config["log_file"]:
-        log_file.setFormatter(
-            logging.Formatter(
-                "%(asctime)s - %(levelname)s:\n\t%(message)s",
-                datefmt="%Y-%m-%d %H:%M:%S",
+        handlers.append(
+            logging.FileHandler(
+                pyfhd_config["output_dir"] / f"{pyfhd_config['log_name']}.log"
             )
         )
 
-    # Write out a config file based
-
-    # Stick a warning in the log if running in an already existing dir
-    if output_dir_exists:
-        logger.warning(
-            f"The output dir {output_dir} already exists, so any existing outputs "
-            "might be overridden depending on settings."
-        )
-
-    logger.info(
-        "Logging and configuration file created and copied to here: {}".format(
-            Path(output_dir).resolve()
-        )
+    fmt = logging.Formatter(
+        "%(asctime)s - %(name)s - %(levelname)s:\n\t%(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
     )
+    for h in handlers:
+        h.setFormatter(fmt)
+        log.addHandler(h)
+        warn_log.addHandler(h)
+    try:
+        yield log
+    finally:
+        for h in handlers:
+            log.removeHandler(h)
+            warn_log.removeHandler(h)
+            h.close()
 
-    return logger, output_dir
 
-
-def pyfhd_setup(options: argparse.Namespace) -> Tuple[dict, logging.Logger]:
+def pyfhd_setup(pyfhd_config: dict, run_time: float, output_dir_exists: bool) -> dict:
     """
     Check for any incompatibilities among the options given for starting the
     pyfhd pipeline as some options do conflict with each other or have dependencies
@@ -1690,29 +1601,79 @@ def pyfhd_setup(options: argparse.Namespace) -> Tuple[dict, logging.Logger]:
 
     Parameters
     ----------
-    options : argparse.Namespace
-        The parsed argparse object.
+    pyfhd_config : dict
+        The configuration dictionary for pyfhd containing all the options.
+    run_time : float
+        The local time the run started (output of time.localtime())
+    output_dir_exists : bool
+        Boolean flag indicating whether the output directory existed before
+        the run (used for warning).
 
     Returns
     -------
     pyfhd_config : dict
-        The configuration dictionary for pyfhd containing all the options.
-    logger : logging.Logger
-        The logger with the appropriate handlers added.
+        The updated configuration dictionary for pyfhd.
+
     """
+    stdout_time = time.strftime("%c", run_time)
+
+    version_info = git_info()
+    # add the version info to the config dict so we can carry it around as needed.
+    pyfhd_config.update(version_info)
+
+    # Show the start message
+    start_string = (
+        INTRO
+        + "\n"
+        + f"""
+        Version: {pyfhd_config["version"]}
+
+        Git Commit Hash: {pyfhd_config["commit_str"]}
+
+        pyfhd Run Started At: {stdout_time}
+
+        Observation ID: {pyfhd_config["obs_id"]}
+
+        Confifuration File: {pyfhd_config["config"]}
+
+        Validating your input...
+    """
+    )
+
+    # start log
+    log_string = ""
+    for line in start_string.split("\n"):
+        log_string += (
+            line.lstrip().replace("_", " ").replace("|    ", "").replace("|", "") + "\n"
+        )
+
+    logger.info(log_string)
+
+    # Stick a warning in the log if running in an already existing dir
+    if output_dir_exists:
+        logger.warning(
+            f"The output dir {pyfhd_config['output_dir']} already exists, so any "
+            "existing outputs might be overridden depending on settings."
+        )
+
+    logger.info(
+        "Logging and configuration file created and copied to here: {}".format(
+            Path(pyfhd_config["output_dir"]).resolve()
+        )
+    )
+
     # Keep track of the errors and warnings.
     errors = 0
     warnings = 0
-    pyfhd_config = vars(options)
-    # Start the logger
-    logger, output_dir = pyfhd_logger(pyfhd_config)
-    pyfhd_config["output_dir"] = output_dir
-    pyfhd_config["top_level_dir"] = str(output_dir).split("/")[-1]
+
+    pyfhd_config["top_level_dir"] = str(pyfhd_config["output_dir"]).split("/")[-1]
     # Check input_path exists and obs_id uvfits and metafits files exist (Error)
     pyfhd_config["input_path"] = Path(pyfhd_config["input_path"]).expanduser().resolve()
     if not pyfhd_config["input_path"].exists():
         logger.error(
-            "{} doesn't exist, please check your input path".format(options.input_path)
+            "{} doesn't exist, please check your input path".format(
+                pyfhd_config["input_path"]
+            )
         )
         errors += 1
     obs_uvfits_path = Path(
@@ -2070,9 +2031,6 @@ def pyfhd_setup(options: argparse.Namespace) -> Tuple[dict, logging.Logger]:
             f"{errors} errors detected, check the log above to see the errors, "
             "stopping pyfhd now"
         )
-        # Close the handlers in the log
-        for handler in logger.handlers:
-            handler.close()
         sys.exit()
 
     if warnings:
@@ -2084,8 +2042,8 @@ def pyfhd_setup(options: argparse.Namespace) -> Tuple[dict, logging.Logger]:
 
     # Create the config directory
     if not pyfhd_config["get_sample_data"]:
-        config_path = Path(output_dir, "config")
+        config_path = Path(pyfhd_config["output_dir"], "config")
         config_path.mkdir(exist_ok=True)
         write_collated_yaml_config(pyfhd_config, config_path)
 
-    return pyfhd_config, logger
+    return pyfhd_config

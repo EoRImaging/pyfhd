@@ -3,7 +3,6 @@ from pathlib import Path
 import numpy as np
 import numpy.testing as npt
 import pytest
-from logging import Logger
 from pyfhd.io.pyfhd_io import convert_sav_to_dict, load, recarray_to_dict, save
 from pyfhd.healpix.healpix_utils import vis_model_freq_split
 
@@ -131,7 +130,6 @@ def test_vis_model_freq_split(before_file, after_file, beam_file):
         h5_before["vis_data_arr"],
         0,
         h5_before["pyfhd_config"],
-        Logger("test"),
         fft=h5_before["fft"],
         save_uvf=False,
         uvf_name=h5_before["uvf_name"],

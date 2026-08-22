@@ -1,5 +1,5 @@
 import numpy as np
-from logging import Logger
+import logging
 from scipy.io import readsav
 from pyfhd.beam_setup.antenna import init_beam
 from pyfhd.beam_setup.beam_utils import beam_power
@@ -10,8 +10,10 @@ from h5py import File
 
 from pyfhd.pyfhd_tools.pyfhd_utils import histogram, rebin, weight_invert
 
+logger = logging.getLogger(__name__)
 
-def create_psf(obs: dict, pyfhd_config: dict, logger: Logger) -> dict | File:
+
+def create_psf(obs: dict, pyfhd_config: dict) -> dict | File:
     """
     Creates the psf dictionary, which includes the hyperresolved uv-kernel used for
     gridding, by building the image-space response of a set of antennas and transforming
@@ -28,8 +30,6 @@ def create_psf(obs: dict, pyfhd_config: dict, logger: Logger) -> dict | File:
         The observation metadata dictionary
     pyfhd_config : dict
         The pyfhd configuration dictionary
-    logger : Logger
-        pyfhd's logger
 
     Raises
     ------
@@ -49,7 +49,7 @@ def create_psf(obs: dict, pyfhd_config: dict, logger: Logger) -> dict | File:
         or pyfhd_config["analytic_beam_yaml"] is not None
     ):
         logger.info("pyfhd is using pyuvdata to set up the beam. ")
-        antenna, psf = init_beam(obs, pyfhd_config, logger)
+        antenna, psf = init_beam(obs, pyfhd_config)
         # TODO: we'll see if the +1 is necessary, IDL indexing thing
         n_freq_bin = np.max(obs["baseline_info"]["fbin_i"]) + 1
         # TODO: Double check the shape
@@ -271,7 +271,6 @@ def create_psf(obs: dict, pyfhd_config: dict, logger: Logger) -> dict | File:
             Path(pyfhd_config["beams_dir"], f"{pyfhd_config['obs_id']}_beam.h5"),
             psf,
             "psf",
-            logger=logger,
             to_chunk={
                 "beam_ptr": {
                     "shape": psf["beam_ptr"].shape,
@@ -317,7 +316,7 @@ def create_psf(obs: dict, pyfhd_config: dict, logger: Logger) -> dict | File:
             pyfhd_config["saved_beam_file_path"].parent,
             pyfhd_config["saved_beam_file_path"].stem + ".h5",
         )
-        save(output_path, psf, "psf", logger=logger, to_chunk=to_chunk)
+        save(output_path, psf, "psf", to_chunk=to_chunk)
         # Since the psf is already in memory, return it
         return psf, None
     elif (
@@ -328,7 +327,6 @@ def create_psf(obs: dict, pyfhd_config: dict, logger: Logger) -> dict | File:
         # If you selected to lazy load the beam, then psf will be a h5py File Object
         psf = load(
             pyfhd_config["saved_beam_file_path"],
-            logger=logger,
             lazy_load=pyfhd_config["lazy_load_beam"],
         )
         return psf, None

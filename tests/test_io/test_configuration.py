@@ -1,9 +1,12 @@
-from logging import Logger
-from pyfhd.pyfhd_tools.pyfhd_setup import pyfhd_parser, pyfhd_setup
-import sys
 import importlib_resources
+import sys
+import time
+
 import configargparse
 import pytest
+
+from pyfhd.pyfhd_tools.pyfhd_setup import pyfhd_parser, pyfhd_setup
+from pyfhd.pyfhd import setup_directory
 
 
 @pytest.mark.github_actions
@@ -27,7 +30,12 @@ def test_configuration():
     # Initialize the configuration parser
     configargparser = pyfhd_parser()
     options = configargparser.parse_args()
-    pyfhd_config, logger = pyfhd_setup(options)
+    pyfhd_config = vars(options)
+    output_dir_exists = False
+
+    run_time = time.localtime()
+    pyfhd_config, output_dir_exists = setup_directory(pyfhd_config, run_time)
+    pyfhd_config = pyfhd_setup(pyfhd_config, run_time, output_dir_exists)
 
     # Check if the parser is an instance of ArgumentParser
     assert isinstance(configargparser, configargparse.ArgumentParser)
@@ -38,4 +46,4 @@ def test_configuration():
     assert pyfhd_config["silent"] is True
     assert "log_file" in pyfhd_config
     assert pyfhd_config["log_file"] is False
-    assert isinstance(logger, Logger)
+    assert "version" in pyfhd_config

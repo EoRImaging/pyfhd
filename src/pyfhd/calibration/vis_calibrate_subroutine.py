@@ -1,9 +1,13 @@
+import logging
+import warnings
+
 import numpy as np
 from numpy.typing import NDArray
-import warnings
-from logging import Logger
+
 from pyfhd.calibration.calibration_utils import calculate_adaptive_gain
 from pyfhd.pyfhd_tools.pyfhd_utils import weight_invert, histogram, idl_median
+
+logger = logging.getLogger(__name__)
 
 
 def vis_calibrate_subroutine(
@@ -14,7 +18,6 @@ def vis_calibrate_subroutine(
     cal: dict,
     params: dict,
     pyfhd_config: dict,
-    logger: Logger,
     calibration_weights=False,
     no_ref_tile=False,
 ):

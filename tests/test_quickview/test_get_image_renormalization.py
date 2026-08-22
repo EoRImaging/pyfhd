@@ -2,7 +2,6 @@ from os import environ as env
 from pathlib import Path
 import numpy.testing as npt
 import pytest
-from logging import Logger
 from pyfhd.io.pyfhd_io import convert_sav_to_dict, load, recarray_to_dict, save
 from pyfhd.io.pyfhd_quickview import get_image_renormalization
 
@@ -97,7 +96,6 @@ def test_get_image_renormalization(before_file, after_file):
         h5_before["beam_base"],
         h5_before["filter_arr"],
         h5_before["pyfhd_config"],
-        Logger(1),
     )
     # Interestingly we are at the limit of single precision for this result so
     # IDL can't actually use the decimal places here where we can i.e. in IDL
