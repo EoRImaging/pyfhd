@@ -26,7 +26,7 @@ To run the example data, you'll need to get the sample data first, to do this ru
 
 .. code-block:: bash
 
-  pyfhd --get-sample-data 1088285600
+  pyfhd_sample_data
 
 Which will copy the sample data built into the pyfhd package to your current
 working directory, inside a directory and sub-directory called ``input/1088285600_example``.
@@ -1369,7 +1369,7 @@ To run the docker image of pyfhd, you can use the following commands:
 .. code-block:: bash
 
   # grab the sample data into your machine
-  docker run --volume .:/pyfhd/input --user $(id -u):$(id -g) skywa7ch3r/pyfhd:latest pyfhd --get-sample-data 1088285600
+  docker run --volume .:/pyfhd/input --user $(id -u):$(id -g) skywa7ch3r/pyfhd:latest pyfhd_sample_data
 
 .. code-block:: bash
 

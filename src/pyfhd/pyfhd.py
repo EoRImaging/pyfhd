@@ -1,6 +1,4 @@
-import importlib_resources
 import logging
-import shutil
 import sys
 import time
 from datetime import timedelta
@@ -26,6 +24,7 @@ from .pyfhd_tools.pyfhd_setup import (
     pyfhd_parser,
     pyfhd_logger,
     pyfhd_setup,
+    setup_directory,
     write_collated_yaml_config,
 )
 from .pyfhd_tools.pyfhd_utils import (
@@ -65,71 +64,24 @@ def _print_time_diff(start: float, end: float, description: str):
         logger.info(f"{description} completed in: {round(runtime, 5)} seconds")
 
 
-def setup_directory(pyfhd_config: dict, run_time: float):
-    """
-    Set up the output directory and set log file name.
-
-    Parameters
-    ----------
-    pyfhd_config : dict
-        The configuration dictionary for pyfhd containing all the options.
-    run_time : float
-        The local time the run started (output of time.localtime())
-
-    """
-    log_time = time.strftime("%Y_%m_%d_%H_%M_%S", run_time)
-
-    # define the output directory
-    if pyfhd_config["description"] is None:
-        dir_name = "pyfhd_" + log_time
-    else:
-        dir_name = "pyfhd_" + pyfhd_config["description"].replace(" ", "_")
-    # Create the output directory path. If the user has selected a description,
-    # don't use the time in the name - that gets used for the log
-    if pyfhd_config["get_sample_data"]:
-        pyfhd_config["output_dir"] = Path(pyfhd_config["output_path"])
-    else:
-        pyfhd_config["output_path"] = (
-            Path(pyfhd_config["output_path"]).expanduser().resolve()
-        )
-        pyfhd_config["output_dir"] = Path(pyfhd_config["output_path"], dir_name)
-    if Path.is_dir(pyfhd_config["output_dir"]):
-        output_dir_exists = True
-    else:
-        output_dir_exists = False
-        Path.mkdir(pyfhd_config["output_dir"], parents=True, exist_ok=True)
-
-    if pyfhd_config["description"] is None:
-        log_name = "pyfhd_" + log_time
-    else:
-        log_name = (
-            "pyfhd_" + pyfhd_config["description"].replace(" ", "_") + "_" + log_time
-        )
-
-    pyfhd_config["log_name"] = log_name
-    pyfhd_config["log_time"] = log_time
-
-    return pyfhd_config, output_dir_exists
-
-
-def finish_pyfhd(pyfhd_start: float, psf: dict | File, pyfhd_config: dict):
+def _finish_pyfhd(pyfhd_start: float, psf: dict | File, pyfhd_config: dict):
     pyfhd_end = time.time()
     runtime = timedelta(seconds=pyfhd_end - pyfhd_start)
     # Close all open h5 files
     if isinstance(psf, h5py.File):
         psf.close()
-    if not pyfhd_config["get_sample_data"]:
-        # Write a final collated yaml for the final pyfhd_config
-        write_collated_yaml_config(
-            pyfhd_config, Path(pyfhd_config["output_dir"], "config"), "-final"
-        )
-        # Save the config in a HDF5 file for ease of reading in previous
-        # parameters from previous runs
-        save(
-            Path(pyfhd_config["output_dir"], "config", "pyfhd_config.h5"),
-            pyfhd_config,
-            "pyfhd_config",
-        )
+
+    # Write a final collated yaml for the final pyfhd_config
+    write_collated_yaml_config(
+        pyfhd_config, Path(pyfhd_config["output_dir"], "config"), "-final"
+    )
+    # Save the config in a HDF5 file for ease of reading in previous
+    # parameters from previous runs
+    save(
+        Path(pyfhd_config["output_dir"], "config", "pyfhd_config.h5"),
+        pyfhd_config,
+        "pyfhd_config",
+    )
     logger.info(
         f"pyfhd Run Completed for {pyfhd_config['obs_id']}\nTotal Runtime "
         f"(Days:Hours:Minutes:Seconds.Millseconds): {runtime}"
@@ -138,43 +90,12 @@ def finish_pyfhd(pyfhd_start: float, psf: dict | File, pyfhd_config: dict):
     return
 
 
-def get_sample_data(pyfhd_config):
-    """
-    Copy the sample data to desired location.
-
-    Parameters
-    ----------
-    pyfhd_config : dict
-        The config dict, primarily from the yaml with a few updates.
-
-    """
-    sample_path = Path(importlib_resources.files("pyfhd")).joinpath(
-        "resources/1088285600_example"
-    )
-    for file in sample_path.iterdir():
-        if file.is_file():
-            dest_file = pyfhd_config["output_path"] / file.name
-            if file.suffix == ".yaml":
-                config = file.read_text()
-                # Replace the input directory in the config with the current
-                # working directory
-                config = config.replace(
-                    "./src/pyfhd/resources/1088285600_example",
-                    str(pyfhd_config["output_path"]),
-                )
-                dest_file.write_text(config)
-                logger.info(
-                    f"Wrote the sample config file to {dest_file} with updated "
-                    "paths to your machine"
-                )
-            else:
-                shutil.copyfile(file, dest_file)
-                logger.info(f"Copied sample data file: {file.name} to {dest_file}")
-
-
 def run_pyfhd(pyfhd_config: dict, pyfhd_start: float):
     """
     Do a full pyfhd run.
+
+    This should be called from the `main` function to ensure all the
+    directories and logging are set up properly.
 
     Parameters
     ----------
@@ -578,8 +499,8 @@ def run_pyfhd(pyfhd_config: dict, pyfhd_start: float):
             logger.info(
                 "The cal_stop option was used, calibration was finished, exiting pyfhd"
             )
-            finish_pyfhd(pyfhd_start, psf, pyfhd_config)
             pyfhd_successful = True
+            _finish_pyfhd(pyfhd_start, psf, pyfhd_config)
             sys.exit(0)
 
         if "image_info" not in psf or (
@@ -736,7 +657,7 @@ def run_pyfhd(pyfhd_config: dict, pyfhd_start: float):
                 obs, psf, cal, params, vis_arr, vis_model_arr, vis_weights, pyfhd_config
             )
         pyfhd_successful = True
-        finish_pyfhd(pyfhd_start, psf, pyfhd_config)
+        _finish_pyfhd(pyfhd_start, psf, pyfhd_config)
     except Exception as e:
         logger.exception(
             f"An error occurred in pyfhd: {e}\n\tExiting pyfhd.", exc_info=True
@@ -761,12 +682,6 @@ def main():
     configargparser = pyfhd_parser()
     options = configargparser.parse_args()
 
-    if options.get_sample_data:
-        options.input_path = importlib_resources.files("pyfhd").joinpath(
-            "resources/1088285600_example"
-        )
-        options.output_path = Path.cwd() / "input" / "1088285600_example"
-
     pyfhd_config = vars(options)
 
     # Get the time, used for various file names setup the name of the output directory
@@ -778,11 +693,6 @@ def main():
     with pyfhd_logger(pyfhd_config):
         # validate options
         pyfhd_config = pyfhd_setup(pyfhd_config, run_time, output_dir_exists)
-
-        if pyfhd_config["get_sample_data"]:
-            get_sample_data(pyfhd_config)
-            finish_pyfhd(pyfhd_start, None, pyfhd_config)
-            return
 
         run_pyfhd(pyfhd_config, pyfhd_start)
 

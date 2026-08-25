@@ -3,6 +3,7 @@ import importlib_resources
 import logging
 import re
 import sys
+import shutil
 import time
 from glob import glob
 from contextlib import contextmanager
@@ -1538,6 +1539,87 @@ def write_collated_yaml_config(
                         outfile.write(f"{yaml_key} : '{pyfhd_config[key]}'\n")
 
 
+def get_sample_data():
+    """
+    Copy the sample data to a folder in the current working directory.
+
+    Parameters
+    ----------
+    pyfhd_config : dict
+        The config dict, primarily from the yaml with a few updates.
+
+    """
+    sample_path = Path(importlib_resources.files("pyfhd")).joinpath(
+        "resources/1088285600_example"
+    )
+    output_path = Path.cwd() / "input" / "1088285600_example"
+    Path.mkdir(output_path, parents=True, exist_ok=True)
+
+    for file in sample_path.iterdir():
+        if file.is_file():
+            dest_file = output_path / file.name
+            if file.suffix == ".yaml":
+                config = file.read_text()
+                # Replace the input directory in the config with the current
+                # working directory
+                config = config.replace(
+                    "./src/pyfhd/resources/1088285600_example", str(output_path)
+                )
+                dest_file.write_text(config)
+                print(
+                    f"Wrote the sample config file to {dest_file} with updated "
+                    "paths to your machine"
+                )
+            else:
+                shutil.copyfile(file, dest_file)
+                print(f"Copied sample data file: {file.name} to {dest_file}")
+
+
+def setup_directory(pyfhd_config: dict, run_time: float):
+    """
+    Set up the output directory and set log file name.
+
+    Parameters
+    ----------
+    pyfhd_config : dict
+        The configuration dictionary for pyfhd containing all the options.
+    run_time : float
+        The local time the run started (output of time.localtime())
+
+    """
+    log_time = time.strftime("%Y_%m_%d_%H_%M_%S", run_time)
+
+    # define the output directory
+    if pyfhd_config["description"] is None:
+        dir_name = "pyfhd_" + log_time
+    else:
+        dir_name = "pyfhd_" + pyfhd_config["description"].replace(" ", "_")
+    # Create the output directory path. If the user has selected a description,
+    # don't use the time in the name - that gets used for the log
+    pyfhd_config["output_path"] = (
+        Path(pyfhd_config["output_path"]).expanduser().resolve()
+    )
+    pyfhd_config["output_dir"] = Path(pyfhd_config["output_path"], dir_name)
+
+    if Path.is_dir(pyfhd_config["output_dir"]):
+        output_dir_exists = True
+    else:
+        output_dir_exists = False
+        Path.mkdir(pyfhd_config["output_dir"], parents=True, exist_ok=True)
+
+    if pyfhd_config["description"] is None:
+        log_name = "pyfhd_" + log_time
+    else:
+        log_name = (
+            "pyfhd_" + pyfhd_config["description"].replace(" ", "_") + "_" + log_time
+        )
+
+    pyfhd_config["log_name"] = log_name
+    pyfhd_config["log_time"] = log_time
+
+    return pyfhd_config, output_dir_exists
+
+
 @contextmanager
 def pyfhd_logger(pyfhd_config: dict):
     """
@@ -2041,9 +2123,8 @@ def pyfhd_setup(pyfhd_config: dict, run_time: float, output_dir_exists: bool) ->
     logger.info("Input validated, starting pyfhd run now")
 
     # Create the config directory
-    if not pyfhd_config["get_sample_data"]:
-        config_path = Path(pyfhd_config["output_dir"], "config")
-        config_path.mkdir(exist_ok=True)
-        write_collated_yaml_config(pyfhd_config, config_path)
+    config_path = Path(pyfhd_config["output_dir"], "config")
+    config_path.mkdir(exist_ok=True)
+    write_collated_yaml_config(pyfhd_config, config_path)
 
     return pyfhd_config
