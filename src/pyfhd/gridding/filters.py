@@ -1,18 +1,17 @@
-import logging
-
+import h5py
 import numpy as np
 from numpy.typing import NDArray
 
 from ..pyfhd_tools.pyfhd_utils import weight_invert
 from . import gridding_utils
 
-logger = logging.getLogger(__name__)
-
 
 def filter_uv_uniform(
     image_uv: NDArray[np.complex128],
-    vis_count: NDArray[np.float64] | None,
+    *,
+    vis_count: NDArray[np.float64] | None = None,
     obs: dict | None = None,
+    psf: dict | h5py.File | None = None,
     params: dict | None = None,
     pyfhd_config: dict | None = None,
     weights: NDArray[np.float64] | None = None,
@@ -30,13 +29,24 @@ def filter_uv_uniform(
     vis_count : NDArray[np.float64] | None
         2D array of number of contributing visibilities per pixel on the {u,v} grid
     obs : dict | None, optional
-        Observation metadata dictionary, by default None
+        Observation metadata dictionary, only used if vis_count is not passed.
+        By default None.
+    psf : dict | h5py.File
+        Beam metadata dictionary, only used if vis_count is not passed.
+        By default None.
     params : dict | None, optional
-        Visibility metadata dictionary, by default None
+        Visibility metadata dictionary, only used if vis_count is not passed.
+        By default None.
     pyfhd_config : dict | None, optional
         Run option dictionary, by default None
     weights : NDArray[np.float64] | None, optional
-        The weights array (aka vis_weights), by default None
+        If vis_count is supplied, this is only used if it's the same shape as
+        image_uv in which case it's used as a mask when calculating the normalization
+        (uv pixels with weights>0 are included in the normalization calculation).
+        If vis_count is not supplied and obs, psf, and params are all supplied,
+        this must be the vis_weights, shaped like the visibility array. If none
+        of vis_count, obs, psf, and params are supplied, this is used to calculate
+        vis_count and should be the shape of image_uv.
     fi_use : NDArray[np.integer] | None, optional
         Frequency index array for gridding (used e.g. when gridding all frequencies
         for continuum images), by default None.
@@ -64,9 +74,15 @@ def filter_uv_uniform(
     # flags from the obs structure (e.g. a list of tiles completely flagged, and
     # of frequencies completely flagged)
     if vis_count is None:
-        if obs is not None or params is not None:
+        if obs is not None and psf is not None and params is not None:
             vis_count = gridding_utils.visibility_count(
-                obs, params, weights, pyfhd_config, fi_use, bi_use, mask_mirror_indices
+                obs=obs,
+                psf=psf,
+                params=params,
+                vis_weights=weights,
+                fi_use=fi_use,
+                bi_use=bi_use,
+                mask_mirror_indices=mask_mirror_indices,
             )
         elif weights is not None and np.size(weights) == np.size(image_uv):
             if np.max(weights) == 0:
@@ -74,7 +90,11 @@ def filter_uv_uniform(
             else:
                 vis_count = np.abs(weights) / np.min(np.abs(weights[weights > 0]))
         else:
-            raise TypeError("obs and params must not be None when vis_count is None")
+            raise ValueError(
+                "Cannot determine vis count. Either vis_count must be provided "
+                "or all of obs, psf and params must be provided or weights must "
+                "be provided and match `image_uv` in size."
+            )
 
     # Get the parts of the filter we're using
     filter_use = weight_invert(vis_count, threshold=1)

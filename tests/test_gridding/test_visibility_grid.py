@@ -251,13 +251,13 @@ def test_visibility_grid(
     psf = recarray_to_dict(h5_before["psf"])
 
     gridding_dict = visibility_grid(
-        h5_before["visibility_ptr"],
-        h5_before["vis_weight_ptr"],
-        obs,
-        psf,
-        h5_before["params"],
-        h5_before["polarization"],
-        h5_before["pyfhd_config"],
+        visibility=h5_before["visibility_ptr"],
+        vis_weights=h5_before["vis_weight_ptr"],
+        obs=obs,
+        psf=psf,
+        params=h5_before["params"],
+        polarization=h5_before["polarization"],
+        pyfhd_config=h5_before["pyfhd_config"],
         calculate_uniform_filter=h5_before["calculate_uniform_filter"],
         no_conjugate=h5_before["no_conjugate"],
         model=h5_before["model_ptr"],
@@ -432,13 +432,13 @@ def test_full_visibility_grid(full_before_gridding: Path, full_after_gridding: P
         h5_before["bi_use"] = new_arr
 
     gridding_dict = visibility_grid(
-        h5_before["visibility_ptr"],
-        h5_before["vis_weight_ptr"],
-        h5_before["obs"],
-        h5_before["psf"],
-        h5_before["params"],
-        h5_before["polarization"],
-        h5_before["pyfhd_config"],
+        visibility=h5_before["visibility_ptr"],
+        vis_weights=h5_before["vis_weight_ptr"],
+        obs=h5_before["obs"],
+        psf=h5_before["psf"],
+        params=h5_before["params"],
+        polarization=h5_before["polarization"],
+        pyfhd_config=h5_before["pyfhd_config"],
         calculate_uniform_filter=h5_before["calculate_uniform_filter"],
         no_conjugate=h5_before["no_conjugate"],
         model=h5_before["model_ptr"],
@@ -674,13 +674,13 @@ def test_visibility_grid_in_vis_model_freq_split(
         h5_before["bi_use"] = new_arr
 
     gridding_dict = visibility_grid(
-        h5_before["visibility_ptr"],
-        h5_before["vis_weight_ptr"],
-        h5_before["obs"],
-        psf,
-        h5_before["params"],
-        0,
-        h5_before["pyfhd_config"],
+        visibility=h5_before["visibility_ptr"],
+        vis_weights=h5_before["vis_weight_ptr"],
+        obs=h5_before["obs"],
+        psf=psf,
+        params=h5_before["params"],
+        polarization=0,
+        pyfhd_config=h5_before["pyfhd_config"],
         calculate_uniform_filter=h5_before["calculate_uniform_filter"],
         no_conjugate=h5_before["no_conjugate"],
         model=h5_before["model_ptr"],
