@@ -409,6 +409,7 @@ def run_pyfhd(pyfhd_config: dict, pyfhd_start: float):
                     polarization=pol_i,
                     pyfhd_config=pyfhd_config,
                     calculate_uniform_filter=calculate_uniform_filter,
+                    calculate_mapfn=pyfhd_config["recalculate_mapfn"],
                     no_conjugate=no_conjugate,
                     model=vis_model_arr_use,
                 )
