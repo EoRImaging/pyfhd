@@ -27,6 +27,7 @@ def visibility_grid(
     polarization: int,
     pyfhd_config: dict,
     calculate_uniform_filter: bool = False,
+    calculate_mapfn: bool = False,
     no_conjugate: bool = False,
     model: NDArray[np.complex128] | None = None,
     fi_use: NDArray[np.integer] | None = None,
@@ -75,6 +76,10 @@ def visibility_grid(
         When called from the main function, this is set to True for the first
         polarization and False for the rest because it's the same across pols
         and only needs to be calculated once.
+    calculate_mapfn : bool, optional
+        Option to calculate the mapping function. Passed here rather than extracted
+        from `pyfhd_config` because this is also called for gridding by frequency
+        when we do not want to calculate the mapping function.
     no_conjugate : bool, optional
         Do not perform the conjugate mirror to fill half of the {u,v} plane, by
         default False
@@ -223,12 +228,13 @@ def visibility_grid(
     uniform_filter = np.zeros((dimension, elements))
 
     # If the uniform gridding has been activated we need to activate the uniform
-    # filter and switch off calculating the HMF
+    # filter and switch off calculating the HMF (this should already be done in
+    # setup, but there's no harm to making sure).
     if pyfhd_config["grid_uniform"]:
         calculate_uniform_filter = True
-        pyfhd_config["recalculate_mapfn"] = False
+        calculate_mapfn = False
 
-    if pyfhd_config["recalculate_mapfn"]:
+    if calculate_mapfn:
         # setup for the mapping function creation. We're going to create it as
         # a scipy sparse array, which only supports 2 dimensional arrays
         # So the 0th dimension is the flattened output uv plane (what you get
@@ -303,17 +309,18 @@ def visibility_grid(
 
     frequency_cache: dict[int, np.ndarray] = {}
 
-    if pyfhd_config["recalculate_mapfn"]:
+    if calculate_mapfn:
         reporting_frac = 0.1
         description = "gridding and mapping function building"
     else:
         reporting_frac = 0.2
         description = "gridding"
     t0 = time.time()
-    logger.info(
-        f"gridding setup complete, begin {description} for polarization "
-        f"{obs['pol_names'][polarization]} (in {n_bin_use} unequal size steps)"
-    )
+    if verbose_logging:
+        logger.info(
+            f"gridding setup complete, begin {description} for polarization "
+            f"{obs['pol_names'][polarization]} (in {n_bin_use} unequal size steps)"
+        )
     for bi in range(n_bin_use):
         # Cycle through sets of visibilities which contribute to the same data/model
         # uv-plane pixels, and perform the gridding operation per set using each
@@ -499,7 +506,7 @@ def visibility_grid(
         #  Calculate the conjugate transpose (dagger) of the uv-pixels that the
         # current beam kernel contributes to
         box_matrix_dag = np.conj(box_matrix)
-        if pyfhd_config["recalculate_mapfn"] and rep_flag:
+        if calculate_mapfn and rep_flag:
             box_matrix *= np.repeat(psf_weight[:, np.newaxis], psf_dim3, axis=1)
 
         if pyfhd_config["grid_spectral"]:
@@ -588,7 +595,7 @@ def visibility_grid(
                 xmin_use : xmin_use + psf_dim, ymin_use : ymin_use + psf_dim
             ] += bin_n[bin_i[bi]]
 
-        if pyfhd_config["recalculate_mapfn"]:
+        if calculate_mapfn:
             if bi in map_fn_init_iters:
                 # convert the current lists into a sparse array and add to the
                 # existing array.
@@ -643,7 +650,7 @@ def visibility_grid(
                 f"time remaining: {est_time_left}"
             )
 
-    if pyfhd_config["recalculate_mapfn"]:
+    if calculate_mapfn:
         # convert the current lists into a sparse array and add to the existing array.
         latest_map = csr_array(
             (map_fn_values, (map_fn_uvout, map_fn_uvin)),
@@ -734,7 +741,7 @@ def visibility_grid(
         if pyfhd_config["grid_spectral"]:
             gridding_dict["spectral_model_uv"] = spectral_model_uv
 
-    if pyfhd_config["recalculate_mapfn"]:
+    if calculate_mapfn:
         gridding_dict["map_fn"] = map_fn
 
     return gridding_dict
