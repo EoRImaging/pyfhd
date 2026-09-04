@@ -124,6 +124,8 @@ def before_gridding(data_dir: Path, number: int, request: pytest.FixtureRequest)
         "grid_uniform": (
             bool("grid_uniform" in h5_save_dict and h5_save_dict["grid_uniform"])
         ),
+        "conserve_memory": False,
+        "recalculate_mapfn": False,
     }
     h5_save_dict["visibility_ptr"] = h5_save_dict["visibility_ptr"].T
     h5_save_dict["vis_weight_ptr"] = h5_save_dict["vis_weight_ptr"].T
@@ -339,6 +341,8 @@ def full_before_gridding(data_dir: Path, full_number: int):
         "grid_uniform": (
             bool("grid_uniform" in h5_save_dict and h5_save_dict["grid_uniform"])
         ),
+        "conserve_memory": False,
+        "recalculate_mapfn": False,
     }
     h5_save_dict["visibility_ptr"] = h5_save_dict["visibility_ptr"].T
     h5_save_dict["vis_weight_ptr"] = h5_save_dict["vis_weight_ptr"].T

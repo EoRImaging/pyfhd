@@ -385,6 +385,14 @@ def pyfhd_parser():
         "grid_recalculate from FHD",
     )
     checkpoints.add_argument(
+        "--recalculate-mapfn",
+        default=False,
+        action=OrderedBooleanOptionalAction,
+        help="Forces pyfhd to recalculate the holographic mapping function. "
+        "Replaces mapfn_recalculate from FHD",
+    )
+
+    checkpoints.add_argument(
         "--recalculate-healpix",
         default=False,
         action=OrderedBooleanOptionalAction,
@@ -1814,6 +1822,7 @@ def recalculate_flow(pyfhd_config: dict) -> dict:
             pyfhd_config["recalculate_grid"] = True
             if pyfhd_config["snapshot_healpix_export"]:
                 pyfhd_config["recalculate_healpix"] = True
+        # add recalculate_mapfn logic & need_mapfn when deconvolution exists
 
     if (
         pyfhd_config["recalculate_beam"]

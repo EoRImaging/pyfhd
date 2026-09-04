@@ -349,7 +349,21 @@ def run_pyfhd(pyfhd_config: dict, pyfhd_start: float):
             product_filenames["grid_model_uv"] = product_file(
                 "grid_model_uv", pyfhd_config, mkdir=True
             )
-        if pyfhd_config["recalculate_grid"]:
+        if pyfhd_config["recalculate_mapfn"]:
+            # update this to need_mapfn once deconvolution exists
+            product_filenames["map_fn"] = product_file(
+                "map_fn", pyfhd_config, mkdir=True
+            )
+
+        if pyfhd_config["recalculate_grid"] or pyfhd_config["recalculate_mapfn"]:
+            if pyfhd_config["recalculate_mapfn"]:
+                step_description = "Gridding and mapping function building"
+                # We're going to construct the mapping function as a dict of
+                # sparse arrays with polarization indexes for keys.
+                map_fn = {}
+            else:
+                step_description = "Gridding"
+
             grid_start = time.time()
             image_uv = np.empty(
                 (obs["n_pol"], obs["elements"], obs["dimension"]), dtype=np.complex128
@@ -367,7 +381,8 @@ def run_pyfhd(pyfhd_config: dict, pyfhd_start: float):
 
             for pol_i in range(obs["n_pol"]):
                 logger.info(
-                    f"Gridding has begun for polarization {obs['pol_names'][pol_i]}"
+                    f"{step_description} has begun for polarization "
+                    f"{obs['pol_names'][pol_i]}"
                 )
                 if pol_i == 0:
                     calculate_uniform_filter = True
@@ -384,6 +399,7 @@ def run_pyfhd(pyfhd_config: dict, pyfhd_start: float):
                 else:
                     vis_model_arr_use = None
 
+                grid_pol_start = time.time()
                 gridding_dict = visibility_grid(
                     visibility=vis_arr[pol_i],
                     vis_weights=vis_weights[pol_i],
@@ -396,6 +412,13 @@ def run_pyfhd(pyfhd_config: dict, pyfhd_start: float):
                     no_conjugate=no_conjugate,
                     model=vis_model_arr_use,
                 )
+                grid_pol_end = time.time()
+                _print_time_diff(
+                    grid_pol_start,
+                    grid_pol_end,
+                    f"{step_description} for polarization {obs['pol_names'][pol_i]}",
+                )
+
                 if len(gridding_dict) != 0:
                     image_uv[pol_i] = gridding_dict["image_uv"]
                     weights_uv[pol_i] = gridding_dict["weights"]
@@ -405,10 +428,8 @@ def run_pyfhd(pyfhd_config: dict, pyfhd_start: float):
                     obs["nf_vis"] = gridding_dict["obs"]["nf_vis"]
                     if pyfhd_config["model_exists"]:
                         model_uv[pol_i] = gridding_dict["model_return"]
-                    logger.info(
-                        "Gridding has finished for polarization "
-                        f"{obs['pol_names'][pol_i]}"
-                    )
+                    if pyfhd_config["recalculate_mapfn"]:
+                        map_fn[obs["pol_names"][pol_i]] = gridding_dict["map_fn"]
                 else:
                     logger.error("All data was flagged during gridding, exiting")
                     sys.exit(1)
@@ -433,9 +454,11 @@ def run_pyfhd(pyfhd_config: dict, pyfhd_start: float):
             )
             if pyfhd_config["model_exists"]:
                 save(product_filenames["grid_model_uv"], model_uv, "model_uv")
+            if pyfhd_config["recalculate_mapfn"]:
+                save(product_filenames["map_fn"], map_fn, "map_fn")
 
             grid_end = time.time()
-            _print_time_diff(grid_start, grid_end, "Visibilities gridded")
+            _print_time_diff(grid_start, grid_end, step_description)
 
         elif pyfhd_config["gridding_plots"] or pyfhd_config["export_images"]:
             image_uv = load(product_filenames["grid_data_uv"])
