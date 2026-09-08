@@ -1,14 +1,18 @@
-from pyfhd.io.pyfhd_io import recarray_to_dict, convert_sav_to_dict
+import importlib_resources
+import copy
+from os import environ as env
+from pathlib import Path
+
 import pytest
 import numpy.testing as npt
 import numpy as np
-from os import environ as env
-from pathlib import Path
-from pyfhd.gridding.visibility_grid import visibility_grid
-from pyfhd.pyfhd_tools.test_utils import get_savs, sav_file_rearrange_psf
-from pyfhd.io.pyfhd_io import save, load
 from scipy.io import readsav
-import importlib_resources
+
+from pyfhd.gridding.gridding_utils import conjugate_mirror
+from pyfhd.gridding.visibility_grid import visibility_grid
+from pyfhd.gridding.visibility_degrid import visibility_degrid
+from pyfhd.io.pyfhd_io import load, recarray_to_dict, convert_sav_to_dict, save
+from pyfhd.pyfhd_tools.test_utils import get_savs, sav_file_rearrange_psf
 
 
 @pytest.fixture
@@ -706,3 +710,64 @@ def test_visibility_grid_in_vis_model_freq_split(
     # difference could cause errors up to 1
     # This doesn't occur for every test.
     npt.assert_allclose(gridding_dict["n_vis"], h5_after["n_vis"])
+
+
+@pytest.mark.github_actions
+@pytest.mark.parametrize("pol_i", [0, 1])
+@pytest.mark.parametrize("ones", [True, False])
+def test_mapfn_zenith_2013(
+    mwa_aee_beam_zenith_2013, zenith_params_2013, model_uv_zenith_2013, pol_i, ones
+):
+    """
+    Test that the mapping function is equivalent to degridding then gridding.
+
+    Tests both a "realistic" uv plane and a uv plane of all ones (i.e. weights).
+    """
+    _, psf, obs, pyfhd_config = mwa_aee_beam_zenith_2013
+    params = zenith_params_2013
+
+    if ones:
+        model_uv_full = np.ones((obs["dimension"], obs["elements"]), dtype=complex)
+    else:
+        model_uv_full = model_uv_zenith_2013
+
+    pyfhd_config_use = copy.deepcopy(pyfhd_config)
+    pyfhd_config_use["conserve_memory"] = True
+    pyfhd_config_use["memory_threshold"] = 1e10
+    pyfhd_config_use["mask_mirror_indices"] = False
+    pyfhd_config_use["beam_per_baseline"] = False
+    pyfhd_config_use["grid_uniform"] = False
+    pyfhd_config_use["grid_spectral"] = False
+    pyfhd_config_use["grid_weights"] = True
+    pyfhd_config_use["grid_variance"] = False
+
+    vis_model = visibility_degrid(
+        image_uv=model_uv_full,
+        vis_weights=None,
+        obs=obs,
+        psf=psf,
+        params=params,
+        pyfhd_config=pyfhd_config_use,
+        polarization=pol_i,
+        fill_model_visibilities=True,
+    )
+
+    vis_weights = np.ones_like(vis_model)
+
+    gridding_dict = visibility_grid(
+        visibility=vis_model,
+        vis_weights=vis_weights,
+        obs=obs,
+        psf=psf,
+        params=params,
+        polarization=pol_i,
+        pyfhd_config=pyfhd_config_use,
+        calculate_uniform_filter=False,
+        calculate_mapfn=True,
+    )
+
+    mapfn_uv_out = gridding_dict["map_fn"].dot(model_uv_full.flat)
+    mapfn_uv_out = mapfn_uv_out.reshape((obs["dimension"], obs["elements"]))
+    mapfn_uv_out = (mapfn_uv_out + conjugate_mirror(mapfn_uv_out)) / 2.0
+
+    npt.assert_allclose(gridding_dict["image_uv"], mapfn_uv_out)
