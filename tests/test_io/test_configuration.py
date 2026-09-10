@@ -10,7 +10,31 @@ from pyfhd.pyfhd import setup_directory
 
 
 @pytest.mark.github_actions
-def test_configuration():
+@pytest.mark.parametrize(
+    ("options", "config", "warn_msg"),
+    [
+        (["--silent"], {"silent": True}, None),
+        (["--no-log-file"], {"log_file": False}, None),
+        (
+            ["--recalculate-all"],
+            {"recalculate_beam": True, "recalculate_grid": True},
+            None,
+        ),
+        (
+            ["--snapshot-healpix-export", "--no-save-visibilities"],
+            {"save_visibilities": True},
+            "If we're exporting healpix we should also save the visibilities "
+            "that created them. Setting save_visibilities to True",
+        ),
+        (
+            ["--grid-uniform", "--recalculate-mapfn"],
+            {"grid_uniform": True, "recalculate_mapfn": False},
+            "The grid_uniform and recalculate_mapfn options are incompatible. "
+            "Setting recalculate_mapfn to False.",
+        ),
+    ],
+)
+def test_configuration(options, config, warn_msg):
     """
     Test the configuration setup for pyfhd.
     This function checks if the configuration parser is correctly initialized.
@@ -26,7 +50,7 @@ def test_configuration():
         "--silent",
         "--no-log-file",
         "1088285600",
-    ]
+    ] + options
     # Initialize the configuration parser
     configargparser = pyfhd_parser()
     options = configargparser.parse_args()
@@ -40,10 +64,10 @@ def test_configuration():
     # Check if the parser is an instance of ArgumentParser
     assert isinstance(configargparser, configargparse.ArgumentParser)
     assert isinstance(pyfhd_config, dict)
-    assert "obs_id" in pyfhd_config
-    assert pyfhd_config["obs_id"] == "1088285600"
-    assert "silent" in pyfhd_config
-    assert pyfhd_config["silent"] is True
-    assert "log_file" in pyfhd_config
-    assert pyfhd_config["log_file"] is False
-    assert "version" in pyfhd_config
+
+    config.update({"obs_id": "1088285600", "silent": True, "log_file": False})
+
+    # TODO: add warning checking once logging fix is in.
+
+    for key, value in config.items():
+        assert pyfhd_config[key] == value

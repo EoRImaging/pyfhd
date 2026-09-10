@@ -1815,8 +1815,8 @@ def pyfhd_setup(pyfhd_config: dict, run_time: float, output_dir_exists: bool) ->
     if pyfhd_config["grid_uniform"] and pyfhd_config["recalculate_mapfn"]:
         pyfhd_config["recalculate_mapfn"] = False
         logger.warning(
-            "The `grid_uniform` and `recalculate_mapfn` options are incompatible. "
-            "Setting `recalculate_mapfn` to False."
+            "The grid_uniform and recalculate_mapfn options are incompatible. "
+            "Setting recalculate_mapfn to False."
         )
         warnings += 1
 
