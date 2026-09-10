@@ -1,5 +1,6 @@
 from h5py import File, Group, Dataset
 from scipy.sparse import csr_array
+from pyuvdata import AiryBeam
 import numpy as np
 import pytest
 
@@ -16,7 +17,7 @@ def test_save_and_load_dict(tmp_path):
     # Create a sample dictionary to save
     sample_data = {
         "key1": [1, 2, 3],
-        "key2": {"subkey1": "value1", "subkey2": "value2"},
+        "key2": {"subkey1": "value1", "subkey2": {"foo": 3, "bar": 4}},
         "key3": 42,
         "key4": None,
         "key5": np.array([0, 0, 1, 2, 2, 2]),
@@ -27,6 +28,7 @@ def test_save_and_load_dict(tmp_path):
             ),
             shape=(3, 3),
         ),
+        "key7": AiryBeam(diameter=14),
     }
 
     file_path = tmp_path / "test_data.h5"
@@ -78,9 +80,11 @@ def test_save_and_load_dict(tmp_path):
             ),
             shape=(3, 3),
         ),
+        [0, 0, 1, 2, 2, 2],
+        3.14,
     ],
 )
-def test_save_and_load_array(tmp_path, sample_data):
+def test_save_and_load_single(tmp_path, sample_data):
     """
     Test the save and load functionality of pyfhd.
     This function checks if the data can be saved to a file and then loaded back
@@ -108,6 +112,7 @@ def test_save_and_load_array(tmp_path, sample_data):
         assert loaded_data == sample_data
 
 
+@pytest.mark.github_actions
 def test_save_and_load_sparse_error(tmp_path):
     sample_data = {
         "key1": {
