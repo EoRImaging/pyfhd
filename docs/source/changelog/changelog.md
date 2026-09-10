@@ -29,6 +29,7 @@ repo and passing None to `beam_file-path`.
 to avoid confusion with the new `uvbeam-file-path` option.
 
 ### New Features
+* pyfhd can now construct the holographic mapping function.
 * The following configuration options have been added: `antenna-size`,
 `recalculate-beam`, `recalculate-cal-model-vis`, `recalculate-cal`,
 `recalculate-healpix`, `save-beam`, `save-skymodel`, `save-model-uv`,
@@ -132,6 +133,7 @@ computer-specific paths in test data.
 ### Version Changes
 
 ### Translation Changes
+* Constructing the holographic mapping function has now been translated.
 * Degridding to create model visibilities has now been translated, along with
 various required functions for selecting sources from catalogs, converting from
 Stokes to instrument polarization fluxes and DFTing the sources to the uvplane.
