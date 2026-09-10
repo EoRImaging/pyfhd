@@ -64,17 +64,35 @@ class OrderedBooleanOptionalAction(argparse.BooleanOptionalAction):
         self.option_strings = longs + shorts
 
 
-def git_info():
-    version_str = version("pyfhd")
-    parts = version_str.split(".")
+def git_info(version_str: str | None = None):
+    """
+    Parse the version info.
 
-    if ".dev" not in version_str:
-        tag = version_str
-        return tag, None, None, False
+    Parameters
+    ----------
+    version_str : str, optional
+        Version string to parse. If None, get the pyfhd version. Should only be
+        set to a string for testing purposes.
+
+    """
+    if version_str is None:
+        version_str = version("pyfhd")
+    parts = version_str.split(".")
 
     dirty_flag = False
     commit = None
     branch = None
+
+    if ".dev" not in version_str:
+        tag = version_str
+        return {
+            "version": version_str,
+            "tag": tag,
+            "commit": commit,
+            "commit_str": tag,
+            "branch": branch,
+            "dirty_flag": dirty_flag,
+        }
 
     dev_loc = version_str.find(".dev")
     tag = version_str[:dev_loc]
@@ -100,9 +118,8 @@ def git_info():
     else:
         branch = None
 
-    commit_str = ""
     if commit is not None:
-        commit_str += f" {commit}"
+        commit_str = f"{commit}"
         if branch is not None:
             commit_str += f" (branch: {branch})"
         if dirty_flag:
@@ -110,7 +127,7 @@ def git_info():
     else:
         commit_str = tag
 
-    version_info = {
+    return {
         "version": version_str,
         "tag": tag,
         "commit": commit,
@@ -118,7 +135,6 @@ def git_info():
         "branch": branch,
         "dirty_flag": dirty_flag,
     }
-    return version_info
 
 
 def pyfhd_parser():
