@@ -11,8 +11,34 @@ from pyfhd.pyfhd_tools.pyfhd_setup import deprecated_args, pyfhd_parser, pyfhd_s
 
 
 @pytest.mark.github_actions
-@pytest.mark.parametrize("deprecated", [True, False])
-def test_configuration(tmp_path, deprecated):
+@pytest.mark.parametrize(
+    ("options", "config", "deprecated", "warn_msg"),
+    [
+        (["--silent"], {"silent": True}, True, None),
+        (["--no-log-file"], {"log_file": False}, False, None),
+        (
+            ["--recalculate-all"],
+            {"recalculate_beam": True, "recalculate_grid": True},
+            False,
+            None,
+        ),
+        (
+            ["--snapshot-healpix-export", "--no-save-visibilities"],
+            {"save_visibilities": True},
+            False,
+            "If we're exporting healpix we should also save the visibilities "
+            "that created them. Setting save_visibilities to True",
+        ),
+        (
+            ["--grid-uniform", "--recalculate-mapfn"],
+            {"grid_uniform": True, "recalculate_mapfn": False},
+            True,
+            "The grid_uniform and recalculate_mapfn options are incompatible. "
+            "Setting recalculate_mapfn to False.",
+        ),
+    ],
+)
+def test_configuration(tmp_path, options, config, warn_msg, deprecated):
     """
     Test the configuration setup for pyfhd.
     This function checks if the configuration parser is correctly initialized.
@@ -30,7 +56,7 @@ def test_configuration(tmp_path, deprecated):
         "1088285600",
         "--output-path",
         str(tmp_path),
-    ]
+    ] + options
 
     if deprecated:
         deprecated_argv = [
@@ -58,28 +84,38 @@ def test_configuration(tmp_path, deprecated):
 
     # Initialize the configuration parser
     configargparser = pyfhd_parser()
-    options = configargparser.parse_args()
-    pyfhd_config = vars(options)
+    namespace = configargparser.parse_args()
+    pyfhd_config = vars(namespace)
     output_dir_exists = False
 
     run_time = time.localtime()
     pyfhd_config, output_dir_exists = setup_directory(pyfhd_config, run_time)
 
+    if warn_msg is None:
+        warn_msgs = []
+        warn_types = []
+    else:
+        warn_msgs = [warn_msg]
+        warn_types = [UserWarning]
+
     if deprecated:
         pyfhd_config["cal_model_file_path"] = None
         pyfhd_config["cal_model_file_type"] = None
-        warn_msgs = list(deprecated_args.values())
-        warn_types = [DeprecationWarning] * len(deprecated_args)
+        warn_msgs.extend(list(deprecated_args.values()))
+        warn_types.extend([DeprecationWarning] * len(deprecated_args))
         other_warn_msgs = [
             "model_file_path is deprecated.",
             "model_file_type is deprecated.",
-            "recalculate_all is not set but setup files do not exist",
         ]
         warn_msgs.extend(other_warn_msgs)
         warn_types.extend([UserWarning] * len(other_warn_msgs))
-    else:
-        warn_msgs = ["recalculate_all is not set but setup files do not exist"]
-        warn_types = UserWarning
+
+    if "--recalculate-all" not in options:
+        warn_msgs.append("recalculate_all is not set but setup files do not exist")
+        warn_types.append(UserWarning)
+
+    print(options)
+    print(warn_msgs)
 
     with check_warnings(warn_types, match=warn_msgs):
         pyfhd_config = pyfhd_setup(pyfhd_config, run_time, output_dir_exists)
@@ -87,10 +123,10 @@ def test_configuration(tmp_path, deprecated):
     # Check if the parser is an instance of ArgumentParser
     assert isinstance(configargparser, configargparse.ArgumentParser)
     assert isinstance(pyfhd_config, dict)
-    assert "obs_id" in pyfhd_config
-    assert pyfhd_config["obs_id"] == "1088285600"
-    assert "silent" in pyfhd_config
-    assert pyfhd_config["silent"] is True
-    assert "log_file" in pyfhd_config
-    assert pyfhd_config["log_file"] is False
-    assert "version" in pyfhd_config
+
+    config.update({"obs_id": "1088285600", "silent": True, "log_file": False})
+
+    # TODO: add warning checking once logging fix is in.
+
+    for key, value in config.items():
+        assert pyfhd_config[key] == value
