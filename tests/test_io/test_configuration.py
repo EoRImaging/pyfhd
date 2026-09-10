@@ -7,7 +7,79 @@ import pytest
 from pyuvdata.testing import check_warnings
 
 from pyfhd.pyfhd import setup_directory
-from pyfhd.pyfhd_tools.pyfhd_setup import deprecated_args, pyfhd_parser, pyfhd_setup
+from pyfhd.pyfhd_tools.pyfhd_setup import (
+    deprecated_args,
+    git_info,
+    pyfhd_parser,
+    pyfhd_setup,
+)
+
+
+@pytest.mark.github_actions
+@pytest.mark.parametrize(
+    ("git_string", "output_dict"),
+    [
+        (
+            "1.0.3.dev321+gc96fd9451.hmf",
+            {
+                "tag": "1.0.3",
+                "commit": "c96fd9451",
+                "commit_str": "c96fd9451 (branch: hmf)",
+                "branch": "hmf",
+                "dirty_flag": False,
+            },
+        ),
+        (
+            "1.0.3.dev321+gc96fd9451.hmf.dirty",
+            {
+                "tag": "1.0.3",
+                "commit": "c96fd9451",
+                "commit_str": "c96fd9451 (branch: hmf) DIRTY (uncommitted changes)",
+                "branch": "hmf",
+                "dirty_flag": True,
+            },
+        ),
+        (
+            "1.0.3.dev321+gc96fd9451",
+            {
+                "tag": "1.0.3",
+                "commit": "c96fd9451",
+                "commit_str": "c96fd9451",
+                "branch": None,
+                "dirty_flag": False,
+            },
+        ),
+        (
+            "1.0.3.dev321+gc96fd9451.dirty",
+            {
+                "tag": "1.0.3",
+                "commit": "c96fd9451",
+                "commit_str": "c96fd9451 DIRTY (uncommitted changes)",
+                "branch": None,
+                "dirty_flag": True,
+            },
+        ),
+        (
+            "1.0.2",
+            {
+                "tag": "1.0.2",
+                "commit": None,
+                "commit_str": "1.0.2",
+                "branch": None,
+                "dirty_flag": False,
+            },
+        ),
+    ],
+)
+def test_git_info(git_string, output_dict):
+    version_info = git_info(git_string)
+
+    assert version_info["version"] == git_string
+    assert version_info["tag"] == output_dict["tag"]
+    assert version_info["commit"] == output_dict["commit"]
+    assert version_info["commit_str"] == output_dict["commit_str"]
+    assert version_info["branch"] == output_dict["branch"]
+    assert version_info["dirty_flag"] == output_dict["dirty_flag"]
 
 
 @pytest.mark.github_actions
