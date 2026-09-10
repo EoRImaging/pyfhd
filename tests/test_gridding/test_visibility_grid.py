@@ -713,15 +713,34 @@ def test_visibility_grid_in_vis_model_freq_split(
 
 
 @pytest.mark.github_actions
-@pytest.mark.parametrize("pol_i", [0, 1])
-@pytest.mark.parametrize("ones", [True, False])
+@pytest.mark.parametrize(
+    ("pol_i", "ones", "interp", "flagging"),
+    [
+        (0, True, False, False),
+        (1, True, True, False),
+        (0, False, True, False),
+        (1, False, False, False),
+        (0, False, True, True),
+        (1, True, False, True),
+    ],
+)
 def test_mapfn_zenith_2013(
-    mwa_aee_beam_zenith_2013, zenith_params_2013, model_uv_zenith_2013, pol_i, ones
+    mwa_aee_beam_zenith_2013,
+    zenith_params_2013,
+    model_uv_zenith_2013,
+    pol_i,
+    ones,
+    interp,
+    flagging,
 ):
     """
     Test that the mapping function is equivalent to degridding then gridding.
 
-    Tests both a "realistic" uv plane and a uv plane of all ones (i.e. weights).
+    Tests variations include:
+        pol_i: xx (0) or yy(1)
+        ones: use a uv plane of all ones (i.e. weights) vs a "realistic" uv plane
+        interp: option to interpolate the kernel
+        flagging: apply a complex flagging structure
     """
     _, psf, obs, pyfhd_config = mwa_aee_beam_zenith_2013
     params = zenith_params_2013
@@ -732,7 +751,6 @@ def test_mapfn_zenith_2013(
         model_uv_full = model_uv_zenith_2013
 
     pyfhd_config_use = copy.deepcopy(pyfhd_config)
-    pyfhd_config_use["conserve_memory"] = True
     pyfhd_config_use["memory_threshold"] = 1e10
     pyfhd_config_use["mask_mirror_indices"] = False
     pyfhd_config_use["beam_per_baseline"] = False
@@ -741,18 +759,38 @@ def test_mapfn_zenith_2013(
     pyfhd_config_use["grid_weights"] = True
     pyfhd_config_use["grid_variance"] = False
 
+    if flagging:
+        vis_weights = np.zeros(
+            (obs["n_freq"], obs["n_baselines"] * obs["n_time"]), dtype=float
+        )
+        vis_weights[0, np.arange(1, 6)] = 1
+        vis_weights[1, np.arange(1, 6) + (obs["n_baselines"])] = 1
+        vis_weights[:, np.arange(5) + 100] = 1
+        fill_model_visibilities = False
+        pyfhd_config_use["conserve_memory"] = False
+    else:
+        pyfhd_config_use["conserve_memory"] = True
+        vis_weights = None
+        fill_model_visibilities = True
+
+    if interp:
+        pyfhd_config_use["interpolate_kernel"] = True
+    else:
+        pyfhd_config_use["interpolate_kernel"] = False
+
     vis_model = visibility_degrid(
         image_uv=model_uv_full,
-        vis_weights=None,
+        vis_weights=vis_weights,
         obs=obs,
         psf=psf,
         params=params,
         pyfhd_config=pyfhd_config_use,
         polarization=pol_i,
-        fill_model_visibilities=True,
+        fill_model_visibilities=fill_model_visibilities,
     )
 
-    vis_weights = np.ones_like(vis_model)
+    if vis_weights is None:
+        vis_weights = np.ones_like(vis_model)
 
     gridding_dict = visibility_grid(
         visibility=vis_model,
