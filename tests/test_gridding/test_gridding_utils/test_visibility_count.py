@@ -1,12 +1,16 @@
-from pyfhd.io.pyfhd_io import recarray_to_dict
-import pytest
+from logging import Logger
 from os import environ as env
 from pathlib import Path
-from pyfhd.pyfhd_tools.test_utils import get_data, get_data_items
-from pyfhd.gridding.gridding_utils import visibility_count
-from pyfhd.io.pyfhd_io import save, load
-from logging import Logger
+
+import numpy as np
+import pytest
 from numpy.testing import assert_allclose
+
+from pyfhd.gridding.filters import filter_uv_uniform
+from pyfhd.gridding.gridding_utils import visibility_count
+from pyfhd.io.pyfhd_io import load, recarray_to_dict, save
+from pyfhd.pyfhd_tools.pyfhd_utils import weight_invert
+from pyfhd.pyfhd_tools.test_utils import get_data, get_data_items
 
 
 @pytest.fixture
@@ -106,11 +110,11 @@ def test_vis_count(vis_count_before: Path, vis_count_after: Path):
     expected_uniform_filter = load(vis_count_after)
 
     uniform_filter = visibility_count(
-        h5_before["obs"],
-        h5_before["psf"],
-        h5_before["params"],
-        h5_before["vis_weights"],
-        Logger(1),
+        obs=h5_before["obs"],
+        psf=h5_before["psf"],
+        params=h5_before["params"],
+        vis_weights=h5_before["vis_weights"],
+        logger=Logger(1),
         fi_use=h5_before["fi_use"],
         bi_use=h5_before["bi_use"],
         mask_mirror_indices=h5_before["mask_mirror_indices"],
@@ -126,3 +130,41 @@ def test_vis_count(vis_count_before: Path, vis_count_after: Path):
     # specifically for test 3. The relative and absolute tolerance can be lower for
     # tests 1 and 2
     assert_allclose(uniform_filter, expected_uniform_filter, rtol=1, atol=1.51)
+
+
+def test_vis_count_via_uniform_filter(
+    vis_count_before: Path, vis_count_after: Path, number
+):
+    if number > 1:
+        pytest.skip()
+
+    h5_before = load(vis_count_before)
+    expected_uniform_filter = load(vis_count_after)
+
+    image_uv = np.ones(
+        (int(h5_before["obs"]["dimension"]), int(h5_before["obs"]["elements"])),
+        dtype=complex,
+    )
+
+    image_uv_filtered, uniform_filter = filter_uv_uniform(
+        image_uv,
+        obs=h5_before["obs"],
+        psf=h5_before["psf"],
+        params=h5_before["params"],
+        weights=h5_before["vis_weights"],
+        fi_use=h5_before["fi_use"],
+        bi_use=h5_before["bi_use"],
+        mask_mirror_indices=h5_before["mask_mirror_indices"],
+    )
+
+    expected_uniform_filter = weight_invert(expected_uniform_filter, threshold=1)
+    wts_i = np.nonzero(expected_uniform_filter)
+    if np.size(wts_i) > 0:
+        expected_uniform_filter /= np.mean(expected_uniform_filter[wts_i])
+    else:
+        expected_uniform_filter /= np.mean(expected_uniform_filter)
+
+    # see explanation above about why the tols are high
+    assert_allclose(uniform_filter, expected_uniform_filter, rtol=0, atol=1.2e-3)
+
+    assert_allclose(image_uv_filtered, expected_uniform_filter, rtol=0, atol=1.2e-3)

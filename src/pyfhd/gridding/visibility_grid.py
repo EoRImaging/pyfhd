@@ -12,6 +12,7 @@ import h5py
 
 
 def visibility_grid(
+    *,
     visibility: NDArray[np.complex128],
     vis_weights: NDArray[np.float64],
     obs: dict,
