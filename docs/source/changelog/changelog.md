@@ -13,6 +13,7 @@ repo and passing None to `beam_file-path`.
 to avoid confusion with the new `uvbeam-file-path` option.
 
 ### New Features
+* pyfhd can now construct the holographic mapping function.
 * pyfhd now supports running without a model (i.e. gridding without calibration).
 * pyfhd can now create model visibilities for calibration using degridding. The
 source catalog to be used in degridding must be specified as a file readable by
@@ -102,6 +103,7 @@ computer-specific paths in test data.
 ### Version Changes
 
 ### Translation Changes
+* Constructing the holographic mapping function has now been translated.
 * Degridding to create model visibilities has now been translated, along with
 various required functions for selecting sources from catalogs, converting from
 Stokes to instrument polarization fluxes and DFTing the sources to the uvplane.

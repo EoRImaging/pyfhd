@@ -1,5 +1,12 @@
+from logging import Logger
+from datetime import timedelta
+import time
+
+import h5py
 import numpy as np
 from numpy.typing import NDArray
+from scipy.sparse import csr_array
+
 from pyfhd.gridding.gridding_utils import (
     interpolate_kernel,
     baseline_grid_locations,
@@ -7,8 +14,6 @@ from pyfhd.gridding.gridding_utils import (
     conjugate_mirror,
 )
 from pyfhd.pyfhd_tools.pyfhd_utils import weight_invert, rebin, l_m_n, idl_argunique
-from logging import Logger
-import h5py
 
 
 def visibility_grid(
@@ -21,6 +26,7 @@ def visibility_grid(
     pyfhd_config: dict,
     logger: Logger,
     calculate_uniform_filter: bool = False,
+    calculate_mapfn: bool = False,
     no_conjugate: bool = False,
     model: NDArray[np.complex128] | None = None,
     fi_use: NDArray[np.integer] | None = None,
@@ -71,6 +77,10 @@ def visibility_grid(
         When called from the main function, this is set to True for the first
         polarization and False for the rest because it's the same across pols
         and only needs to be calculated once.
+    calculate_mapfn : bool, optional
+        Option to calculate the mapping function. Passed here rather than extracted
+        from `pyfhd_config` because this is also called for gridding by frequency
+        when we do not want to calculate the mapping function.
     no_conjugate : bool, optional
         Do not perform the conjugate mirror to fill half of the {u,v} plane, by
         default False
@@ -220,9 +230,53 @@ def visibility_grid(
     uniform_filter = np.zeros((dimension, elements))
 
     # If the uniform gridding has been activated we need to activate the uniform
-    # filter and switch off mapping if it has been activated
+    # filter and switch off calculating the HMF (this should already be done in
+    # setup, but there's no harm to making sure).
     if pyfhd_config["grid_uniform"]:
         calculate_uniform_filter = True
+        calculate_mapfn = False
+
+    if calculate_mapfn:
+        # setup for the mapping function creation. We're going to create it as
+        # a scipy sparse array, which only supports 2 dimensional arrays
+        # So the 0th dimension is the flattened output uv plane (what you get
+        # from gridding) and the 1st dimension is the flattened input uv plane
+        # (what you DFT sources to). Under the hood, what is stored on a sparse
+        # array are 3 1D arrays giving the indices for the two dimensions and
+        # the values.
+        # We're going to build up these as separate lists and then convert them
+        # to a sparse array object. Initialize the lists here:
+        map_fn_uvout = []
+        map_fn_uvin = []
+        map_fn_values = []
+        # we also need an index array to quickly grab index values from:
+        index_arr = np.arange(dimension * elements).reshape((dimension, elements))
+
+        # we often can't collect all the mapping function additions at once, due
+        # to memory limitations. But there are a lot of overlapping parts of the
+        # mapping function, so if we periodically sum those all by converting to
+        # a scipy csr sparse array object it drops the memory usage and we can
+        # start accumulating them again. The final sparse array takes a fair bit
+        # of memory but is much smaller than all the individual contributions
+        # from visibility sets. The ordering of the visibility sets also helps --
+        # they are ordered by where they appear in the uv plane so nearby ones
+        # tend to overlap.
+        if pyfhd_config["conserve_memory"]:
+            # each entry is 2 indices, 1 complex value = 4 64bit numbers
+            # need another factor of 2, not sure why
+            bytes_per_bl_set = 2 * 4 * 8 * psf_dim3 * psf_dim3
+            num_set_per_step = int(
+                np.floor(pyfhd_config["memory_threshold"] / bytes_per_bl_set)
+            )
+            n_sum_steps = n_bin_use / num_set_per_step
+            # make a list of iteration numbers to do the sum on.
+            map_fn_init_iters = np.arange(
+                n_bin_use // n_sum_steps, n_bin_use, step=n_bin_use // n_sum_steps
+            )
+        else:
+            n_sum_steps = 1
+            map_fn_init_iters = []
+        map_fn = None
 
     conj_i = np.where(params["vv"][bi_use] > 0)[0]
     if conj_i.size > 0:
@@ -257,6 +311,18 @@ def visibility_grid(
 
     frequency_cache: dict[int, np.ndarray] = {}
 
+    if calculate_mapfn:
+        reporting_frac = 0.1
+        description = "gridding and mapping function building"
+    else:
+        reporting_frac = 0.2
+        description = "gridding"
+    t0 = time.time()
+    if verbose_logging:
+        logger.info(
+            f"gridding setup complete, begin {description} for polarization "
+            f"{obs['pol_names'][polarization]} (in {n_bin_use} unequal size steps)"
+        )
     for bi in range(n_bin_use):
         # Cycle through sets of visibilities which contribute to the same data/model
         # uv-plane pixels, and perform the gridding operation per set using each
@@ -290,6 +356,7 @@ def visibility_grid(
             # Calculate the interpolated kernel on the uv-grid given the
             # derivatives to baseline locations and the hyperresolved
             # pre-calculated beam kernel
+            rep_flag = 0
 
             # Select the 2D derivatives to baseline locations
             dx1dy1 = dx1dy1_arr.flat[inds]
@@ -348,6 +415,8 @@ def visibility_grid(
                 # the same discretized location given the hyperresolution, then
                 # reduce the number of gridding operations to only non-repeated
                 # baselines
+                rep_flag = 1
+
                 inds = inds[xyf_si]
                 inds_use = xyf_si[xyf_ui]
                 freq_i = freq_i[inds_use]
@@ -390,6 +459,7 @@ def visibility_grid(
                 # If there are not enough baselines which use the same beam kernel
                 # and discretized location to warrant reduction, then perform
                 # the gridding operation per baseline
+                rep_flag = 0
                 if model is not None:
                     model_box = model_use.flat[inds]
                 vis_box = vis_arr_use.flat[inds]
@@ -439,6 +509,8 @@ def visibility_grid(
         #  Calculate the conjugate transpose (dagger) of the uv-pixels that the
         # current beam kernel contributes to
         box_matrix_dag = np.conj(box_matrix)
+        if calculate_mapfn and rep_flag:
+            box_matrix *= np.repeat(psf_weight[:, np.newaxis], psf_dim3, axis=1)
 
         if pyfhd_config["grid_spectral"]:
             term_A_box = np.dot(
@@ -526,14 +598,71 @@ def visibility_grid(
                 xmin_use : xmin_use + psf_dim, ymin_use : ymin_use + psf_dim
             ] += bin_n[bin_i[bi]]
 
-        if verbose_logging and (
-            (n_bin_use <= 10)
-            or (bi in np.arange(n_bin_use // 10, n_bin_use, n_bin_use // 10))
-        ):
-            logger.info(
-                f"Gridding visibilities for baseline {bi} of {n_bin_use} for "
-                f"polarization {obs['pol_names'][polarization]}"
+        if calculate_mapfn:
+            if bi in map_fn_init_iters:
+                # convert the current lists into a sparse array and add to the
+                # existing array.
+                latest_map = csr_array(
+                    (map_fn_values, (map_fn_uvout, map_fn_uvin)),
+                    shape=(dimension * elements, dimension * elements),
+                )
+                if map_fn is None:
+                    map_fn = latest_map
+                else:
+                    map_fn = map_fn + latest_map
+                # re-initialize the lists
+                map_fn_uvout = []
+                map_fn_uvin = []
+                map_fn_values = []
+
+            # N.B.: The normalization by n_vis is required for the dot product
+            # of the mapping function with the model uv plane to be ~equal to the
+            # output gridded uv plane. This normalization is used in FHD but it's
+            # hidden because it's carried around in the mapping function structure
+            # and applied when matrix multiplies (or dot products) are done.
+            # There's no similar normalization parameter on scipy sparse arrays,
+            # so we need to divide it out here.
+            box_arr_map = np.matmul(np.transpose(box_matrix_dag), box_matrix / n_vis)
+            uv_inds = index_arr[
+                xmin_use : xmin_use + psf_dim, ymin_use : ymin_use + psf_dim
+            ]
+
+            uvout_inds, uvin_inds = np.meshgrid(
+                uv_inds.flat, uv_inds.flat, indexing="ij"
             )
+
+            locs_use = np.nonzero(box_arr_map)
+
+            map_fn_uvout.extend(uvout_inds[locs_use].flatten().tolist())
+            map_fn_uvin.extend(uvin_inds[locs_use].flatten().tolist())
+            map_fn_values.extend(box_arr_map[locs_use].flatten().tolist())
+
+        loop_time = time.time()
+        if verbose_logging and (
+            n_bin_use > int(1.0 / reporting_frac)
+            and bi % int(np.round(n_bin_use * reporting_frac)) == 0
+            and (bi + 1) < n_bin_use
+        ):
+            ave_loop_time = (loop_time - t0) / (bi + 1)
+            est_time_left = timedelta(
+                seconds=round((n_bin_use - (bi + 1)) * ave_loop_time, 2)
+            )
+            logger.info(
+                f"{bi + 1}/{n_bin_use} {description} loops completed. Average "
+                f"loop time: {round(ave_loop_time, 3)} seconds. Estimated "
+                f"time remaining: {est_time_left}"
+            )
+
+    if calculate_mapfn:
+        # convert the current lists into a sparse array and add to the existing array.
+        latest_map = csr_array(
+            (map_fn_values, (map_fn_uvout, map_fn_uvin)),
+            shape=(dimension * elements, dimension * elements),
+        )
+        if map_fn is None:
+            map_fn = latest_map
+        else:
+            map_fn = map_fn + latest_map
 
     # Free Up Memory
     del (
@@ -614,5 +743,8 @@ def visibility_grid(
         gridding_dict["model_return"] = model_return
         if pyfhd_config["grid_spectral"]:
             gridding_dict["spectral_model_uv"] = spectral_model_uv
+
+    if calculate_mapfn:
+        gridding_dict["map_fn"] = map_fn
 
     return gridding_dict

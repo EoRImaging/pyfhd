@@ -538,7 +538,18 @@ def main():
             # only one value
             pyfhd_config["beam_per_baseline"] = False
 
-        if pyfhd_config["recalculate_grid"] or not pyfhd_config["gridding_checkpoint"]:
+        if (
+            pyfhd_config["recalculate_grid"]
+            or pyfhd_config["recalculate_mapfn"]
+            or not pyfhd_config["gridding_checkpoint"]
+        ):
+            if pyfhd_config["recalculate_mapfn"]:
+                step_description = "Gridding and mapping function building"
+                # We're going to construct the mapping function as a dict of
+                # sparse arrays with polarization indexes for keys.
+                map_fn = {}
+            else:
+                step_description = "Gridding"
             grid_start = time.time()
             image_uv = np.empty(
                 (obs["n_pol"], obs["elements"], obs["dimension"]), dtype=np.complex128
@@ -558,7 +569,8 @@ def main():
 
             for pol_i in range(obs["n_pol"]):
                 logger.info(
-                    f"Gridding has begun for polarization {obs['pol_names'][pol_i]}"
+                    f"{step_description} has begun for polarization "
+                    f"{obs['pol_names'][pol_i]}"
                 )
                 if pol_i == 0:
                     calculate_uniform_filter = True
@@ -574,6 +586,8 @@ def main():
                     vis_model_arr_use = None
                 else:
                     vis_model_arr_use = vis_model_arr[pol_i]
+
+                grid_pol_start = time.time()
                 gridding_dict = visibility_grid(
                     vis_arr[pol_i],
                     vis_weights[pol_i],
@@ -584,9 +598,18 @@ def main():
                     pyfhd_config,
                     logger,
                     calculate_uniform_filter=calculate_uniform_filter,
+                    calculate_mapfn=pyfhd_config["recalculate_mapfn"],
                     no_conjugate=no_conjugate,
                     model=vis_model_arr_use,
                 )
+                grid_pol_end = time.time()
+                _print_time_diff(
+                    grid_pol_start,
+                    grid_pol_end,
+                    f"{step_description} for polarization {obs['pol_names'][pol_i]}",
+                    logger,
+                )
+
                 if len(gridding_dict.keys()) != 0:
                     image_uv[pol_i] = gridding_dict["image_uv"]
                     weights_uv[pol_i] = gridding_dict["weights"]
@@ -596,10 +619,8 @@ def main():
                     obs["nf_vis"] = gridding_dict["obs"]["nf_vis"]
                     if vis_model_arr is not None:
                         model_uv[pol_i] = gridding_dict["model_return"]
-                    logger.info(
-                        "Gridding has finished for polarization "
-                        f"{obs['pol_names'][pol_i]}"
-                    )
+                    if pyfhd_config["recalculate_mapfn"]:
+                        map_fn[obs["pol_names"][pol_i]] = gridding_dict["map_fn"]
                 else:
                     logger.error("All data was flagged during gridding, exiting")
                     sys.exit(1)
@@ -637,6 +658,19 @@ def main():
                 }
                 if vis_model_arr is not None:
                     checkpoint["model_uv"] = model_uv
+                if pyfhd_config["recalculate_mapfn"]:
+                    # save out the mapping function
+                    mapping_fn_file = Path(
+                        pyfhd_config["checkpoint_dir"], f"{checkpoint_name}_map_fn.h5"
+                    )
+                    logger.info(f"Saving the mapping function into {mapping_fn_file}.")
+                    map_save_start = time.time()
+                    save(mapping_fn_file, map_fn, "map_fn", logger=logger)
+                    map_save_end = time.time()
+                    _print_time_diff(
+                        map_save_start, map_save_end, "Save mapping function", logger
+                    )
+                logger.info(f"Saving the gridding outputs into {grid_checkpoint_file}.")
                 save(
                     grid_checkpoint_file,
                     checkpoint,
@@ -649,7 +683,7 @@ def main():
                     f"{grid_checkpoint_file}"
                 )
             grid_end = time.time()
-            _print_time_diff(grid_start, grid_end, "Visibilities gridded", logger)
+            _print_time_diff(grid_start, grid_end, step_description, logger)
         else:
             grid_checkpoint = load(grid_checkpoint_file, logger=logger)
             image_uv = grid_checkpoint["image_uv"]

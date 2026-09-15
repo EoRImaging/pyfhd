@@ -592,6 +592,7 @@ def vis_model_freq_split(
             fi_use=fi_use,
             bi_use=bi_use,
             verbose_logging=False,
+            calculate_mapfn=False,
         )
         if not gridding_dict:
             logger.warning(

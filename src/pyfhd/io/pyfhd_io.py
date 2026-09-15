@@ -7,7 +7,9 @@ import h5py
 import numpy as np
 import yaml
 from numpy.typing import NDArray, DTypeLike
+from pyuvdata.analytic_beam import AnalyticBeam
 from scipy.io import readsav
+from scipy.sparse import csr_array
 
 
 def dtype_picker(dtype: DTypeLike) -> type:
@@ -303,8 +305,19 @@ def save_dataset(
             h5py_obj.create_dataset(key, dtype="b")
         case str() | np.str_():
             h5py_obj.create_dataset(key, data=np.bytes_(value))
+        case csr_array():
+            # This is a scipy csr sparse array. Save the parts of it.
+            csr_attrs = {
+                "sparse_array_type": "csr_array",
+                "data": value.data,
+                "indices": value.indices,
+                "indptr": value.indptr,
+                "shape": value.shape,
+            }
+            group = h5py_obj.create_group(key)
+            dict_to_group(group, csr_attrs, to_chunk, variable_lengths, logger)
         case _:
-            if "analytic_beam" in key:
+            if isinstance(key, str) and isinstance(value, AnalyticBeam):
                 yaml_str = yaml.safe_dump(value)
                 h5py_obj.create_dataset(key, data=np.bytes_(yaml_str))
             else:
@@ -446,16 +459,19 @@ def save(
                     h5_file.attrs[key] = save_dataset(
                         h5_file, key, to_save[key], to_chunk, variable_lengths, logger
                     )
+            case csr_array():
+                # This is a scipy csr sparse array. Save the parts of it.
+                if logger:
+                    logger.info(
+                        f"Writing the {dataset_name} sparse array to {file_name}"
+                    )
+                h5_file.attrs[dataset_name] = save_dataset(
+                    h5_file, dataset_name, to_save, to_chunk, variable_lengths, logger
+                )
             case _:
                 h5_file.attrs[dataset_name] = save_dataset(
                     h5_file, dataset_name, to_save, to_chunk, variable_lengths, logger
                 )
-                if logger:
-                    logger.warning(
-                        "Not a dict or numpy array, pyfhd won't write other types "
-                        "at this time, refer to pyfhd.io.pyfhd_io.save to see "
-                        "what is supported"
-                    )
 
 
 def load_dataset(
@@ -503,6 +519,8 @@ def load_dataset(
             value = _decode_byte_arr(value)
         if isinstance(value, bytes):
             value = value.decode()
+            if value.startswith("!AnalyticBeam"):
+                value = yaml.safe_load(value)
         return value
 
 
@@ -528,6 +546,19 @@ def group_to_dict(group: h5py.Group) -> dict:
                 return_dict[key] = load_dataset(group, key, group[key])
             case h5py.Group():
                 return_dict[key] = group_to_dict(group[key])
+    if "sparse_array_type" in return_dict.keys():
+        # This is a sparse array saved out as a dict. Reassemble it.
+        if return_dict["sparse_array_type"] == "csr_array":
+            return csr_array(
+                (return_dict["data"], return_dict["indices"], return_dict["indptr"]),
+                shape=return_dict["shape"],
+            )
+        else:
+            raise NotImplementedError(
+                f"{return_dict['sparse_array_type']} sparse array "
+                "type detected, load only supports csr sparse arrays "
+                "currently."
+            )
     return return_dict
 
 
@@ -578,11 +609,18 @@ def load(
         return h5_file
     try:
         if len(keys) == 1:
-            # Assume that it contains only one numpy array, in which case read the array
             key = keys[0]
-            if logger:
-                logger.info(f"Loading {key} from {file_name} into an array")
-            array = load_dataset(h5_file, key, h5_file[key])
+            match h5_file[key]:
+                case h5py.Dataset():
+                    # Assume that it contains only one numpy array, read the array
+                    if logger:
+                        logger.info(f"Loading {key} from {file_name} into an array")
+                    array = load_dataset(h5_file, key, h5_file[key])
+                case h5py.Group():
+                    # Assume that it contains only one scipy sparse array, read it
+                    if logger:
+                        logger.info(f"Loading {file_name} into a scipy sparse array")
+                    array = group_to_dict(h5_file[key])
             return array
         else:
             return_dict = {}

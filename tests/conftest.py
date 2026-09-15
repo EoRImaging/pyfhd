@@ -73,11 +73,6 @@ def zenith_psf_2013_cut():
 def mwa_aee_beam_zenith_2013(zenith_obs_2013_main, tmp_path_factory):
     obs = copy.deepcopy(zenith_obs_2013_main)
 
-    # check to make sure we have the right version of pyuvdata installed
-    from pyuvdata import UVBeam
-
-    assert hasattr(UVBeam, "decompose_feed_aligned_terms")
-
     mwa_aee_jfile = uvdata_fetch("mwa_jmatrix")
     mwa_aee_zfile = uvdata_fetch("mwa_zmatrix")
 
