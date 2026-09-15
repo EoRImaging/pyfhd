@@ -131,6 +131,8 @@ def vis_calibrate_subroutine(
             f"Beginning Calibration for polarization {pol_i} "
             f"({obs['pol_names'][pol_i]})"
         )
+        diverged_freqs = {}
+        max_iter_freqs = {}
         convergence = np.zeros((n_freq, n_tile))
         conv_iter_arr = np.zeros((n_freq, n_tile))
         # Want to ensure we're not affecting the current array till we overwrite it
@@ -437,13 +439,12 @@ def vis_calibrate_subroutine(
                             if divergence_test_1 or divergence_test_2:
                                 # If both measures of convergence are getting
                                 # worse, we need to stop.
-                                logger.info(
-                                    f"Calibration diverged at iteration: {i}, "
-                                    f"for pol_i: {pol_i}, freq_i: {fi}. Convergence "
-                                    f"was: {conv_test[fii, i - 1]} and the "
-                                    f"threshold was: {conv_thresh}"
-                                )
                                 divergence_flag = True
+                                # Add freq to diverged dict
+                                diverged_freqs[fi] = {
+                                    "iter": i,
+                                    "convergence": {conv_test[fii, i - 1]},
+                                }
                                 break
             if divergence_flag:
                 # If the solution diverged, back up one iteration and use the
@@ -457,18 +458,40 @@ def vis_calibrate_subroutine(
                 ) * weight_invert(np.abs(gain_old))
                 conv_iter_arr[fi, tile_use] = i
             if i == max_cal_iter:
-                logger.info(
-                    f"Calibration reached max iterations before converging for "
-                    f"pol_i: {pol_i} and freq_i: {fi}. Convergence was: "
-                    f"{conv_test[fii, i - 1]} and the threshold was: {conv_thresh}"
-                )
+                # Add freq to max iteration dict
+                max_iter_freqs[fi] = {"convergence": {conv_test[fii, i - 1]}}
             del A_ind_arr
-            logger.info(
-                f"Convergence was reached for polarization: {obs['pol_names'][pol_i]} "
-                f"({pol_i}) and frequency: {fi}, with a convergence of: "
-                f"{conv_test[fii, i]} and the threshold was: {conv_thresh}"
-            )
             gain_arr[fi, tile_use] = gain_curr
+        n_diverged = len(diverged_freqs)
+        n_max_iter = len(max_iter_freqs)
+        if n_diverged == 0 and n_max_iter == 0:
+            logger.info(
+                f"All frequencies for pol {pol_i} converged in under the max "
+                "iterations."
+            )
+        else:
+            logger.info(
+                f"{n_converged} of {freq_use.size} frequencies for pol {pol_i} "
+                "converged in under the max iterations."
+            )
+            if n_diverged > 0:
+                details = [
+                    f"freq_i {fi}: iteration {info['iter']}, convergence "
+                    f"{info['convergence']}"
+                    for fi, info in diverged_freqs.items()
+                ]
+                logger.warning(f"{n_diverged} frequencies diverged for pol {pol_i}.")
+                logger.info("Diverged frequency details:\n" + "\n".join(details))
+            if n_max_iter > 0:
+                details = [
+                    f"freq_i {fi}: convergence {info['convergence']}"
+                    for fi, info in max_iter_freqs.items()
+                ]
+                logger.warning(
+                    f"{n_max_iter} frequencies reached max iterations for pol {pol_i}."
+                )
+                logger.info("max iterations frequency details:\n" + "\n".join(details))
+
         nan_i = np.where(np.isnan(gain_curr))[0]
         if nan_i.size > 0:
             # any gains with NANs -> all tiles for that freq will have NANs
