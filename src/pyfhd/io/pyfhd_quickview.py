@@ -1,12 +1,14 @@
+import logging
+from datetime import datetime
+from pathlib import Path
+
+from astropy.io import fits
 import numpy as np
 from numpy.typing import NDArray
-from pyfhd.io.pyfhd_io import save
-from logging import Logger
-from pathlib import Path
-from astropy.io import fits
-from datetime import datetime
+
 from pyfhd.data_setup.obs import update_obs
 from pyfhd.beam_setup.beam_utils import beam_image
+from pyfhd.io.pyfhd_io import save
 from pyfhd.pyfhd_tools.unit_conv import pixel_to_radec
 from pyfhd.pyfhd_tools.pyfhd_utils import (
     meshgrid,
@@ -18,6 +20,8 @@ from pyfhd.pyfhd_tools.pyfhd_utils import (
 from pyfhd.gridding.gridding_utils import dirty_image_generate
 from pyfhd.plotting.fits_image import plot_fits_image
 
+logger = logging.getLogger(__name__)
+
 
 def get_image_renormalization(
     obs: dict,
@@ -25,7 +29,6 @@ def get_image_renormalization(
     beam_base: NDArray[np.complex128],
     filter_arr: NDArray[np.float64],
     pyfhd_config: dict,
-    logger: Logger,
 ) -> np.ndarray:
     """
     Use the weights to renormalize the image for Jy/beam to Jy/sr. While
@@ -45,8 +48,6 @@ def get_image_renormalization(
         a uniform filter.
     pyfhd_config : dict
         pyfhd configuration settings.
-    logger : Logger
-        pyfhd's Logger.
 
     Returns
     -------
@@ -59,7 +60,6 @@ def get_image_renormalization(
         dirty_image, _, _ = dirty_image_generate(
             weights[pol_i],
             pyfhd_config,
-            logger,
             weights=weights[pol_i],
             pad_uv_image=pyfhd_config["pad_uv_image"],
             filter=filter_arr[pol_i],
@@ -88,7 +88,6 @@ def quickview(
     uniform_filter_uv: NDArray[np.float64],
     model_uv: NDArray[np.complex128] | None,
     pyfhd_config: dict,
-    logger: Logger,
 ) -> None:
     """
     Generate continuum images from all gridded u-v planes, and save as
@@ -120,8 +119,7 @@ def quickview(
         Continuum uv-plane of the model data.
     pyfhd_config : dict
         pyfhd configuration settings.
-    logger : Logger
-        pyfhd's Logger.
+
     """
     # Save all the things into the output directory
     pyfhd_config["metadata_dir"] = Path(pyfhd_config["output_dir"], "metadata")
@@ -133,13 +131,13 @@ def quickview(
             pyfhd_config["metadata_dir"], f"{pyfhd_config['obs_id']}_obs.h5"
         )
         logger.info(f"Saving the obs dictionary to {obs_path}")
-        save(obs_path, obs, "obs", logger=logger)
+        save(obs_path, obs, "obs")
     if pyfhd_config["save_params"]:
         params_path = Path(
             pyfhd_config["metadata_dir"], f"{pyfhd_config['obs_id']}_params.h5"
         )
         logger.info(f"Saving params dictionary to {params_path}")
-        save(params_path, params, "params", logger=logger)
+        save(params_path, params, "params")
     if pyfhd_config["save_visibilities"]:
         if pyfhd_config["recalculate_grid"]:
             gridding_path = Path(pyfhd_config["output_dir"], "gridding")
@@ -149,51 +147,46 @@ def quickview(
                 Path(gridding_path, f"{pyfhd_config['obs_id']}_image_uv.h5"),
                 image_uv,
                 "image_uv",
-                logger=logger,
             )
             save(
                 Path(gridding_path, f"{pyfhd_config['obs_id']}_weights_uv.h5"),
                 weights_uv,
                 "weights_uv",
-                logger=logger,
             )
             save(
                 Path(gridding_path, f"{pyfhd_config['obs_id']}_variance_uv.h5"),
                 variance_uv,
                 "variance_uv",
-                logger=logger,
             )
             save(
                 Path(gridding_path, f"{pyfhd_config['obs_id']}_uniform_filter_uv.h5"),
                 uniform_filter_uv,
                 "uniform_filter_uv",
-                logger=logger,
             )
             save(
                 Path(gridding_path, f"{pyfhd_config['obs_id']}_model_uv.h5"),
                 model_uv,
                 "model_uv",
-                logger=logger,
             )
         cal_vis_arr_path = Path(
             pyfhd_config["visibilities_path"],
             f"{pyfhd_config['obs_id']}_calibrated_vis_arr.h5",
         )
         logger.info(f"Saving the calibrated visibilities to {cal_vis_arr_path}")
-        save(cal_vis_arr_path, vis_arr, "visibilities", logger=logger)
+        save(cal_vis_arr_path, vis_arr, "visibilities")
     if pyfhd_config["save_cal"] and pyfhd_config["calibrate_visibilities"]:
         cal_path = Path(pyfhd_config["output_dir"], "calibration")
         cal_path.mkdir(exist_ok=True)
         cal_path = Path(cal_path, f"{pyfhd_config['obs_id']}_cal.h5")
         logger.info(f"Saving the calibration dictionary to {cal_path}")
-        save(cal_path, cal, "cal", logger=logger)
+        save(cal_path, cal, "cal")
     if pyfhd_config["save_weights"]:
         weights_path = Path(
             pyfhd_config["visibilities_path"],
             f"{pyfhd_config['obs_id']}_calibrated_vis_weights.h5",
         )
         logger.info(f"Saving the calibrated weights to {weights_path}")
-        save(weights_path, vis_weights, "weights", logger=logger)
+        save(weights_path, vis_weights, "weights")
 
     obs_out = update_obs(
         obs, int(obs["dimension"] * pyfhd_config["pad_uv_image"]), obs["kpix"]
@@ -263,7 +256,6 @@ def quickview(
         instr_dirty_arr[pol_i], filter, _ = dirty_image_generate(
             image_uv[pol_i],
             pyfhd_config,
-            logger,
             uniform_filter_uv=uniform_filter_uv,
             degpix=obs_out["degpix"],
             weights=weights_uv[pol_i],
@@ -277,7 +269,6 @@ def quickview(
             instr_model_arr[pol_i], filter, _ = dirty_image_generate(
                 model_uv[pol_i],
                 pyfhd_config,
-                logger,
                 uniform_filter_uv=uniform_filter_uv,
                 degpix=obs_out["degpix"],
                 weights=weights_uv[pol_i],
@@ -287,7 +278,7 @@ def quickview(
                 beam_ptr=beam_base_out[pol_i],
             )
     renorm_factor = get_image_renormalization(
-        obs_out, weights_uv, beam_base_out, filter_arr, pyfhd_config, logger
+        obs_out, weights_uv, beam_base_out, filter_arr, pyfhd_config
     )
     # Reshape renorm factor to multiply per polarization without loop to
     # [obs["n_pol"], 1, 1]
@@ -439,30 +430,25 @@ def quickview(
                 Path(fits_output, f"{instr_dirty_name}.fits"),
                 Path(png_output, f"{instr_dirty_name}.png"),
                 title=f"Dirty Image {pol_names[pol_i]}",
-                logger=logger,
             )
             if model_uv is not None:
                 plot_fits_image(
                     Path(fits_output, f"{instr_model_name}.fits"),
                     Path(png_output, f"{instr_model_name}.png"),
                     title=f"Model Image {pol_names[pol_i]}",
-                    logger=logger,
                 )
                 plot_fits_image(
                     Path(fits_output, f"{instr_residual_name}.fits"),
                     Path(png_output, f"{instr_residual_name}.png"),
                     title=f"Residual Image {pol_names[pol_i]}",
-                    logger=logger,
                 )
             plot_fits_image(
                 Path(fits_output, f"{beam_name}.fits"),
                 Path(png_output, f"{beam_name}.png"),
                 title=f"Beam Image {pol_names[pol_i]}",
-                logger=logger,
             )
             plot_fits_image(
                 Path(fits_output, f"{weights_name}.fits"),
                 Path(png_output, f"{weights_name}.png"),
                 title=f"Weight Image {pol_names[pol_i]}",
-                logger=logger,
             )

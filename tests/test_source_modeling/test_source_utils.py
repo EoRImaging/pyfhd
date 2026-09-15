@@ -1,5 +1,4 @@
 import copy
-import logging
 
 import numpy as np
 import pytest
@@ -27,9 +26,7 @@ def gleam_cut_2013_sky(mwa_aee_beam_zenith_2013):
     _, psf, obs, _ = mwa_aee_beam_zenith_2013
     catalog_path = fetch_data("gleam_rlb2019_cut")
 
-    sky = generate_source_cal_skymodel(
-        obs=obs, psf=psf, logger=None, catalog_path=catalog_path
-    )
+    sky = generate_source_cal_skymodel(obs=obs, psf=psf, catalog_path=catalog_path)
 
     yield sky
 
@@ -115,7 +112,7 @@ def test_gen_cal_sky(fixed_obs, zenith_psf_2013_cut, refraction):
     expected_sky.at_frequencies(np.atleast_1d(expected_sky.reference_frequency[0]))
 
     sky = generate_source_cal_skymodel(
-        obs=obs, psf=psf, catalog_path=catalog_path, logger=None, refraction=refraction
+        obs=obs, psf=psf, catalog_path=catalog_path, refraction=refraction
     )
 
     # sorting is slightly different because of different beam values
@@ -175,7 +172,6 @@ def test_gen_cal_sky_sidelobes(fixed_obs, zenith_psf_2013_cut, beam_thresh):
         obs=obs,
         psf=psf,
         catalog_path=catalog_path,
-        logger=None,
         allow_sidelobe_sources=True,
         beam_threshold=beam_thresh,
     )
@@ -184,7 +180,6 @@ def test_gen_cal_sky_sidelobes(fixed_obs, zenith_psf_2013_cut, beam_thresh):
         obs=obs,
         psf=psf,
         catalog_path=catalog_path,
-        logger=None,
         allow_sidelobe_sources=True,
         sidelobe_catalog_path=catalog_path,
         beam_threshold=beam_thresh,
@@ -222,13 +217,9 @@ def test_gen_cal_sky_icrs(fixed_obs, zenith_psf_2013_cut, tmpdir):
     new_cat_name = tmpdir / "gleam_rlb2019_cut_icrs.skyh5"
     new_sky.write_skyh5(new_cat_name)
 
-    sky1 = generate_source_cal_skymodel(
-        obs=obs, psf=psf, catalog_path=catalog_path, logger=None
-    )
+    sky1 = generate_source_cal_skymodel(obs=obs, psf=psf, catalog_path=catalog_path)
 
-    sky2 = generate_source_cal_skymodel(
-        obs=obs, psf=psf, catalog_path=new_cat_name, logger=None
-    )
+    sky2 = generate_source_cal_skymodel(obs=obs, psf=psf, catalog_path=new_cat_name)
 
     # make histories match for comparison purposes
     sky2.history = sky1.history
@@ -257,16 +248,10 @@ def test_gen_cal_sky_flux_thresh(fixed_obs, zenith_psf_2013_cut, tmpdir):
     new_sky.write_skyh5(new_cat_name)
 
     sky1 = generate_source_cal_skymodel(
-        obs=obs,
-        psf=psf,
-        catalog_path=catalog_path,
-        logger=None,
-        flux_threshold=flux_thresh,
+        obs=obs, psf=psf, catalog_path=catalog_path, flux_threshold=flux_thresh
     )
 
-    sky2 = generate_source_cal_skymodel(
-        obs=obs, psf=psf, catalog_path=new_cat_name, logger=None
-    )
+    sky2 = generate_source_cal_skymodel(obs=obs, psf=psf, catalog_path=new_cat_name)
 
     # make histories match for comparison purposes
     sky2.history = sky1.history
@@ -294,12 +279,10 @@ def test_gen_cal_sky_max_src(
     src_cap = 100
 
     sky1 = generate_source_cal_skymodel(
-        obs=obs, psf=psf, catalog_path=catalog_path, logger=None, max_sources=src_cap
+        obs=obs, psf=psf, catalog_path=catalog_path, max_sources=src_cap
     )
 
-    sky2 = generate_source_cal_skymodel(
-        obs=obs, psf=psf, catalog_path=catalog_path, logger=None
-    )
+    sky2 = generate_source_cal_skymodel(obs=obs, psf=psf, catalog_path=catalog_path)
     if extended:
         src_cap += 1
 
@@ -336,13 +319,9 @@ def test_gen_cal_sky_extended(fixed_obs, zenith_psf_2013_cut, tmpdir):
     ext_cat_name = tmpdir / "gleam_rlb2019_cut_ext.skyh5"
     ext_sky.write_skyh5(ext_cat_name)
 
-    sky1 = generate_source_cal_skymodel(
-        obs=obs, psf=psf, catalog_path=catalog_path, logger=None
-    )
+    sky1 = generate_source_cal_skymodel(obs=obs, psf=psf, catalog_path=catalog_path)
 
-    sky2 = generate_source_cal_skymodel(
-        obs=obs, psf=psf, catalog_path=ext_cat_name, logger=None
-    )
+    sky2 = generate_source_cal_skymodel(obs=obs, psf=psf, catalog_path=ext_cat_name)
     assert sky2.extended_model_group is not None
     np.testing.assert_array_equal(
         np.unique(sky2.extended_model_group), np.array(["", "test_ext"])
@@ -392,18 +371,13 @@ def test_gen_cal_sky_extend_collapse(
     ext_cat_path = split_kept_source
 
     sky1 = generate_source_cal_skymodel(
-        obs=obs,
-        psf=psf,
-        catalog_path=catalog_path,
-        logger=None,
-        restrict_sources=restrict_sources,
+        obs=obs, psf=psf, catalog_path=catalog_path, restrict_sources=restrict_sources
     )
 
     sky2 = generate_source_cal_skymodel(
         obs=obs,
         psf=psf,
         catalog_path=ext_cat_path,
-        logger=None,
         no_extend=True,
         restrict_sources=restrict_sources,
     )
@@ -428,13 +402,9 @@ def test_gen_cal_sky_extend_cut(fixed_obs, zenith_psf_2013_cut, tmpdir):
     outfile = tmpdir / "gleam_rlb2019_cut_ext_cut.skyh5"
     split_source_as_extended(filein=catalog_path, name="100224", fileout=outfile)
 
-    sky1 = generate_source_cal_skymodel(
-        obs=obs, psf=psf, catalog_path=catalog_path, logger=None
-    )
+    sky1 = generate_source_cal_skymodel(obs=obs, psf=psf, catalog_path=catalog_path)
 
-    sky2 = generate_source_cal_skymodel(
-        obs=obs, psf=psf, catalog_path=outfile, logger=None
-    )
+    sky2 = generate_source_cal_skymodel(obs=obs, psf=psf, catalog_path=outfile)
     assert sky2.extended_model_group is None
 
     # sorting is slightly different
@@ -480,7 +450,7 @@ def test_gen_cal_sky_errors(fixed_obs, zenith_psf_2013_cut, err_type, message, k
     obs = fixed_obs
     catalog_path = fetch_data("gleam_rlb2019_cut")
 
-    kwargs_use = {"obs": obs, "psf": psf, "catalog_path": catalog_path, "logger": None}
+    kwargs_use = {"obs": obs, "psf": psf, "catalog_path": catalog_path}
 
     if kwargs is None:
         sky = SkyModel.from_file(catalog_path)
@@ -582,7 +552,6 @@ def test_source_dft_center():
         dimension=2048,
         elements=2048,
         flux=np.reshape(np.array([0.5, 0.5, 0, 0]), (4, 1)),
-        logger=logging.getLogger(),
     )
 
     np.testing.assert_allclose(model_uv[0:2], 0.5, atol=1e-15, rtol=0)
@@ -711,7 +680,6 @@ def test_vis_source_model_smoke(
         params=params,
         antenna=antenna,
         skymodel=sky,
-        logger=logging.getLogger(),
         vis_weights=None,
         fill_model_visibilities=True,
     )

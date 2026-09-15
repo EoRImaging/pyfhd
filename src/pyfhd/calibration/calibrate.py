@@ -1,6 +1,6 @@
 from copy import deepcopy
-from logging import Logger
 from pathlib import Path
+import logging
 import time
 
 import numpy as np
@@ -29,6 +29,8 @@ from ..source_modeling.source_utils import generate_source_cal_skymodel
 from ..source_modeling.vis_source_model import vis_source_model
 from ..io.pyfhd_io import save
 
+logger = logging.getLogger(__name__)
+
 
 def calibrate(
     *,
@@ -40,7 +42,6 @@ def calibrate(
     vis_weights: NDArray[np.float64],
     vis_model_arr: NDArray[np.complex128] | None = None,
     pyfhd_config: dict,
-    logger: Logger,
 ) -> tuple[NDArray[np.complex128], dict, dict]:
     """
     Solve for the amplitude and phase of the electronic response of each tile or
@@ -66,8 +67,6 @@ def calibrate(
         Simulated model visibilites.
     pyfhd_config : dict
         pyfhd's configuration dictionary containing all the options set for a pyfhd run
-    logger : Logger
-        pyfhd's logger for displaying errors and info to the log files
 
     Returns
     -------
@@ -96,7 +95,6 @@ def calibrate(
         sky = generate_source_cal_skymodel(
             obs=obs,
             psf=psf,
-            logger=logger,
             catalog_path=pyfhd_config["calibration_catalog_file_path"],
             sidelobe_catalog_path=pyfhd_config[
                 "calibration_sidelobe_catalog_file_path"
@@ -115,7 +113,7 @@ def calibrate(
             flatten_spectrum=pyfhd_config["calibration_catalog_flatten_spectrum"],
         )
         catalog_end = time.time()
-        _print_time_diff(catalog_start, catalog_end, "Catalog setup", logger)
+        _print_time_diff(catalog_start, catalog_end, "Catalog setup")
 
         cal_folder = Path(pyfhd_config["output_dir"], "calibration")
         cal_skymodel_path = Path(
@@ -135,12 +133,11 @@ def calibrate(
             antenna=antenna,
             skymodel=sky,
             vis_weights=None,
-            logger=logger,
             fill_model_visibilities=True,
             model_delay_filter=pyfhd_config["calibration_model_delay_filter"],
         )
         degrid_end = time.time()
-        _print_time_diff(degrid_start, degrid_end, "Model visibility creation", logger)
+        _print_time_diff(degrid_start, degrid_end, "Model visibility creation")
 
         # Option to save unflagged model visibilities as part of a
         # calibration-only loop.
@@ -151,7 +148,7 @@ def calibrate(
                 f"{pyfhd_config['obs_id']}_model_vis_arr.h5",
             )
             logger.info(f"Saving the models visibilities to {model_vis_arr_path}")
-            save(model_vis_arr_path, vis_model_arr, "visibilities", logger=logger)
+            save(model_vis_arr_path, vis_model_arr, "visibilities")
     # Calculate auto-correlation visibilities, optionally use them for initial
     # calibration estimates
     vis_auto, auto_tile_i = vis_extract_autocorr(obs, vis_arr, pyfhd_config)
@@ -172,7 +169,7 @@ def calibrate(
     # Do the calibration with vis_calibrate_subroutine
     logger.info("Gain initialized beginning vis_calibrate subroutine")
     cal = vis_calibrate_subroutine(
-        vis_arr, vis_model_arr, vis_weights, obs, cal, params, pyfhd_config, logger
+        vis_arr, vis_model_arr, vis_weights, obs, cal, params, pyfhd_config
     )
     logger.info("Function vis_calibrate_subroutine has completed.")
     if pyfhd_config["flag_calibration"]:
@@ -180,7 +177,7 @@ def calibrate(
             "Flagging Calibration has been activated and calibration will now be "
             "flagged"
         )
-        obs = vis_calibration_flag(obs, cal, pyfhd_config, logger)
+        obs = vis_calibration_flag(obs, cal, pyfhd_config)
 
     # Copy the cal structure with per-frequency gain solutions for future comparisons
     cal_base = deepcopy(cal)
@@ -193,14 +190,14 @@ def calibrate(
             cal, auto_ratio = cal_auto_ratio_divide(obs, cal, vis_auto, auto_tile_i)
         else:
             auto_ratio = None
-        cal_bandpass, cal_remainder = vis_cal_bandpass(obs, cal, pyfhd_config, logger)
+        cal_bandpass, cal_remainder = vis_cal_bandpass(obs, cal, pyfhd_config)
 
         if pyfhd_config["calibration_polyfit"]:
             logger.info(
                 "You have selected to perform polynomial fits over the frequency band"
             )
             cal_polyfit, pyfhd_config = vis_cal_polyfit(
-                obs, cal_remainder, auto_ratio, pyfhd_config, logger
+                obs, cal_remainder, auto_ratio, pyfhd_config
             )
             # Replace vis_cal_combine with this line as the gain is the same size
             # for polyfit and bandpass
@@ -214,7 +211,7 @@ def calibrate(
         if pyfhd_config["auto_ratio_calibration"]:
             cal = cal_auto_ratio_remultiply(cal, auto_ratio, auto_tile_i)
     elif pyfhd_config["calibration_polyfit"]:
-        cal, pyfhd_config = vis_cal_polyfit(cal, obs, None, pyfhd_config, logger)
+        cal, pyfhd_config = vis_cal_polyfit(cal, obs, None, pyfhd_config)
 
     # Get the gain residuals
     if pyfhd_config["calibration_auto_fit"]:
@@ -233,9 +230,7 @@ def calibrate(
         cal = cal_auto
     # Apply Calibration
     logger.info("Applying the calibration")
-    vis_cal, cal = vis_calibration_apply(
-        vis_arr, obs, cal, vis_model_arr, vis_weights, logger
-    )
+    vis_cal, cal = vis_calibration_apply(vis_arr, obs, cal, vis_model_arr, vis_weights)
     cal["gain_residual"] = cal_res_gain
 
     # Save the ratio and sigma average variance related to vis_cal

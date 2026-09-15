@@ -1,7 +1,7 @@
+import logging
 import subprocess  # nosec B404
 from copy import deepcopy
 from datetime import timedelta
-from logging import Logger
 from math import factorial, pi
 from sys import exit
 
@@ -15,7 +15,7 @@ from scipy.ndimage import label, median_filter
 from scipy import special
 
 
-def _print_time_diff(start: float, end: float, description: str, logger: Logger):
+def _print_time_diff(start: float, end: float, description: str):
     """
     Print the time difference in a nice format between start and end time
 
@@ -36,6 +36,9 @@ def _print_time_diff(start: float, end: float, description: str, logger: Logger)
         )
     else:
         logger.info(f"{description} completed in: {round(runtime, 5)} seconds")
+
+
+logger = logging.getLogger(__name__)
 
 
 @njit
@@ -1053,11 +1056,7 @@ def parallactic_angle(latitude: float, hour_angle: float, dec: float) -> float:
 
 
 def simple_deproject_w_term(
-    obs: dict,
-    params: dict,
-    vis_arr: NDArray[np.complex128],
-    direction: float,
-    logger: Logger,
+    obs: dict, params: dict, vis_arr: NDArray[np.complex128], direction: float
 ) -> NDArray[np.complex128]:
     """
     Applies a w-term deprojection to the visibility array

@@ -18,12 +18,13 @@ from ..pyfhd_tools.pyfhd_utils import (
 from ..pyfhd_tools.unit_conv import pixel_to_radec, radec_to_pixel
 from ..pyfhd_tools.types import BoolArray, ComplexArray, FloatArray, IntArray
 
+logger = logging.getLogger(__name__)
+
 
 def generate_source_cal_skymodel(
     *,
     obs: dict,
     psf: dict,
-    logger: logging.Logger,
     skymodel: SkyModel | None = None,
     catalog_path: Path | str | None = None,
     sidelobe_catalog_path: Path | str | None = None,
@@ -51,8 +52,6 @@ def generate_source_cal_skymodel(
         The Observation Metadata dictionary
     psf: dict | h5py.File
         Beam dictionary
-    logger : logging.Logger
-        pyfhd's logger
     skymodel : SkyModel, optional
         SkyModel object to start with, if provided, catalog_path is ignored.
         Called "source_array" in FHD.
@@ -189,7 +188,6 @@ def generate_source_cal_skymodel(
         sidelobe_skymodel = generate_source_cal_skymodel(
             obs=obs,
             psf=psf,
-            logger=logger,
             catalog_path=sidelobe_catalog_path,
             beam=beam_in,
             mask=beam_sidelobe_mask,
@@ -830,7 +828,6 @@ def source_dft(
     dimension: int,
     elements: int,
     flux: FloatArray | ComplexArray,
-    logger: logging.Logger,
     xvals: FloatArray | None = None,
     yvals: FloatArray | None = None,
     inds_use: IntArray | None = None,
@@ -854,8 +851,6 @@ def source_dft(
         Size of image (y dimension).
     flux : np.ndarray of float
         Fluxes for sources, shape: (n_pol, n_sources)
-    logger : logging.Logger
-        PyFHD's logger
     xvals : np.ndarray of float
         u pixel values in uv plane to DFT to.
     yvals : np.ndarray of float
@@ -965,7 +960,6 @@ def source_dft_multi(
     obs: dict,
     antenna: dict,
     skymodel: SkyModel,
-    logger: logging.Logger,
     uv_i_use: tuple[IntArray] | None = None,
     conserve_memory: bool = True,
     memory_threshold: float = 1e8,
@@ -988,8 +982,6 @@ def source_dft_multi(
         The antenna/beam dictionary.
     skymodel : pyradiosky.SkyModel
         Skymodel object containing the sources to use.
-    logger : logging.Logger
-        PyFHD's logger
     uv_i_use : tuple of np.ndarray of int
         Tuple of index arrays giving the locations in the uv plane to use.
     sigma_threshold : float, optional
@@ -1046,7 +1038,6 @@ def source_dft_multi(
         flux=flux_arr,
         memory_threshold=memory_threshold,
         conserve_memory=conserve_memory,
-        logger=logger,
     )
 
     model_uv_full[:, uv_i_use[0], uv_i_use[1]] = model_uv_vals
@@ -1059,7 +1050,6 @@ def source_dft_model(
     obs: dict,
     antenna: dict,
     skymodel: SkyModel,
-    logger: logging.Logger,
     uv_mask: BoolArray | None = None,
     sigma_threshold: float | None = None,
     conserve_memory: bool = True,
@@ -1088,8 +1078,6 @@ def source_dft_model(
         the whole plane.
     sigma_threshold : float, optional
         Signal to noise threshold on included sources.
-    logger : logging.Logger
-        PyFHD's logger
     conserve_memory : bool
         Option to limit memory use by chunking the number of sources to DFT
         at a time.
@@ -1120,7 +1108,6 @@ def source_dft_model(
         obs=obs,
         antenna=antenna,
         skymodel=skymodel,
-        logger=logger,
         uv_i_use=uv_i_use,
         conserve_memory=conserve_memory,
         memory_threshold=memory_threshold,

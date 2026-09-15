@@ -2,7 +2,6 @@ from os import environ as env
 from pathlib import Path
 import numpy as np
 import pytest
-from logging import Logger
 import astropy
 from pyfhd.io.pyfhd_io import convert_sav_to_dict, load, recarray_to_dict, save
 from pyfhd.io.pyfhd_quickview import quickview
@@ -132,7 +131,6 @@ def test_quickview(before_file, data_dir):
         None,
         h5_before["model_uv"],
         h5_before["pyfhd_config"],
-        Logger(1),
     )
     # Close the HDF5 file
     psf.close()

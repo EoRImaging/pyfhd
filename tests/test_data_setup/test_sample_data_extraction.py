@@ -1,5 +1,4 @@
 import pytest
-from logging import Logger
 from pathlib import Path
 from pyfhd.data_setup.uvfits import (
     extract_header,
@@ -29,7 +28,6 @@ def test_obs_creation(obs_id):
     # almost identical
     # to that of the IDL structures in the ways that matter for a pyfhd run.
     # In this case we're only going to test the obs structure from run1 of each test.
-    logger = Logger(1)
     pyfhd_config = {
         "obs_id": obs_id,
         "input_path": importlib_resources.files("pyfhd").joinpath(
@@ -63,17 +61,15 @@ def test_obs_creation(obs_id):
     )
     obs_fhd = load(data_dir / f"{obs_id}_obs.h5")
     pyfhd_header, params_data, antenna_header, antenna_data = extract_header(
-        pyfhd_config, logger
+        pyfhd_config
     )
-    params = create_params(pyfhd_header, params_data, logger)
-    layout = create_layout(antenna_header, antenna_data, pyfhd_config, logger)
-    obs = create_obs(pyfhd_header, params, layout, pyfhd_config, logger)
+    params = create_params(pyfhd_header, params_data)
+    layout = create_layout(antenna_header, antenna_data, pyfhd_config)
+    obs = create_obs(pyfhd_header, params, layout, pyfhd_config)
 
-    vis_arr, vis_weights = extract_visibilities(
-        pyfhd_header, params_data, pyfhd_config, logger
-    )
+    vis_arr, vis_weights = extract_visibilities(pyfhd_header, params_data, pyfhd_config)
 
-    vis_model_arr = vis_model_transfer(pyfhd_config, obs, params, logger)
+    vis_model_arr = vis_model_transfer(pyfhd_config, obs, params)
 
     Path(pyfhd_config["output_dir"], "layout.h5").unlink()
 

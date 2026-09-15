@@ -15,9 +15,11 @@ from pyfhd.data_setup.uvfits import extract_visibilities, extract_header
 from pyfhd.io.pyfhd_io import recarray_to_dict, save, load
 from pyfhd.pyfhd_tools.pyfhd_utils import run_command
 
+logger = logging.getLogger(__name__)
+
 
 def vis_model_transfer(
-    pyfhd_config: dict, obs: dict, params: dict, logger: logging.Logger
+    pyfhd_config: dict, obs: dict, params: dict
 ) -> tuple[NDArray[np.complex128], dict]:
     """
     Transfer in a simulated model of the visibilities from either a sav file or
@@ -31,8 +33,6 @@ def vis_model_transfer(
         The Observation Metadata dictionary
     params : dict
         Visibility metadata dictionary
-    logger : logging.Logger
-        pyfhd's logger
 
     Returns
     -------
@@ -48,15 +48,15 @@ def vis_model_transfer(
     """
     if pyfhd_config["model_file_type"] == "sav":
         vis_model, params_model, obs_model = import_vis_model_from_sav(
-            pyfhd_config, obs, logger
+            pyfhd_config, obs
         )
     elif pyfhd_config["model_file_type"] == "uvfits":
         vis_model, params_model, obs_model = import_vis_model_from_uvfits(
-            pyfhd_config, obs, logger
+            pyfhd_config, obs
         )
     elif pyfhd_config["model_file_type"] == "h5":
         # Assume it's a pyfhd h5 file
-        model = load(pyfhd_config["model_file_path"], logger=logger)
+        model = load(pyfhd_config["model_file_path"])
         vis_model = model["vis_model_arr"]
         params_model = model["params"]
         obs_model = model["obs"]
@@ -75,7 +75,6 @@ def vis_model_transfer(
             obs_data=obs,
             obs_model=obs_model,
             pyfhd_config=pyfhd_config,
-            logger=logger,
         )
     else:
         logger.warning(
@@ -91,13 +90,13 @@ def vis_model_transfer(
         model_dir.mkdir(parents=True, exist_ok=True)
         model_file = Path(model_dir, f"{pyfhd_config['obs_id']}_vis_model.h5")
         model = {"vis_model_arr": vis_model, "params": params_model}
-        save(model_file, model, "vis_model", logger=logger)
+        save(model_file, model, "vis_model")
 
     return vis_model
 
 
 def import_vis_model_from_sav(
-    pyfhd_config: dict, obs: dict, logger: logging.Logger
+    pyfhd_config: dict, obs: dict
 ) -> tuple[NDArray[np.complex128], dict]:
     """
     Read a model visibility array and metadata in from multiple IDL sav files
@@ -113,8 +112,6 @@ def import_vis_model_from_sav(
         The pyfhd config dictionary
     obs : dict
         The dictionary containing observation data and metadata
-    logger : logging.Logger
-        pyfhd's logger
 
     Returns
     -------
@@ -204,7 +201,7 @@ def import_vis_model_from_sav(
 
 
 def import_vis_model_from_uvfits(
-    pyfhd_config: dict, obs: dict, logger: logging.Logger
+    pyfhd_config: dict, obs: dict
 ) -> tuple[NDArray[np.complex128], dict]:
     """Read a model visibility array in from a `uvfits` with filepath given
     by pyfhd_config['model_file_path']. Reads data in via
@@ -227,20 +224,18 @@ def import_vis_model_from_uvfits(
     """
 
     header_model, params_data_model, antenna_header, antenna_data = extract_header(
-        pyfhd_config, logger, model_uvfits=True
+        pyfhd_config, model_uvfits=True
     )
 
-    params_model = create_params(header_model, params_data_model, logger)
+    params_model = create_params(header_model, params_data_model)
 
     vis_model_arr, _ = extract_visibilities(
-        header_model, params_data_model, pyfhd_config, logger
+        header_model, params_data_model, pyfhd_config
     )
 
-    layout_model = create_layout(antenna_header, antenna_data, pyfhd_config, logger)
+    layout_model = create_layout(antenna_header, antenna_data, pyfhd_config)
 
-    obs_model = create_obs(
-        header_model, params_model, layout_model, pyfhd_config, logger
-    )
+    obs_model = create_obs(header_model, params_model, layout_model, pyfhd_config)
 
     return vis_model_arr, params_model, obs_model
 
@@ -311,7 +306,6 @@ def flag_model_visibilities(
     obs_data: dict,
     obs_model: dict,
     pyfhd_config: dict,
-    logger: logging.Logger,
 ) -> NDArray[np.complex128]:
     """
     Match the times and the tile flags between the data and the input model, and
@@ -332,8 +326,6 @@ def flag_model_visibilities(
         The observaton dictionary containing metadata from the input uvfits or sav file
     pyfhd_config : dict
         The pyfhd configuration dictionary
-    logger : logging.Logger
-        The pyfhd logger
 
     Returns
     -------
@@ -520,7 +512,6 @@ def flag_model_visibilities(
 def convert_vis_model_arr_to_sav(
     vis_model_arr: NDArray[np.complex128],
     pyfhd_config: dict,
-    logger: logging.Logger,
     model_vis_dir: str,
     n_pol: int,
 ):
@@ -537,8 +528,6 @@ def convert_vis_model_arr_to_sav(
     pyfhd_config : dict
         The options from argparse in a dictionary, that have been verified using
         `pyfhd.pyfhd_tools.pyfhd_setup.pyfhd_setup`.
-    logger : logging.Logger
-        pyfhd logger to feed information to
     model_vis_dir : str
         Directory location to write the output files to
     n_pol : int

@@ -8,7 +8,6 @@ import numpy.testing as npt
 from pyfhd.io.pyfhd_io import save, load
 import numpy as np
 import importlib_resources
-from logging import Logger
 
 
 @pytest.fixture
@@ -215,9 +214,8 @@ def test_vis_cal_polyfit(before_file, after_file):
 
     pyfhd_config = h5_before["pyfhd_config"]
     pyfhd_config["instrument"] = "mwa"
-    logger = Logger(1)
 
-    cal_polyfit, _ = vis_cal_polyfit(obs, cal, auto_ratio, pyfhd_config, logger)
+    cal_polyfit, _ = vis_cal_polyfit(obs, cal, auto_ratio, pyfhd_config)
     npt.assert_allclose(
         cal_polyfit["amp_params"], expected_cal_return["amp_params"], atol=2e-7
     )

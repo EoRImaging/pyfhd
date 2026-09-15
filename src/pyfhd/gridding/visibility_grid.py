@@ -1,5 +1,9 @@
+import logging
+
+import h5py
 import numpy as np
 from numpy.typing import NDArray
+
 from pyfhd.gridding.gridding_utils import (
     interpolate_kernel,
     baseline_grid_locations,
@@ -7,8 +11,8 @@ from pyfhd.gridding.gridding_utils import (
     conjugate_mirror,
 )
 from pyfhd.pyfhd_tools.pyfhd_utils import weight_invert, rebin, l_m_n, idl_argunique
-from logging import Logger
-import h5py
+
+logger = logging.getLogger(__name__)
 
 
 def visibility_grid(
@@ -19,7 +23,6 @@ def visibility_grid(
     params: dict,
     polarization: int,
     pyfhd_config: dict,
-    logger: Logger,
     calculate_uniform_filter: bool = False,
     no_conjugate: bool = False,
     model: NDArray[np.complex128] | None = None,
@@ -62,8 +65,6 @@ def visibility_grid(
         Index of the current polarization
     pyfhd_config : dict
         pyfhd's configuration dictionary containing all the options for a run
-    logger : Logger
-        pyfhd's logger
     calculate_uniform_filter : bool, optional
         Option to create a uniform filter by counting the number of baselines
         contributing for each pixel (called `uniform_filter` in the FHD function
@@ -117,7 +118,6 @@ def visibility_grid(
         psf=psf,
         params=params,
         vis_weights=vis_weights,
-        logger=logger,
         bi_use=bi_use,
         fi_use=fi_use,
         mask_mirror_indices=pyfhd_config["mask_mirror_indices"],
@@ -403,7 +403,6 @@ def visibility_grid(
                 box_matrix = grid_beam_per_baseline(
                     psf=psf,
                     pyfhd_config=pyfhd_config,
-                    logger=logger,
                     uu=uu,
                     vv=vv,
                     ww=ww,

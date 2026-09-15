@@ -1,5 +1,5 @@
+import logging
 import os
-from logging import Logger
 from pathlib import Path
 from typing import Any
 
@@ -8,6 +8,8 @@ import numpy as np
 import yaml
 from numpy.typing import NDArray, DTypeLike
 from scipy.io import readsav
+
+logger = logging.getLogger(__name__)
 
 
 def dtype_picker(dtype: DTypeLike) -> type:
@@ -170,7 +172,6 @@ def save_dataset(
     value: Any,
     to_chunk: dict[str, dict],
     variable_lengths: dict[str, DTypeLike],
-    logger: Logger | None,
 ) -> bool:
     """
     A general function for saving a dataset inside a HDF5 File or Group. It's
@@ -207,8 +208,6 @@ def save_dataset(
         use it in the variable_lengths dictionary like so,
         `{'ija': h5py.vlen_dtype(np.int64)}`, which will set the dtype appropriately
         during a `create_dataset` call. By default {}
-    logger : Logger | None
-        pyfhd's Logger
 
     Returns
     -------
@@ -227,7 +226,7 @@ def save_dataset(
             group = h5py_obj.create_group(key)
             # dict_to_group will be recursively called if there is another dict
             # in this dict
-            dict_to_group(group, value, to_chunk, variable_lengths, logger)
+            dict_to_group(group, value, to_chunk, variable_lengths)
         case np.ndarray():
             if key not in variable_lengths:
                 # Find and replace all None objects
@@ -313,10 +312,9 @@ def save_dataset(
                     # floats, strings etc
                     h5py_obj.create_dataset(key, data=value)
                 except ValueError:
-                    if logger is not None:
-                        logger.error(
-                            f"Failed to save {key}, the type of key was {type(value)}"
-                        )
+                    logger.error(
+                        f"Failed to save {key}, the type of key was {type(value)}"
+                    )
     return is_none
 
 
@@ -325,7 +323,6 @@ def dict_to_group(
     to_convert: dict,
     to_chunk: dict[str, dict],
     variable_lengths: dict[str, DTypeLike],
-    logger: Logger | None,
 ) -> None:
     """
     Converts a dictionary to a HDF5 group. This is called in the event a dictionary
@@ -342,8 +339,6 @@ def dict_to_group(
         The chunking dictionary, see `save` for more information
     variable_lengths : dict[str, DTypeLike]
         The variable length dictionary, see `save` for more information
-    logger : Logger
-       pyfhd's Logger
 
     See Also
     --------
@@ -351,7 +346,7 @@ def dict_to_group(
     """
     for key in to_convert:
         group.attrs[key] = save_dataset(
-            group, key, to_convert[key], to_chunk, variable_lengths, logger
+            group, key, to_convert[key], to_chunk, variable_lengths
         )
 
 
@@ -359,7 +354,6 @@ def save(
     file_name: Path,
     to_save: NDArray[Any] | dict,
     dataset_name: str,
-    logger: Logger | None = None,
     to_chunk: dict[str, dict] | None = None,
     variable_lengths: dict[str, DTypeLike] | None = None,
 ) -> None:
@@ -385,9 +379,6 @@ def save(
     dataset_name : str
         Used in the case that the to_save variable is an array, this name will
         be used as the key for the dataset in the hdf5 file.
-    logger : Logger, optional
-        pyfhd's Logger, by default None (in case you don't want to use the logger
-        for testing)
     to_chunk : dict[str, dict], optional
         A dictionary where each key-value pair represents a key in the to_save
         dictionary, and the value is a dictionary which should contain two
@@ -428,34 +419,31 @@ def save(
     with h5py.File(file_name, "w") as h5_file:
         match to_save:
             case np.ndarray():
-                if logger:
-                    logger.info(f"Writing the {dataset_name} array to {file_name}")
+                logger.info(f"Writing the {dataset_name} array to {file_name}")
                 h5_file.attrs[dataset_name] = save_dataset(
-                    h5_file, dataset_name, to_save, to_chunk, variable_lengths, logger
+                    h5_file, dataset_name, to_save, to_chunk, variable_lengths
                 )
             case dict():
-                if logger:
-                    logger.info(
-                        f"Writing the {dataset_name} dict to {file_name}, each "
-                        "key will be a dataset, if the key contains a dict then "
-                        "it will be a group."
-                    )
+                logger.info(
+                    f"Writing the {dataset_name} dict to {file_name}, each key "
+                    "will be a dataset, if the key contains a dict then it will "
+                    "be a group."
+                )
                 for key in to_save:
                     # We're using the attributes as a mask, where if True then we know
                     # the dataset is representing a None object.
                     h5_file.attrs[key] = save_dataset(
-                        h5_file, key, to_save[key], to_chunk, variable_lengths, logger
+                        h5_file, key, to_save[key], to_chunk, variable_lengths
                     )
             case _:
                 h5_file.attrs[dataset_name] = save_dataset(
-                    h5_file, dataset_name, to_save, to_chunk, variable_lengths, logger
+                    h5_file, dataset_name, to_save, to_chunk, variable_lengths
                 )
-                if logger:
-                    logger.warning(
-                        "Not a dict or numpy array, pyfhd won't write other types "
-                        "at this time, refer to pyfhd.io.pyfhd_io.save to see "
-                        "what is supported"
-                    )
+                logger.warning(
+                    "Not a dict or numpy array, pyfhd won't write other types "
+                    "at this time, refer to pyfhd.io.pyfhd_io.save to see what "
+                    "is supported"
+                )
 
 
 def load_dataset(
@@ -532,10 +520,7 @@ def group_to_dict(group: h5py.Group) -> dict:
 
 
 def load(
-    file_name: Path,
-    logger: Logger | None = None,
-    lazy_load: bool = False,
-    ret_attrs: bool = False,
+    file_name: Path, lazy_load: bool = False, ret_attrs: bool = False
 ) -> dict[str, object] | NDArray[Any] | h5py.File:
     """
     Loads a HDF5 file into pyfhd, it reads the HDF5 into an array if the
@@ -547,8 +532,6 @@ def load(
     ----------
     file_name : Path
         The /path/to/the/hdf5.h5
-    logger : Logger
-        pyfhd's Logger
     lazy_load : bool, optional
         Set to true if you wish to lazy load the file, currently the only file
         that will be supported to do this in pyfhd will be the beam/psf file,
@@ -580,14 +563,12 @@ def load(
         if len(keys) == 1:
             # Assume that it contains only one numpy array, in which case read the array
             key = keys[0]
-            if logger:
-                logger.info(f"Loading {key} from {file_name} into an array")
+            logger.info(f"Loading {key} from {file_name} into an array")
             array = load_dataset(h5_file, key, h5_file[key])
             return array
         else:
             return_dict = {}
-            if logger:
-                logger.info(f"Loading {file_name} into a dictionary")
+            logger.info(f"Loading {file_name} into a dictionary")
             for key in keys:
                 if key in h5_file:
                     match h5_file[key]:
@@ -722,7 +703,7 @@ def recarray_to_dict(data: np.recarray | dict) -> dict:
     return data
 
 
-def convert_sav_to_dict(sav_path: str, logger: Logger, tmp_dir="temp_pyfhd"):
+def convert_sav_to_dict(sav_path: str, tmp_dir="temp_pyfhd"):
     """
     Given a path to an IDL style .sav file, load into a python dictionary
     using scipy.io.readsav.
@@ -742,8 +723,6 @@ def convert_sav_to_dict(sav_path: str, logger: Logger, tmp_dir="temp_pyfhd"):
     ----------
     sav_path : str
         Filepath for an IDL .sav file
-    logger : Logger
-        The logger to output any error messages to
     tmp_dir : str
         Dir to place temporary files, creates the directory if doesn't exist.
         Default: "tmp_pyfhd".

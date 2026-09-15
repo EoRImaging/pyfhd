@@ -1,8 +1,11 @@
 import contextlib
+import logging
 from importlib.metadata import PackageNotFoundError, version
 from pathlib import Path
 
 from setuptools_scm import get_version
+
+logging.getLogger("pyfhd").addHandler(logging.NullHandler())
 
 
 # copy this function here from setup.py.
