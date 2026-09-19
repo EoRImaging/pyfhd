@@ -133,9 +133,11 @@ def test_many_points(before_file, after_file):
     obs = h5_before["obs"]
     params = h5_before["params"]
 
-    psf = {"dim": 54}
+    psf_dim = 54
 
-    weights_result, obs_result = vis_weights_update(vis_weight_arr, obs, psf, params)
+    weights_result, obs_result = vis_weights_update(
+        vis_weight_arr, obs=obs, psf_dim=psf_dim, params=params
+    )
 
     npt.assert_allclose(weights_result, h5_after["vis_weight_ptr"])
     npt.assert_array_equal(
@@ -165,9 +167,11 @@ def test_many_points_before_cal(cal_before_file, cal_after_file):
     obs = h5_before["obs"]
     params = h5_before["params"]
 
-    psf = {"dim": 54}
+    psf_dim = 54
 
-    weights_result, obs_result = vis_weights_update(vis_weight_arr, obs, psf, params)
+    weights_result, obs_result = vis_weights_update(
+        vis_weight_arr, obs=obs, psf_dim=psf_dim, params=params
+    )
 
     npt.assert_allclose(weights_result, h5_after["vis_weights"])
     npt.assert_array_equal(

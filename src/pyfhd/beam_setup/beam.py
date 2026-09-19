@@ -5,7 +5,7 @@ from pyfhd.beam_setup.antenna import init_beam
 from pyfhd.beam_setup.beam_utils import beam_power
 from pyfhd.io.pyfhd_io import recarray_to_dict
 from pathlib import Path
-from pyfhd.io.pyfhd_io import save, load
+from pyfhd.io.pyfhd_io import product_file, save, load
 from h5py import File
 
 from pyfhd.pyfhd_tools.pyfhd_utils import histogram, rebin, weight_invert
@@ -265,19 +265,16 @@ def create_psf(obs: dict, pyfhd_config: dict) -> dict | File:
         )
 
         # Save the psf to a file
-        pyfhd_config["beams_dir"] = Path(pyfhd_config["output_dir"], "beams")
-        pyfhd_config["beams_dir"].mkdir(exist_ok=True)
-        save(
-            Path(pyfhd_config["beams_dir"], f"{pyfhd_config['obs_id']}_beam.h5"),
-            psf,
-            "psf",
-            to_chunk={
+        if pyfhd_config["save_beam"]:
+            psf_filepath = product_file("psf", pyfhd_config)
+            psf_filepath.parent.mkdir(exist_ok=True)
+            chunk_dict = {
                 "beam_ptr": {
                     "shape": psf["beam_ptr"].shape,
                     "chunk": tuple([1] * 2 + list(psf["beam_ptr"].shape)[2:]),
                 }
-            },
-        )
+            }
+            save(psf_filepath, psf, "psf", to_chunk=chunk_dict)
 
         return psf, antenna
     elif pyfhd_config["saved_beam_file_path"].suffix == ".sav":

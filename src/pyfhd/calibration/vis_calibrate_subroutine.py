@@ -31,7 +31,7 @@ def vis_calibrate_subroutine(
     vis_arr : NDArray[np.complex128]
         Uncalibrated data visiblities
     vis_model_ptr : NDArray[np.complex128]
-        Simulated model visibilites
+        Simulated model visibilities
     vis_weight_ptr : NDArray[np.float64]
         Weights (flags) of the visibilities
     obs : dict

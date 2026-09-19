@@ -52,7 +52,7 @@ beam-clip-floor: true
 
 # Calibration
 calibrate-visibilities: true
-# options for choosing sources to go into model visibiliites:
+# options for choosing sources to go into model visibilities:
 # The calibration catalog file must be readable by pyradiosky's SkyModel object
 calibration-catalog-file-path : '../GLEAM_v2_plus_rlb2019.sav'
 calibration-model-delay-filter: true

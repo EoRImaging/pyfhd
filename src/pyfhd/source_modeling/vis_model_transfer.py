@@ -46,17 +46,17 @@ def vis_model_transfer(
     pyfhd.source_modeling.vis_model_transfer.import_vis_model_from_uvfits :
         Import model from a uvfits file
     """
-    if pyfhd_config["model_file_type"] == "sav":
+    if pyfhd_config["cal_model_file_type"] == "sav":
         vis_model, params_model, obs_model = import_vis_model_from_sav(
             pyfhd_config, obs
         )
-    elif pyfhd_config["model_file_type"] == "uvfits":
+    elif pyfhd_config["cal_model_file_type"] == "uvfits":
         vis_model, params_model, obs_model = import_vis_model_from_uvfits(
             pyfhd_config, obs
         )
-    elif pyfhd_config["model_file_type"] == "h5":
+    elif pyfhd_config["cal_model_file_type"] == "h5":
         # Assume it's a pyfhd h5 file
-        model = load(pyfhd_config["model_file_path"])
+        model = load(pyfhd_config["cal_model_file_path"])
         vis_model = model["vis_model_arr"]
         params_model = model["params"]
         obs_model = model["obs"]
@@ -127,11 +127,11 @@ def import_vis_model_from_sav(
 
     try:
         path = Path(
-            pyfhd_config["model_file_path"], f"{pyfhd_config['obs_id']}_params.sav"
+            pyfhd_config["cal_model_file_path"], f"{pyfhd_config['obs_id']}_params.sav"
         )
         if not path.exists():
             path = Path(
-                pyfhd_config["model_file_path"],
+                pyfhd_config["cal_model_file_path"],
                 fhd_subdirs["params"],
                 f"{pyfhd_config['obs_id']}_params.sav",
             )
@@ -139,11 +139,11 @@ def import_vis_model_from_sav(
         params_model = recarray_to_dict(params_model.params)
 
         path = Path(
-            pyfhd_config["model_file_path"], f"{pyfhd_config['obs_id']}_obs.sav"
+            pyfhd_config["cal_model_file_path"], f"{pyfhd_config['obs_id']}_obs.sav"
         )
         if not path.exists():
             path = Path(
-                pyfhd_config["model_file_path"],
+                pyfhd_config["cal_model_file_path"],
                 fhd_subdirs["obs"],
                 f"{pyfhd_config['obs_id']}_obs.sav",
             )
@@ -152,13 +152,13 @@ def import_vis_model_from_sav(
 
         # Read in the first polarization from pol_names
         pol_i = 0
-        vis_path_parts = [pyfhd_config["model_file_path"]]
+        vis_path_parts = [pyfhd_config["cal_model_file_path"]]
         path = Path(
             *vis_path_parts,
             f"{pyfhd_config['obs_id']}_vis_model_{obs['pol_names'][pol_i]}.sav",
         )
         if not path.exists():
-            vis_path_parts = [pyfhd_config["model_file_path"], fhd_subdirs["vis"]]
+            vis_path_parts = [pyfhd_config["cal_model_file_path"], fhd_subdirs["vis"]]
             path = Path(
                 *vis_path_parts,
                 f"{pyfhd_config['obs_id']}_vis_model_{obs['pol_names'][pol_i]}.sav",
@@ -222,16 +222,15 @@ def import_vis_model_from_uvfits(
     params_model : dict
         The parameters for said model used for flagging
     """
+    uvfits_path = Path(pyfhd_config["cal_model_file_path"])
 
     header_model, params_data_model, antenna_header, antenna_data = extract_header(
-        pyfhd_config, model_uvfits=True
+        uvfits_path
     )
 
     params_model = create_params(header_model, params_data_model)
 
-    vis_model_arr, _ = extract_visibilities(
-        header_model, params_data_model, pyfhd_config
-    )
+    vis_model_arr, _ = extract_visibilities(uvfits_path=uvfits_path, n_pol=obs["n_pol"])
 
     layout_model = create_layout(antenna_header, antenna_data, pyfhd_config)
 
@@ -409,7 +408,7 @@ def flag_model_visibilities(
     # If less antennas in the model than the data, we can't calibrate the whole
     # dataset so just error for now
     if flaginfo_model.num_ants < flaginfo_data.num_ants:
-        model_path = pyfhd_config["model_file_path"] + pyfhd_config["model_file_type"]
+        model_path = pyfhd_config["cal_model_file_path"]
         raise ValueError(
             f"There are less antennas (tiles) in the model "
             f"{model_path} than in the data, so cannot calibrate the "

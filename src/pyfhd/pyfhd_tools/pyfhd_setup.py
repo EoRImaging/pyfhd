@@ -13,6 +13,8 @@ from pathlib import Path
 import configargparse
 import yaml
 
+from pyfhd.io.pyfhd_io import checkpoint_complete
+
 logger = logging.getLogger(__name__)
 
 INTRO = """
@@ -156,7 +158,7 @@ def pyfhd_parser():
     )
     # Add All the Groups
     checkpoints = parser.add_argument_group(
-        "Checkpoints", "Activate checkpoints and Load up checkpoints"
+        "Checkpoints", "Options for recalculating vs using checkpoints."
     )
     instrument = parser.add_argument_group(
         "Instrument", "Adjust parameters specific to your instrument"
@@ -213,14 +215,6 @@ def pyfhd_parser():
         action="store_true",
         help="Copy sample data from pyfhd package directory to the current "
         "working directory. Will copy to an 'input' directory.",
-    )
-    parser.add_argument(
-        "-r",
-        "--recalculate-all",
-        action=OrderedBooleanOptionalAction,
-        help="Forces pyfhd to recalculate all values. This will ignore values "
-        "set for recalculate-grid, recalculate-beam, as it will set all of them "
-        "to True",
     )
     parser.add_argument(
         "-s",
@@ -308,47 +302,86 @@ def pyfhd_parser():
         "parameter value for the direction value in the function",
     )
 
-    # Checkpoints
+    # Checkpoints & recalculating
+    checkpoints.add_argument(
+        "-r",
+        "--recalculate-all",
+        action=OrderedBooleanOptionalAction,
+        help="Forces pyfhd to recalculate all values. This will ignore values "
+        "set for recalculate-grid, recalculate-beam, as it will set all of them "
+        "to True",
+    )
+    checkpoints.add_argument(
+        "--recalculate-beam",
+        default=False,
+        action=OrderedBooleanOptionalAction,
+        help="Forces pyfhd to redo the beam setup using pyfhd's beam setup.",
+    )
+    checkpoints.add_argument(
+        "--recalculate-cal-model-vis",
+        default=False,
+        action=OrderedBooleanOptionalAction,
+        help="Forces pyfhd to recalculate the model visibilities (degridding).",
+    )
+    checkpoints.add_argument(
+        "--recalculate-cal",
+        default=False,
+        action=OrderedBooleanOptionalAction,
+        help="Forces pyfhd to recalculate the calibration. This does not force "
+        "recalculating the model visibilities unless recalcuate-beam or "
+        "recalculate-all are also set.",
+    )
+    checkpoints.add_argument(
+        "-g",
+        "--recalculate-grid",
+        default=False,
+        action=OrderedBooleanOptionalAction,
+        help="Forces pyfhd to recalculate the gridding function. Replaces "
+        "grid_recalculate from FHD",
+    )
+    checkpoints.add_argument(
+        "--recalculate-healpix",
+        default=False,
+        action=OrderedBooleanOptionalAction,
+        help="Forces pyfhd to recalculate the recalculate Healpix cubes. Replaces "
+        "healpix_recalculate from FHD",
+    )
+
+    # deprecated checkpoints:
     checkpoints.add_argument(
         "--save-checkpoints",
         default=False,
         action=OrderedBooleanOptionalAction,
-        help="Activates pyfhd's checkpointing system and saves them into the "
-        "output directory",
+        deprecated=True,
+        help="Deprecated, does nothing. See recalculate and save options.",
     )
     checkpoints.add_argument(
         "--obs-checkpoint",
         default=False,
         action=OrderedBooleanOptionalAction,
-        help="Load the checkpoint just after creating the observation metadata "
-        "dictionary, should contain the observation metadata dictionary, "
-        "uncalibrated visibility parameters, array and weights.",
+        deprecated=True,
+        help="Deprecated, does nothing. See recalculate and save options.",
     )
     checkpoints.add_argument(
         "--beam-checkpoint",
         default=False,
         action=OrderedBooleanOptionalAction,
-        help="Load the checkpoint just after setting up the beam, should contain "
-        "the observation metadata dictionary, "
-        "uncalibrated visibility parameters, array and weights.",
+        deprecated=True,
+        help="Deprecated, does nothing. See recalculate and save options.",
     )
     checkpoints.add_argument(
         "--calibrate-checkpoint",
         default=False,
         action=OrderedBooleanOptionalAction,
-        help="Load the checkpoint after calibration. This contains the flagged "
-        "observation metadata dictionary and the calibration dictionary, as well "
-        "as the calibrated and flagged visibility parameters, arrays, and weights.",
+        deprecated=True,
+        help="Deprecated, does nothing. See recalculate and save options.",
     )
     checkpoints.add_argument(
         "--gridding-checkpoint",
         default=False,
         action=OrderedBooleanOptionalAction,
-        help="Load the checkpoint after gridding. This contains the gridded uv "
-        "planes for the image, weights, variance, and uniform filter. Additionally, "
-        "if a model has been provided, its visibility array will gridded on the "
-        "uv plane and saved in this checkpoint. This must be used with the "
-        "calibrate-checkpoint option.",
+        deprecated=True,
+        help="Deprecated, does nothing. See recalculate and save options.",
     )
 
     # Instrument Group
@@ -358,6 +391,15 @@ def pyfhd_parser():
         default="mwa",
         choices=["mwa", "ovro-lwa", "hera", "other"],
         help="Set the instrument used for the FHD run.",
+    )
+    instrument.add_argument(
+        "--antenna-size",
+        default=None,
+        type=float,
+        help="The antenna size in meters. Used to set the size of the beam "
+        "(gridding kernel) in uv space. If instrument is 'mwa' or 'hera' this "
+        "defaults sensibly, otherwise it defaults to 10 meters, which may not be "
+        "sensible.",
     )
     instrument.add_argument(
         "--override-target-phasera",
@@ -386,12 +428,6 @@ def pyfhd_parser():
         action=OrderedBooleanOptionalAction,
         help="pyfhd will lazy load the beam HDF5 file, allowing pyfhd to be run "
         "on much smaller systems with much less memory than FHD",
-    )
-    beam.add_argument(
-        "--recalculate-beam",
-        default=False,
-        action=OrderedBooleanOptionalAction,
-        help="Forces pyfhd to redo the beam setup using pyfhd's beam setup.",
     )
     beam.add_argument(
         "--interpolate-kernel",
@@ -957,14 +993,6 @@ def pyfhd_parser():
 
     # Gridding Group
     gridding.add_argument(
-        "-g",
-        "--recalculate-grid",
-        default=False,
-        action=OrderedBooleanOptionalAction,
-        help="Forces pyfhd to recalculate the gridding function. Replaces "
-        "grid_recalculate from FHD",
-    )
-    gridding.add_argument(
         "--mask-mirror-indices",
         default=False,
         action=OrderedBooleanOptionalAction,
@@ -1115,42 +1143,67 @@ def pyfhd_parser():
         default=True,
     )
     export.add_argument(
-        "--save-visibilities",
-        default=False,
+        "--save-beam",
+        default=True,
         action=OrderedBooleanOptionalAction,
-        help="Save the raw visibilities, the calibrated data visibilities, the model "
-        "visibilities, and the gridded uv planes",
+        help="Save the antenna and psf dicts. These take some time to construct "
+        "but also take a lot of space on disk.",
+    )
+    export.add_argument(
+        "--save-skymodel",
+        default=True,
+        action=OrderedBooleanOptionalAction,
+        help="Save the skymodel used to form visibilities for calibration and "
+        "subtraction (if different).",
+    )
+    export.add_argument(
+        "--save-model-uv",
+        default=True,
+        action=OrderedBooleanOptionalAction,
+        help="Save the model uv used to form visibilities for calibration and "
+        "subtraction (if different).",
+    )
+    export.add_argument(
+        "--save-visibilities",
+        default=True,
+        action=OrderedBooleanOptionalAction,
+        help="Save the calibrated data visibilities, the model visibilities "
+        "(if calculated) and the visibility weights",
     )
     export.add_argument(
         "--save-weights",
         default=False,
         action=OrderedBooleanOptionalAction,
-        help="Save the raw and calibrated weights from pyfhd's run",
+        deprecated=True,
+        help="Deprecated, has no effect. See save-visibilities.",
     )
     export.add_argument(
         "--save-model",
         default=False,
         action=OrderedBooleanOptionalAction,
-        help="Save the model visibilities created/transferred in during pyfhd's "
-        "run as HDF5.",
+        deprecated=True,
+        help="Deprecated, has no effect. See save-visibilities and save-model-uv.",
     )
     export.add_argument(
         "--save-obs",
         default=False,
         action=OrderedBooleanOptionalAction,
-        help="Save the obs dictionary created during pyfhd's run",
+        deprecated=True,
+        help="Deprecated, has no effect (obs dict is always saved).",
     )
     export.add_argument(
         "--save-params",
         default=False,
         action=OrderedBooleanOptionalAction,
-        help="Save the params dictionary created during pyfhd's run",
+        deprecated=True,
+        help="Deprecated, has no effect (params dict is always saved).",
     )
     export.add_argument(
         "--save-cal",
         default=False,
         action=OrderedBooleanOptionalAction,
-        help="Save the cal dictionary created during pyfhd's run",
+        deprecated=True,
+        help="Deprecated, has no effect (cal dict is always saved).",
     )
     export.add_argument(
         "--save-healpix-fits",
@@ -1211,27 +1264,43 @@ def pyfhd_parser():
 
     # Model Group
     model.add_argument(
-        "-m",
-        "--model-file-type",
-        default="sav",
+        "--cal-model-file-type",
+        default=None,
         choices=["sav", "uvfits"],
         help="Set the file type of the model, by default it looks for sav files "
-        "of format <obs_id>_params.sav and <obs_id>_vis_model_<pol_name>.sav. "
-        "If you set uvfits you must put set path using --import-model-uvfits. "
-        "This argument is required as pyfhd currently cannot produce a model.",
+        "of format <obs_id>_params.sav and <obs_id>_vis_model_<pol_name>.sav. ",
     )
     model.add_argument(
-        "--model-file-path",
+        "--cal-model-file-path",
         default=None,
         type=Path,
-        help="In the case you chose 'sav' for model-file-type then this will be a "
+        help="In the case you chose 'sav' for cal-model-file-type then this will be a "
         "directory containing all the <obs_id>_params and "
         "<obs_id>_vis_model_<pol_name> sav files. "
         "In the case you chose 'uvfits', then the path is to a uvfits file, in "
         "which case make sure the phase centre of model data must match the 'RA' "
         "and 'DEC' values in the metafits file (NOT the 'RAPHASE' and 'DECPHASE')."
-        "If you want to do a run without a model, this must be set to None (~),"
+        "If you want pyfhd to create model visibilities for calibration from a "
+        "catalog, set this to None (~) and set calibration-catalog-file-path. "
+        "To do a run without a model, this must be set to None (~),"
         "and calibrate-visibilities should be set as False. ",
+    )
+    model.add_argument(
+        "-m",
+        "--model-file-type",
+        default="sav",
+        choices=["sav", "uvfits"],
+        deprecated=True,
+        help="Deprecated. The values set here is passed to cal_model_file_type "
+        "if that is not set.",
+    )
+    model.add_argument(
+        "--model-file-path",
+        default=None,
+        type=Path,
+        deprecated=True,
+        help="Deprecated. The values set here is passed to cal_model_file_path "
+        "if that is not set.",
     )
     model.add_argument(
         "--allow-sidelobe-model-sources",
@@ -1673,6 +1742,193 @@ def pyfhd_logger(pyfhd_config: dict):
             h.close()
 
 
+def recalculate_flow(pyfhd_config: dict) -> dict:
+    """
+    Figure out what needs to be recalculated based on config and what files exist.
+
+    Also figure out what data products we actually need to create/load during run.
+
+    Parameters
+    ----------
+    pyfhd_config : dict
+        The pyfhd config dict, which is updated and returned.
+
+    Returns
+    -------
+    pyfhd_config : dict
+        The updated config dict.
+
+    """
+    if not pyfhd_config["recalculate_all"] and not checkpoint_complete(
+        "setup", pyfhd_config
+    ):
+        logger.warning(
+            "recalculate_all is not set but setup files do not exist. "
+            "Recalculating all."
+        )
+        pyfhd_config["recalculate_all"] = True
+
+    if pyfhd_config["recalculate_all"]:
+        logger.info(
+            "Recalculate all option has been enabled so everything will be "
+            "recalculated."
+        )
+        pyfhd_config["recalculate_beam"] = True
+        if pyfhd_config["calibrate_visibilities"]:
+            pyfhd_config["recalculate_cal"] = True
+            if pyfhd_config["cal_model_file_path"] is None:
+                pyfhd_config["recalculate_cal_model_vis"]
+        if not pyfhd_config["cal_stop"]:
+            pyfhd_config["recalculate_grid"]
+            if pyfhd_config["snapshot_healpix_export"]:
+                pyfhd_config["recalculate_healpix"]
+
+    if (
+        pyfhd_config["recalculate_beam"]
+        and pyfhd_config["calibrate_visibilities"]
+        and pyfhd_config["cal_model_file_path"] is None
+    ):
+        pyfhd_config["recalculate_cal_model_vis"] = True
+
+    if (
+        pyfhd_config["calibrate_visibilities"]
+        and pyfhd_config["cal_model_file_path"] is None
+        and not pyfhd_config["recalculate_cal_model_vis"]
+        and not checkpoint_complete("cal_model_vis", pyfhd_config)
+    ):
+        logger.warning(
+            "recalculate_cal_model_vis is not set but model vis files are needed and "
+            "do not exist. Recalculating calibration model vis."
+        )
+        pyfhd_config["recalculate_cal_model_vis"] = True
+
+    if (
+        pyfhd_config["recalculate_cal_model_vis"]
+        and pyfhd_config["calibrate_visibilities"]
+    ):
+        pyfhd_config["recalculate_cal"] = True
+
+    if (
+        pyfhd_config["recalculate_beam"]
+        or pyfhd_config["recalculate_cal_model_vis"]
+        or pyfhd_config["recalculate_cal"]
+    ) and not pyfhd_config["cal_stop"]:
+        pyfhd_config["recalculate_grid"] = True
+
+        if pyfhd_config["snapshot_healpix_export"]:
+            pyfhd_config["recalculate_healpix"] = True
+
+    if (
+        not pyfhd_config["recalculate_grid"]
+        and not pyfhd_config["cal_stop"]
+        and not checkpoint_complete("gridding", pyfhd_config)
+    ):
+        logger.warning(
+            "recalculate_grid is not set but grid checkpoint files do "
+            "not exist and are needed. Recalculating grid."
+        )
+        pyfhd_config["recalculate_grid"] = True
+
+    if (
+        not pyfhd_config["recalculate_healpix"]
+        and not pyfhd_config["cal_stop"]
+        and pyfhd_config["snapshot_healpix_export"]
+        and not checkpoint_complete("healpix", pyfhd_config)
+    ):
+        # N.B. This checkpoint_complete call really only checks
+        # if _any_ files are there, so it's necessary but not sufficient.
+        # Need more information to check for all files, deferred to main
+        logger.warning(
+            "recalculate_healpix not set but healpix checkpoint files do "
+            "not exist and are needed. Recalculating healpix."
+        )
+        pyfhd_config["recalculate_healpix"] = True
+
+    # there are some checks below here that require a recursive call back to this
+    # same function to ensure the updates flow to other recalculates as needed.
+    # Make a variable to track the need for this.
+    rerun = False
+    # do we need calibrated visibilities?
+    if pyfhd_config["calibrate_visibilities"] and (
+        pyfhd_config["recalculate_grid"] or pyfhd_config["recalculate_healpix"]
+    ):
+        pyfhd_config["need_cal_vis"] = True
+    else:
+        pyfhd_config["need_cal_vis"] = False
+
+    if (
+        not pyfhd_config["recalculate_cal"]
+        and pyfhd_config["need_cal_vis"]
+        and not checkpoint_complete("cal", pyfhd_config)
+    ):
+        logger.warning(
+            "recalculate_cal is not set but cal files are needed and do "
+            "not exist. Recalculating cal."
+        )
+        pyfhd_config["recalculate_cal"] = True
+        rerun = True
+
+    # Do we need the beam?
+    if (
+        pyfhd_config["recalculate_grid"]
+        or pyfhd_config["recalculate_healpix"]
+        or (
+            pyfhd_config["recalculate_cal"]
+            and pyfhd_config["cal_model_file_path"] is None
+        )
+    ):
+        pyfhd_config["need_beam"] = True
+    else:
+        pyfhd_config["need_beam"] = False
+
+    if (
+        pyfhd_config["need_beam"]
+        and not pyfhd_config["recalculate_beam"]
+        and not checkpoint_complete("beam", pyfhd_config)
+    ):
+        logger.warning(
+            "recalculate_beam is not set but beam files are needed and do not "
+            "exist. Recalculating beam."
+        )
+        pyfhd_config["recalculate_beam"] = True
+        # re-run this recursively to make sure everything gets set properly
+        rerun = True
+
+    # Do we need the raw (uncalibrated) visibilities?
+    if pyfhd_config["recalculate_cal"] or (
+        not pyfhd_config["calibrate_visibilities"]
+        and (pyfhd_config["recalculate_grid"] or pyfhd_config["recalculate_healpix"])
+    ):
+        pyfhd_config["need_raw_vis"] = True
+    else:
+        pyfhd_config["need_raw_vis"] = False
+
+    # Does a model exist?
+    # if a model was passed or if we are calibrating (and so creating one)
+    if (
+        pyfhd_config["calibrate_visibilities"]
+        or pyfhd_config["cal_model_file_path"] is not None
+    ):
+        pyfhd_config["model_exists"] = True
+    else:
+        pyfhd_config["model_exists"] = False
+
+    # Do we need model vis?
+    # if we are calibrating or one exists and we are gridding
+    if pyfhd_config["recalculate_cal"] or (
+        pyfhd_config["model_exists"]
+        and (pyfhd_config["recalculate_grid"] or pyfhd_config["recalculate_healpix"])
+    ):
+        pyfhd_config["need_model_vis"] = True
+    else:
+        pyfhd_config["need_model_vis"] = False
+
+    if rerun:
+        pyfhd_config = recalculate_flow(pyfhd_config)
+
+    return pyfhd_config
+
+
 def pyfhd_setup(pyfhd_config: dict, run_time: float, output_dir_exists: bool) -> dict:
     """
     Check for any incompatibilities among the options given for starting the
@@ -1778,15 +2034,103 @@ def pyfhd_setup(pyfhd_config: dict, run_time: float, output_dir_exists: bool) ->
             )
             errors += 1
 
-    # Force pyfhd to recalculate the beam, gridding and mapping functions
-    if pyfhd_config["recalculate_all"]:
-        pyfhd_config["recalculate_beam"] = True
-        pyfhd_config["recalculate_grid"] = True
-        pyfhd_config["recalculate_mapfn"] = True
-        logger.info(
-            "Recalculate All option has been enabled, the beam, gridding and map "
-            "function will be recalculated"
+    # deal with deprecated options
+    if (
+        pyfhd_config["cal_model_file_path"] is None
+        and pyfhd_config["model_file_path"] is not None
+    ):
+        pyfhd_config["cal_model_file_path"] = pyfhd_config["model_file_path"]
+        del pyfhd_config["model_file_path"]
+        logger.warning(
+            "model_file_path is deprecated. Please use cal_model_file_path instead. "
+            "Setting cal_model_file_path to what was passed to model_file_path."
         )
+        warnings += 1
+
+    if pyfhd_config["cal_model_file_path"] is not None:
+        if pyfhd_config["cal_model_file_type"] is None:
+            if pyfhd_config["model_file_type"] is not None:
+                pyfhd_config["cal_model_file_type"] = pyfhd_config["model_file_type"]
+                del pyfhd_config["model_file_type"]
+                logger.warning(
+                    "model_file_type is deprecated. Please use cal_model_file_type "
+                    "instead. Setting cal_model_file_type to what was passed to "
+                    "model_file_type."
+                )
+                warnings += 1
+            else:
+                pyfhd_config["cal_model_file_type"] = "sav"
+                logger.warning(
+                    "cal_model_file_path is set but cal_model_file_type is not. "
+                    "Defaulting cal_model_file_type to sav."
+                )
+                warnings += 1
+
+    # make recalculate options be sensible
+    if (
+        pyfhd_config["cal_model_file_path"] is not None
+        and pyfhd_config["recalculate_cal_model_vis"]
+    ):
+        pyfhd_config["recalculate_cal_model_vis"] = False
+        logger.warning(
+            "recalculate_cal_model_vis is True but model_file_path is set so model "
+            "visibilities do not need to be calculated. Setting "
+            "recalculate_cal_model_vis to False."
+        )
+        warnings += 1
+    if not pyfhd_config["calibrate_visibilities"] and pyfhd_config["recalculate_cal"]:
+        pyfhd_config["recalculate_cal"] = False
+        logger.warning(
+            "recalculate_cal is True but calibrate_visibilities is False. Setting "
+            "recalculate_cal to False."
+        )
+        warnings += 1
+
+    if pyfhd_config["cal_stop"]:
+        if pyfhd_config["recalculate_grid"]:
+            pyfhd_config["recalculate_grid"] = False
+            logger.warning(
+                "Both cal_stop and recalculate_grid are True, but there is no "
+                "gridding if cal_stop is set. Setting recalculate_grid to False."
+            )
+            warnings += 1
+        if pyfhd_config["snapshot_healpix_export"]:
+            pyfhd_config["snapshot_healpix_export"] = False
+            logger.warning(
+                "Both cal_stop and snapshot_healpix_export are True, but healpix "
+                "cubes are not made if cal_stop is set. Setting "
+                "snapshot_healpix_export to False."
+            )
+            warnings += 1
+    if (
+        not pyfhd_config["snapshot_healpix_export"]
+        and pyfhd_config["recalculate_healpix"]
+    ):
+        pyfhd_config["recalculate_healpix"] = False
+        logger.warning(
+            "recalculate_healpix is True, but snapshot_healpix_export is False. "
+            "Setting recalculate_healpix to False."
+        )
+        warnings += 1
+
+    pyfhd_config = recalculate_flow(pyfhd_config)
+
+    # If cal_stop is set, ensure the visibilities and model uv plane are saved
+    if pyfhd_config["cal_stop"]:
+        if not pyfhd_config["save_visibilities"]:
+            pyfhd_config["save_visibilities"] = True
+            logger.warning(
+                "If cal_stop is True we should save the visibilities. "
+                "Setting save_visibilities to True"
+            )
+            warnings += 1
+        if not pyfhd_config["save_model_uv"]:
+            pyfhd_config["save_model_uv"] = True
+            logger.warning(
+                "If cal_stop is True we should save the model uv plane. "
+                "Setting save_model_uv to True"
+            )
+            warnings += 1
 
     # If both mapping function and healpix export are on save the visibilities (Warning)
     if (
@@ -1799,6 +2143,16 @@ def pyfhd_setup(pyfhd_config: dict, run_time: float, output_dir_exists: bool) ->
             "that created them. Setting save_visibilities to True"
         )
         warnings += 1
+
+    # default the antenna size if not set
+    antenna_size_defaults = {"mwa": 5, "hera": 14}
+    if pyfhd_config["antenna_size"] is None:
+        if pyfhd_config["instrument"] in antenna_size_defaults:
+            pyfhd_config["antenna_size"] = antenna_size_defaults[
+                pyfhd_config["instrument"]
+            ]
+        else:
+            pyfhd_config["antenna_size"] = 10
 
     # require psf_dim to be a multiple of 2
     if pyfhd_config["psf_dim"] is not None:
@@ -1900,7 +2254,7 @@ def pyfhd_setup(pyfhd_config: dict, run_time: float, output_dir_exists: bool) ->
     if (
         pyfhd_config["calibrate_visibilities"]
         and pyfhd_config["calibration_catalog_file_path"] is None
-        and pyfhd_config["model_file_path"] is None
+        and pyfhd_config["cal_model_file_path"] is None
         and pyfhd_config["transfer_calibration"] is None
     ):
         logger.error(
@@ -1997,15 +2351,15 @@ def pyfhd_setup(pyfhd_config: dict, run_time: float, output_dir_exists: bool) ->
 
     # if importing model visiblities from a uvfits file, check that file
     # exists
-    if pyfhd_config["model_file_path"] is not None:
-        errors += _check_file_exists(pyfhd_config, "model_file_path")
+    if pyfhd_config["cal_model_file_path"] is not None:
+        errors += _check_file_exists(pyfhd_config, "cal_model_file_path")
 
-        if pyfhd_config["model_file_path"] == "sav":
+        if pyfhd_config["cal_model_file_type"] == "sav":
             # We're expecting to find a params file, then a vis_model_XX and "
             # "vis_model_YY at the very least
             if not Path.exists(
                 Path(
-                    pyfhd_config["model_file_path"],
+                    pyfhd_config["cal_model_file_path"],
                     f"{pyfhd_config['obs_id']}_params.sav",
                 )
             ):

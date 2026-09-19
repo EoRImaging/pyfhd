@@ -3,7 +3,6 @@ import logging
 from typing import Literal
 
 import numpy as np
-from astropy.constants import c
 from astropy.coordinates import SkyCoord, EarthLocation
 from astropy import units
 from astropy.time import Time
@@ -312,12 +311,6 @@ def init_beam(obs: dict, pyfhd_config: dict) -> dict:
         else:
             freq_center[fi] = np.median(frequency_array[fi_i])
 
-    antenna_size = {"mwa": 5, "hera": 14}
-    if pyfhd_config["instrument"] in antenna_size:
-        ant_size_m = antenna_size[pyfhd_config["instrument"]]
-    else:
-        ant_size_m = 10
-
     if pyfhd_config["instrument"] == "mwa":
         # Get the antenna coordinates
         n_dipoles = 16
@@ -338,7 +331,7 @@ def init_beam(obs: dict, pyfhd_config: dict) -> dict:
     antenna = {
         "n_pol": n_ant_pol,
         "antenna_type": pyfhd_config["instrument"],
-        "size_meters": ant_size_m,
+        "size_meters": pyfhd_config["antenna_size"],
         "names": ant_names,
         "freq": freq_center,
         "nfreq_bin": nfreq_bin,
@@ -361,21 +354,9 @@ def init_beam(obs: dict, pyfhd_config: dict) -> dict:
         "pix_window": None,
     }
 
-    # psf_dim is *required* to be even
-    if pyfhd_config["psf_dim"] is not None:
-        psf_dim = pyfhd_config["psf_dim"]
-    else:
-        psf_dim = np.ceil(
-            antenna["size_meters"]
-            * 2
-            * np.max(obs["baseline_info"]["freq"])
-            / (c.value * obs["kpix"])
-        )
-        psf_dim = int(np.ceil(psf_dim / 2) * 2)
-
     # Create the initial psf dict
     psf = {
-        "dim": psf_dim,
+        "dim": pyfhd_config["psf_dim"],
         "resolution": pyfhd_config["psf_resolution"],
         # This is more of a placeholder, if we want pyfhd to support processing
         # more than one instrument at a time we'll need to edit this to be

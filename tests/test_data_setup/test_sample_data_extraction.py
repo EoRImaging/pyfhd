@@ -20,7 +20,7 @@ def obs_id(request):
 
 
 @pytest.mark.github_actions
-def test_obs_creation(obs_id):
+def test_obs_creation(tmp_path, obs_id):
     # The obs creation test is more of an integration test, since we will be
     # using the extract_header, create_params, and create_layout to create the
     # obs dictionary.
@@ -44,13 +44,13 @@ def test_obs_creation(obs_id):
         "beam_nfreq_avg": 16,
         "dft_threshold": False,
         "healpix_inds": 1,
-        "output_dir": ".",
+        "output_dir": tmp_path,
         "override_target_phasera": None,
         "override_target_phasedec": None,
         "flag_model": True,
         "save_model": False,
-        "model_file_type": "uvfits",
-        "model_file_path": str(
+        "cal_model_file_type": "uvfits",
+        "cal_model_file_path": str(
             importlib_resources.files("pyfhd").joinpath(
                 "resources/1088285600_example/1088285600_model.uvfits"
             )
@@ -60,18 +60,19 @@ def test_obs_creation(obs_id):
         "resources/test_data/data_setup"
     )
     obs_fhd = load(data_dir / f"{obs_id}_obs.h5")
+    uvfits_path = Path(pyfhd_config["input_path"], pyfhd_config["obs_id"] + ".uvfits")
     pyfhd_header, params_data, antenna_header, antenna_data = extract_header(
-        pyfhd_config
+        uvfits_path=uvfits_path
     )
     params = create_params(pyfhd_header, params_data)
     layout = create_layout(antenna_header, antenna_data, pyfhd_config)
     obs = create_obs(pyfhd_header, params, layout, pyfhd_config)
 
-    vis_arr, vis_weights = extract_visibilities(pyfhd_header, params_data, pyfhd_config)
+    vis_arr, vis_weights = extract_visibilities(
+        uvfits_path=uvfits_path, n_pol=obs["n_pol"]
+    )
 
     vis_model_arr = vis_model_transfer(pyfhd_config, obs, params)
-
-    Path(pyfhd_config["output_dir"], "layout.h5").unlink()
 
     # Check the basic obs info
     assert obs["n_pol"] == obs_fhd["n_pol"]
