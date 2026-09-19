@@ -131,7 +131,7 @@ def vis_cal_auto_init(
     vis_arr : NDArray[np.complex128]
         Uncalibrated data visiblities
     vis_model_arr : NDArray[np.complex128]
-        Simulated model visibilites
+        Simulated model visibilities
     vis_auto : NDArray[np.float64]
         Data auto-correlations
     vis_auto_model : NDArray[np.float64]
@@ -1467,7 +1467,7 @@ def vis_calibration_apply(
     cal : dict
         Calibration dictionary
     vis_model_arr : NDArray[np.complex128]
-        Simulated model visibilites
+        Simulated model visibilities
     vis_weights : NDArray[np.float64]
         Weights (flags) of the visibilities
 
@@ -1587,7 +1587,7 @@ def vis_baseline_hist(
     vis_cal : NDArray[np.complex128]
         Calibrated data visibilities
     vis_model_arr : NDArray[np.complex128]
-        Simulated model visibilites
+        Simulated model visibilities
 
     Returns
     -------

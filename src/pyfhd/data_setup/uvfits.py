@@ -8,14 +8,15 @@ from astropy.io.fits.header import Header
 from astropy.time import Time
 import numpy as np
 from numpy.typing import NDArray
+from pyuvdata.utils.io import fits as fits_utils
 
-from pyfhd.io.pyfhd_io import save
+from pyfhd.io.pyfhd_io import product_file, save
 
 logger = logging.getLogger(__name__)
 
 
 def extract_header(
-    pyfhd_config: dict, model_uvfits: bool = False
+    uvfits_path: Path | str,
 ) -> tuple[dict, np.recarray, FITS_rec, Header]:
     """
     Extract data from the uvfits header, the data extracted will contain
@@ -23,13 +24,8 @@ def extract_header(
 
     Parameters
     ----------
-    uvfits_path : str
-        Path to the uvfits to open (either the data or the model)
-    pyfhd_config : dict
-        This is the config created from the argparse
-    model_uvfits : bool
-        If True, load in the model uvfits. If False, load in a data uvfits file,
-        by default False
+    uvfits_path : Path | str
+        Path or string filename to read.
 
     Returns
     -------
@@ -37,7 +33,8 @@ def extract_header(
         The result from the extraction of the header of the UVFITS file,
         containing observation metadata mostly
     params_data: np.recarray
-        The data from the UVFITS file, containing the visibility metadata
+        The parameter data from the UVFITS file, containing the visibility
+        metadata but not the visibilities or weights
     antenna_data : FITS_rec
         The layout data which will be used in the create_layout function, mostly
         antenna metadata
@@ -51,52 +48,54 @@ def extract_header(
         If the UVFITS file doesn't contain all the data then a KeyError will be raised
     """
 
-    if model_uvfits:
-        uvfits_path = Path(pyfhd_config["model_file_path"])
-        logger.info(f"Reading in model visibilities from: {uvfits_path}")
-    else:
-        uvfits_path = Path(
-            pyfhd_config["input_path"], pyfhd_config["obs_id"] + ".uvfits"
-        )
-        logger.info(f"Reading in visibilities from: {uvfits_path}")
+    logger.info(f"Reading in visibilities from: {uvfits_path}")
 
-    # Retrieve all data from the observation
+    # Retrieve header and group parameters from the observation
+    params_to_save = [
+        "UU",
+        "VV",
+        "WW",
+        "DATE",
+        "DATE",
+        "BASELINE",
+        "ANTENNA1",
+        "ANTENNA2",
+    ]
     with fits.open(uvfits_path) as observation:
-        params_header = observation[0].header
-        params_data = observation[0].data
+        data_header = observation[0].header
+        param_list = observation[0].data.parnames
+        params_data = {}
+        for parname in params_to_save:
+            if parname in param_list:
+                # either antennas or baselines must be present, but not both
+                params_data[parname] = observation[0].data.par(parname)
 
         # Keep the layout header and data for the create_layout function
         antenna_data = observation[1].data
         antenna_header = observation[1].header
 
     pyfhd_header = {}
-    # Retrieve data from the params_header
+    # Retrieve info from the data_header
     pyfhd_header["pol_dim"] = 2
     pyfhd_header["freq_dim"] = 4
-    pyfhd_header["real_index"] = 0
-    pyfhd_header["imaginary_index"] = 1
-    pyfhd_header["weights_index"] = 2
     pyfhd_header["n_tile"] = antenna_header["naxis2"]
-    pyfhd_header["naxis"] = params_header["naxis"]
-    pyfhd_header["n_params"] = params_header["pcount"]
-    pyfhd_header["n_baselines"] = params_header["gcount"]
-    pyfhd_header["n_complex"] = params_header["naxis2"]
-    pyfhd_header["n_pol"] = params_header["naxis3"]
-    pyfhd_header["n_freq"] = params_header["naxis4"]
-    pyfhd_header["freq_ref"] = params_header["crval4"]
-    pyfhd_header["freq_res"] = params_header["cdelt4"]
-    try:
-        pyfhd_header["dateobs"] = params_header["date-obs"]
-    except KeyError:
-        pyfhd_header["dateobs"] = params_header["dateobs"]
-    freq_ref_i = params_header["crpix4"] - 1
+    pyfhd_header["naxis"] = data_header["naxis"]
+    pyfhd_header["n_params"] = data_header["pcount"]
+    pyfhd_header["n_baselines"] = data_header["gcount"]
+    pyfhd_header["n_complex"] = data_header["naxis2"]
+    pyfhd_header["n_pol"] = data_header["naxis3"]
+    pyfhd_header["n_freq"] = data_header["naxis4"]
+    pyfhd_header["freq_ref"] = data_header["crval4"]
+    pyfhd_header["freq_res"] = data_header["cdelt4"]
+
+    freq_ref_i = data_header["crpix4"] - 1
     pyfhd_header["frequency_array"] = (
         np.arange(pyfhd_header["n_freq"]) - freq_ref_i
     ) * pyfhd_header["freq_res"] + pyfhd_header["freq_ref"]
     # the following is guaranteed from the uvfits memo (AIPS memo 117), logic
     # stolen from pyuvdata. The uvfits memo is available in the pyuvdata repo
     # under docs/resources and on the NRAO website.
-    if params_header["naxis"] == 7:
+    if data_header["naxis"] == 7:
         ra_axis = 6
         dec_axis = 7
     else:
@@ -104,22 +103,22 @@ def extract_header(
         dec_axis = 6
     # obsra/obsdec/ra/dec are not standard uvfits keywords
     try:
-        pyfhd_header["obsra"] = params_header["obsra"]
+        pyfhd_header["obsra"] = data_header["obsra"]
     except KeyError:
         logger.warning("OBSRA not found in UVFITS file")
-        if "ra" in params_header:
-            pyfhd_header["obsra"] = params_header["ra"]
+        if "ra" in data_header:
+            pyfhd_header["obsra"] = data_header["ra"]
         else:
-            pyfhd_header["obsra"] = params_header[f"CRVAL{ra_axis}"]
+            pyfhd_header["obsra"] = data_header[f"CRVAL{ra_axis}"]
 
     try:
-        pyfhd_header["obsdec"] = params_header["obsdec"]
+        pyfhd_header["obsdec"] = data_header["obsdec"]
     except KeyError:
         logger.warning("OBSDEC not found in UVFITS file")
-        if "dec" in params_header:
-            pyfhd_header["obsdec"] = params_header["dec"]
+        if "dec" in data_header:
+            pyfhd_header["obsdec"] = data_header["dec"]
         else:
-            pyfhd_header["obsdec"] = params_header[f"CRVAL{dec_axis}"]
+            pyfhd_header["obsdec"] = data_header[f"CRVAL{dec_axis}"]
 
     # The telescope location information in uvfits is stored in the antenna table
     location = EarthLocation.from_geocentric(
@@ -132,54 +131,50 @@ def extract_header(
     # These are all non-standard uvfits keywords. This information is stored in
     # the antenna table. See pyuvdata for the right way to do this.
     try:
-        pyfhd_header["lon"] = params_header["lon"]
+        pyfhd_header["lon"] = data_header["lon"]
     except KeyError:
         pyfhd_header["lon"] = location.lon.deg
     try:
-        pyfhd_header["lat"] = params_header["lat"]
+        pyfhd_header["lat"] = data_header["lat"]
     except KeyError:
         pyfhd_header["lat"] = location.lat.deg
     try:
-        pyfhd_header["alt"] = params_header["alt"]
+        pyfhd_header["alt"] = data_header["alt"]
     except KeyError:
         pyfhd_header["alt"] = location.height.value
 
     logger.info(
-        f"Setting {pyfhd_config['instrument']} instrument location to: lon "
+        f"Setting instrument location to: lon "
         f"{pyfhd_header['lon']:.2f}, lat {pyfhd_header['lat']:.2f}, alt "
         f"{pyfhd_header['alt']:.2f}"
     )
 
     # Setup params list and names
-    param_list = []
-    ptype_list = ["PTYPE{}".format(i) for i in range(1, pyfhd_header["n_params"] + 1)]
-    for ptype in ptype_list:
-        param_list.append(params_header[ptype].strip())
     param_names = []
-    for key in list(params_header.keys()):
+    for key in list(data_header.keys()):
         if key.startswith("CTYPE"):
-            param_names.append(params_header[key].strip().lower())
+            param_names.append(data_header[key].strip().lower())
 
     # Validate params list
     params_valid = True
     pyfhd_header["uu_i"] = "UU" in param_list
     if not pyfhd_header["uu_i"]:
         logger.error(
-            "Group parameter UU not found within uvfits params_header PTYPE keywords"
+            "Group parameter UU not found within uvfits data_header PTYPE keywords"
         )
         params_valid = False
 
     pyfhd_header["vv_i"] = "VV" in param_list
     if not pyfhd_header["vv_i"]:
         logger.error(
-            "Group parameter VV not found within uvfits params_header PTYPE keywords"
+            "Group parameter VV not found within uvfits data_header PTYPE keywords"
         )
         params_valid = False
 
     pyfhd_header["ww_i"] = "WW" in param_list
     if not pyfhd_header["ww_i"]:
         logger.error(
-            "Group parameter WW not found within uvfits params_header PTYPE keywords"
+            "Group parameter WW not found within uvfits data_header PTYPE keywords"
         )
         params_valid = False
 
@@ -191,14 +186,14 @@ def extract_header(
         if not pyfhd_header["baseline_i"]:
             logger.error(
                 "Group parameter BASELINE (or ANTENNA1 and ANTENNA2) not found "
-                "within uvfits params_header PTYPE keywords"
+                "within uvfits data_header PTYPE keywords"
             )
             params_valid = False
 
     pyfhd_header["date_i"] = param_list.index("DATE")
     if not pyfhd_header["date_i"]:
         logger.error(
-            "Group parameter DATE not found within uvfits params_header PTYPE keywords"
+            "Group parameter DATE not found within uvfits data_header PTYPE keywords"
         )
         params_valid = False
 
@@ -209,31 +204,14 @@ def extract_header(
             "UU, VV, WW, BASELINE, DATE, check the log to see which one"
         )
 
-    # Get the Julian Date
-    if param_list.count("DATE") > 1:
-        # This needs testing as Astropy scales automatically, which affects the
-        # DATE data read in, this should be the same though
-        pyfhd_header["jd0"] = (
-            params_header["PZERO{}".format(pyfhd_header["date_i"] + 1)]
-            + params_data["DATE"][0]
-            - params_data.columns[pyfhd_header["date_i"]].bzero
-        )
-    else:
-        # This is the bzero value used to normalize the value in Astropy for date
-        pyfhd_header["jd0"] = params_header[
-            "PZERO{}".format(pyfhd_header["date_i"] + 1)
-        ]
+    # Get the starting Julian Date
+    # Astropy takes care of all scaling and combining of multiple date columns
+    pyfhd_header["jd0"] = params_data["DATE"][0]
 
     # Take the julian date and use that in dateobs in the fits format
-    if "jd0" in pyfhd_header.keys():
-        julian_time = Time(pyfhd_header["jd0"], format="jd")
-        julian_time.format = "fits"
-        pyfhd_header["dateobs"] = julian_time.value
-    # Probably won't reach here, if it does fill in jd0 from dateobs (fits to julian)
-    elif "dateobs" in pyfhd_header.keys():
-        fits_time = Time(pyfhd_header["dateobs"], format="fits")
-        fits_time.format = "jd"
-        pyfhd_header["jd0"] = fits_time.value
+    julian_time = Time(pyfhd_header["jd0"], format="jd")
+    julian_time.format = "fits"
+    pyfhd_header["dateobs"] = julian_time.value
 
     return pyfhd_header, params_data, antenna_header, antenna_data
 
@@ -307,19 +285,17 @@ def create_params(pyfhd_header: dict, params_data: np.recarray) -> dict:
 
 
 def extract_visibilities(
-    pyfhd_header: dict, params_data: np.recarray, pyfhd_config: dict
+    uvfits_path: Path | str, n_pol: int
 ) -> tuple[NDArray[np.complex128], NDArray[np.float64]]:
     """
     Extract the visibilities and their weights from the UVFITS data.
 
     Parameters
     ----------
-    pyfhd_header : dict
-        The resulting header fom the fits file stored in a dictonary
-    params_data : np.recarray
-        The data from the fits file as taken from astropy.io.fits.getdata
-    pyfhd_config : dict
-        This is the config created from the argprase
+    uvfits_path : Path or str
+        The uvfits file to read the visibilities from.
+    n_pol : int
+        The number of polarizations to read in.
 
     Returns
     -------
@@ -335,23 +311,35 @@ def extract_visibilities(
     extract_header : Extracts the header from the UVFITS file and returns the
         header and data
     """
+    real_index = 0
+    imag_index = 1
+    weights_index = 2
 
-    data_array = np.squeeze(params_data["DATA"])
-    # Set the number of polarizations
-    if pyfhd_config["n_pol"] == 0:
-        n_pol = pyfhd_header["n_pol"]
-    else:
-        n_pol = pyfhd_config["n_pol"]
+    # Retrieve data from the observation
+    with fits.open(uvfits_path) as observation:
+        data_hdu = observation[0]
+
+        # figure out what polarization indices we want. Do not assume a pol ordering
+        # in the uvfits.
+        pol_array = np.int32(fits_utils._gethduaxis(data_hdu, 3))
+        # this corresponds to
+        # obs["pol_names"] = ["XX", "YY", "XY", "YX", "I", "Q", "U", "V"]
+        pyfhd_pol_array = np.array([-5, -6, -7, -8, 1, 2, 3, 4])
+        desired_pols = pyfhd_pol_array[np.arange(n_pol)]
+
+        pol_inds = []
+        for pol in desired_pols:
+            pol_inds.append(np.nonzero(pol_array == pol)[0][0])
+        pol_inds = np.array(pol_inds)
+
+        data_array = np.squeeze(data_hdu.data.data[..., pol_inds, :])
 
     if data_array.ndim > 4:
         logger.error("No current support for pyfhd to support spectral dimensions yet")
         exit()
     else:
-        polarizations = np.arange(n_pol)
-        vis_arr = data_array[
-            :, :, polarizations, pyfhd_header["real_index"]
-        ] + data_array[:, :, polarizations, pyfhd_header["imaginary_index"]] * (1j)
-        vis_weights = data_array[:, :, polarizations, pyfhd_header["weights_index"]]
+        vis_arr = data_array[..., real_index] + data_array[..., imag_index] * (1j)
+        vis_weights = data_array[..., weights_index]
     # Redo the shape so its the format per polarization, per frequency per baseline.
     # Also ensure the types are double precision to ensure calculations from them result
     # in double precision
@@ -672,6 +660,8 @@ def create_layout(
     _check_layout_valid(layout, "polb")
     _check_layout_valid(layout, "polb_orientation", check_min_max=True)
 
-    save(Path(pyfhd_config["output_dir"], "layout.h5"), layout, "layout")
+    layout_path = product_file("layout", pyfhd_config)
+    layout_path.parent.mkdir(exist_ok=True)
+    save(layout_path, layout, "layout")
 
     return layout

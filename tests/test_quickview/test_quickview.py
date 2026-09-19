@@ -119,18 +119,13 @@ def test_quickview(before_file, data_dir):
     # else but the things required to make the FITS files. In this case we're
     # lazy loading beam file to save on memory.
     quickview(
-        h5_before["obs"],
-        psf,
-        None,
-        None,
-        None,
-        None,
-        h5_before["image_uv_arr"],
-        h5_before["weights_arr"],
-        None,
-        None,
-        h5_before["model_uv"],
-        h5_before["pyfhd_config"],
+        obs=h5_before["obs"],
+        psf=psf,
+        image_uv=h5_before["image_uv_arr"],
+        weights_uv=h5_before["weights_arr"],
+        model_uv=h5_before["model_uv"],
+        uniform_filter_uv=None,
+        pyfhd_config=h5_before["pyfhd_config"],
     )
     # Close the HDF5 file
     psf.close()
