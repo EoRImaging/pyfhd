@@ -1,14 +1,14 @@
-from math import pi
 import logging
+from math import pi
 
-from astropy.convolution import Box2DKernel
 import h5py
 import numpy as np
+from astropy.convolution import Box2DKernel
 from numpy.typing import NDArray
 from scipy.signal import convolve
 
-import pyfhd.gridding.filters as filters
-from pyfhd.pyfhd_tools.pyfhd_utils import rebin, histogram, array_match, meshgrid
+from ..pyfhd_tools.pyfhd_utils import array_match, histogram, meshgrid, rebin
+from . import filters
 
 logger = logging.getLogger(__name__)
 

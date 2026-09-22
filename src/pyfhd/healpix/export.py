@@ -4,19 +4,19 @@ import h5py
 import numpy as np
 from numpy.typing import NDArray
 
-from pyfhd.io.pyfhd_io import save
-from pyfhd.data_setup.obs import update_obs
-from pyfhd.healpix.healpix_utils import (
-    healpix_cnv_generate,
-    healpix_cnv_apply,
-    beam_image_cube,
-    vis_model_freq_split,
-)
-from pyfhd.flagging.flagging import vis_flag_tiles
-from pyfhd.pyfhd_tools.pyfhd_utils import (
-    vis_weights_update,
+from ..data_setup.obs import update_obs
+from ..flagging.flagging import vis_flag_tiles
+from ..io.pyfhd_io import save
+from ..pyfhd_tools.pyfhd_utils import (
     split_vis_weights,
     vis_noise_calc,
+    vis_weights_update,
+)
+from .healpix_utils import (
+    beam_image_cube,
+    healpix_cnv_apply,
+    healpix_cnv_generate,
+    vis_model_freq_split,
 )
 
 

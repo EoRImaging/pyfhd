@@ -1,9 +1,11 @@
 from os import environ as env
 from pathlib import Path
+
 import numpy.testing as npt
 import pytest
-from pyfhd.io.pyfhd_io import convert_sav_to_dict, load, recarray_to_dict, save
+
 from pyfhd.beam_setup.beam_utils import gaussian_decomp
+from pyfhd.io.pyfhd_io import convert_sav_to_dict, load, recarray_to_dict, save
 
 
 @pytest.fixture

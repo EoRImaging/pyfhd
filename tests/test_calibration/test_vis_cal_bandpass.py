@@ -1,13 +1,13 @@
-from pyfhd.io.pyfhd_io import recarray_to_dict
-import pytest
 from pathlib import Path
-from pyfhd.calibration.calibration_utils import vis_cal_bandpass
-from pyfhd.io.pyfhd_io import convert_sav_to_dict
-from pyfhd.pyfhd_tools.test_utils import sav_file_vis_arr_swap_axes
-import numpy as np
-from pyfhd.io.pyfhd_io import save, load
-import numpy.testing as npt
+
 import importlib_resources
+import numpy as np
+import numpy.testing as npt
+import pytest
+
+from pyfhd.calibration.calibration_utils import vis_cal_bandpass
+from pyfhd.io.pyfhd_io import convert_sav_to_dict, load, recarray_to_dict, save
+from pyfhd.pyfhd_tools.test_utils import sav_file_vis_arr_swap_axes
 
 
 @pytest.fixture

@@ -1,13 +1,13 @@
-from pyfhd.io.pyfhd_io import recarray_to_dict
-import pytest
-from pathlib import Path
 from os import environ as env
-from pyfhd.io.pyfhd_io import convert_sav_to_dict
-from pyfhd.pyfhd_tools.test_utils import sav_file_vis_arr_swap_axes
-from pyfhd.flagging.flagging import vis_flag_basic
-from pyfhd.io.pyfhd_io import save, load
-import numpy.testing as npt
+from pathlib import Path
+
 import numpy as np
+import numpy.testing as npt
+import pytest
+
+from pyfhd.flagging.flagging import vis_flag_basic
+from pyfhd.io.pyfhd_io import convert_sav_to_dict, load, recarray_to_dict, save
+from pyfhd.pyfhd_tools.test_utils import sav_file_vis_arr_swap_axes
 
 
 @pytest.fixture

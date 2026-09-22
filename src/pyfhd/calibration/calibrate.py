@@ -1,33 +1,33 @@
-from copy import deepcopy
-from pathlib import Path
 import logging
 import time
+from copy import deepcopy
+from pathlib import Path
 
 import numpy as np
 from numpy.typing import NDArray
 
-from .calibration_utils import (
-    vis_extract_autocorr,
-    vis_cal_auto_init,
-    vis_calibration_flag,
-    vis_cal_bandpass,
-    vis_cal_polyfit,
-    vis_cal_auto_fit,
-    vis_calibration_apply,
-    vis_baseline_hist,
-    cal_auto_ratio_divide,
-    cal_auto_ratio_remultiply,
-)
-from .vis_calibrate_subroutine import vis_calibrate_subroutine
-from ..pyfhd_tools.pyfhd_utils import (
-    resistant_mean,
-    reshape_and_average_in_time,
-    _print_time_diff,
-)
+from ..io.pyfhd_io import save
 from ..plotting.calibration import plot_cals
+from ..pyfhd_tools.pyfhd_utils import (
+    _print_time_diff,
+    reshape_and_average_in_time,
+    resistant_mean,
+)
 from ..source_modeling.source_utils import generate_source_cal_skymodel
 from ..source_modeling.vis_source_model import vis_source_model
-from ..io.pyfhd_io import save
+from .calibration_utils import (
+    cal_auto_ratio_divide,
+    cal_auto_ratio_remultiply,
+    vis_baseline_hist,
+    vis_cal_auto_fit,
+    vis_cal_auto_init,
+    vis_cal_bandpass,
+    vis_cal_polyfit,
+    vis_calibration_apply,
+    vis_calibration_flag,
+    vis_extract_autocorr,
+)
+from .vis_calibrate_subroutine import vis_calibrate_subroutine
 
 logger = logging.getLogger(__name__)
 

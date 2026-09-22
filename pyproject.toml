@@ -94,10 +94,16 @@ select = [
     "B", # flake8-bugbear
     "A", # flake8-builtins
     "C4", # flake8-comprehensions
+    "I", # isort
 ]
 ignore = [
     "B028", # no-explicit-stacklevel for warnings
 ]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+known-first-party = ["pyfhd"]
+split-on-trailing-comma = false
 
 [tool.bandit.assert_used]
 skips = ["*/*_test.py", "*/test_*.py", "*/conftest.py"]

@@ -1,21 +1,21 @@
-import importlib_resources
 import logging
 import sys
 from pathlib import Path
 
 import h5py
+import importlib_resources
 import numpy as np
 from astropy.coordinates import EarthLocation
-from numpy.typing import NDArray
 from healpy import query_disc
 from healpy.pixelfunc import ang2vec, pix2vec, vec2ang
+from numpy.typing import NDArray
 
-from pyfhd.beam_setup.beam_utils import beam_image
-from pyfhd.gridding.visibility_grid import visibility_grid
-from pyfhd.gridding.gridding_utils import dirty_image_generate
-from pyfhd.io.pyfhd_io import load, save
-from pyfhd.pyfhd_tools.pyfhd_utils import angle_difference, histogram, region_grow
-from pyfhd.pyfhd_tools.unit_conv import radec_to_altaz, radec_to_pixel
+from ..beam_setup.beam_utils import beam_image
+from ..gridding.gridding_utils import dirty_image_generate
+from ..gridding.visibility_grid import visibility_grid
+from ..io.pyfhd_io import load, save
+from ..pyfhd_tools.pyfhd_utils import angle_difference, histogram, region_grow
+from ..pyfhd_tools.unit_conv import radec_to_altaz, radec_to_pixel
 
 logger = logging.getLogger(__name__)
 

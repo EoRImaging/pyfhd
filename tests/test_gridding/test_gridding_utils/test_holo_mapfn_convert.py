@@ -1,7 +1,9 @@
-import pytest
-import numpy as np
 from os import environ as env
 from pathlib import Path
+
+import numpy as np
+import pytest
+
 from pyfhd.gridding.gridding_utils import holo_mapfn_convert
 from pyfhd.pyfhd_tools.test_utils import get_data_items
 

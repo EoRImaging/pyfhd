@@ -1,10 +1,12 @@
 from os import environ as env
 from pathlib import Path
+
 import numpy as np
 import numpy.testing as npt
 import pytest
-from pyfhd.io.pyfhd_io import convert_sav_to_dict, load, recarray_to_dict, save
+
 from pyfhd.healpix.healpix_utils import beam_image_cube
+from pyfhd.io.pyfhd_io import convert_sav_to_dict, load, recarray_to_dict, save
 
 
 @pytest.fixture

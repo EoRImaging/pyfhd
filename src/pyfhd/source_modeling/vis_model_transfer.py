@@ -1,19 +1,23 @@
-import importlib_resources
 import logging
 import os
-from pathlib import Path
 import shutil
+from pathlib import Path
 
 import h5py
+import importlib_resources
 import numpy as np
 from numpy.typing import NDArray
 from scipy.io import readsav
 
-from pyfhd.data_setup.obs import create_obs
-from pyfhd.data_setup.uvfits import create_params, create_layout
-from pyfhd.data_setup.uvfits import extract_visibilities, extract_header
-from pyfhd.io.pyfhd_io import recarray_to_dict, save, load
-from pyfhd.pyfhd_tools.pyfhd_utils import run_command
+from ..data_setup.obs import create_obs
+from ..data_setup.uvfits import (
+    create_layout,
+    create_params,
+    extract_header,
+    extract_visibilities,
+)
+from ..io.pyfhd_io import load, recarray_to_dict, save
+from ..pyfhd_tools.pyfhd_utils import run_command
 
 logger = logging.getLogger(__name__)
 
