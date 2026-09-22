@@ -117,7 +117,7 @@ def create_obs(
         if (tile_B_test > 1) and (baseline_min % 2 == 1):
             antenna_mod_index /= 2 ** np.floor(np.log(np.min(tile_B_test)) / np.log(2))
         baseline_info["tile_a"] = np.floor(params["baseline_arr"] / antenna_mod_index)
-        baseline_info["tile_b"] = np.fix(params["baseline_arr"] / antenna_mod_index)
+        baseline_info["tile_b"] = np.trunc(params["baseline_arr"] % antenna_mod_index)
         max_tile = max(np.max(baseline_info["tile_a"]), np.max(baseline_info["tile_b"]))
         if max_tile != obs["n_tile"]:
             logger.warning(
