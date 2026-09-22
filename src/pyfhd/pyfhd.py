@@ -548,13 +548,13 @@ def run_pyfhd(pyfhd_config: dict, pyfhd_start: float):
                 else:
                     vis_model_arr_use = vis_model_arr[pol_i]
                 gridding_dict = visibility_grid(
-                    vis_arr[pol_i],
-                    vis_weights[pol_i],
-                    obs,
-                    psf,
-                    params,
-                    pol_i,
-                    pyfhd_config,
+                    visibility=vis_arr[pol_i],
+                    vis_weights=vis_weights[pol_i],
+                    obs=obs,
+                    psf=psf,
+                    params=params,
+                    polarization=pol_i,
+                    pyfhd_config=pyfhd_config,
                     calculate_uniform_filter=calculate_uniform_filter,
                     no_conjugate=no_conjugate,
                     model=vis_model_arr_use,

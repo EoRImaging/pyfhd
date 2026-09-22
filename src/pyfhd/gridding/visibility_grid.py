@@ -16,6 +16,7 @@ logger = logging.getLogger(__name__)
 
 
 def visibility_grid(
+    *,
     visibility: NDArray[np.complex128],
     vis_weights: NDArray[np.float64],
     obs: dict,
