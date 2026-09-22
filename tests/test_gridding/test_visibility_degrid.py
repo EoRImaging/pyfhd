@@ -173,3 +173,32 @@ def test_vis_degrid_zenith_2013(
     assert abs_diff.max() < 0.5
     assert rel_diff[mean_nonzero].mean() < 0.1
     assert rel_diff.max() < 2
+
+
+@pytest.mark.github_actions
+@pytest.mark.parametrize("pol_i", [0, 1])
+def test_vis_degrid_ones(mwa_aee_beam_zenith_2013, zenith_params_2013, pol_i):
+    """Test that degridding a uv plane of all ones gives visibilities close to 1."""
+    _, psf, obs, pyfhd_config = mwa_aee_beam_zenith_2013
+    params = zenith_params_2013
+
+    pyfhd_config_use = copy.deepcopy(pyfhd_config)
+    pyfhd_config_use["conserve_memory"] = True
+    pyfhd_config_use["memory_threshold"] = 1e10
+    vis_ones = visibility_degrid(
+        image_uv=np.ones((obs["dimension"], obs["elements"]), dtype=complex),
+        vis_weights=None,
+        obs=obs,
+        psf=psf,
+        params=params,
+        pyfhd_config=pyfhd_config_use,
+        polarization=pol_i,
+        fill_model_visibilities=True,
+    )
+
+    # There are some long baseline visibilities which end up as zeros
+    wh_nonzero = np.nonzero(vis_ones)
+
+    # I believe the deviation from 1 is due to discretization and grid offsets...
+    npt.assert_allclose(vis_ones[wh_nonzero], 1.0, atol=7e-3, rtol=0)
+    npt.assert_allclose(np.abs(vis_ones[wh_nonzero]), 1.0, atol=7e-3, rtol=0)

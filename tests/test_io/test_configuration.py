@@ -5,12 +5,103 @@ import time
 import configargparse
 import pytest
 
-from pyfhd.pyfhd_tools.pyfhd_setup import pyfhd_parser, pyfhd_setup
+from pyfhd.pyfhd_tools.pyfhd_setup import git_info, pyfhd_parser, pyfhd_setup
 from pyfhd.pyfhd import setup_directory
 
 
 @pytest.mark.github_actions
-def test_configuration():
+@pytest.mark.parametrize(
+    ("git_string", "output_dict"),
+    [
+        (
+            "1.0.3.dev321+gc96fd9451.hmf",
+            {
+                "tag": "1.0.3",
+                "commit": "c96fd9451",
+                "commit_str": "c96fd9451 (branch: hmf)",
+                "branch": "hmf",
+                "dirty_flag": False,
+            },
+        ),
+        (
+            "1.0.3.dev321+gc96fd9451.hmf.dirty",
+            {
+                "tag": "1.0.3",
+                "commit": "c96fd9451",
+                "commit_str": "c96fd9451 (branch: hmf) DIRTY (uncommitted changes)",
+                "branch": "hmf",
+                "dirty_flag": True,
+            },
+        ),
+        (
+            "1.0.3.dev321+gc96fd9451",
+            {
+                "tag": "1.0.3",
+                "commit": "c96fd9451",
+                "commit_str": "c96fd9451",
+                "branch": None,
+                "dirty_flag": False,
+            },
+        ),
+        (
+            "1.0.3.dev321+gc96fd9451.dirty",
+            {
+                "tag": "1.0.3",
+                "commit": "c96fd9451",
+                "commit_str": "c96fd9451 DIRTY (uncommitted changes)",
+                "branch": None,
+                "dirty_flag": True,
+            },
+        ),
+        (
+            "1.0.2",
+            {
+                "tag": "1.0.2",
+                "commit": None,
+                "commit_str": "1.0.2",
+                "branch": None,
+                "dirty_flag": False,
+            },
+        ),
+    ],
+)
+def test_git_info(git_string, output_dict):
+    version_info = git_info(git_string)
+
+    assert version_info["version"] == git_string
+    assert version_info["tag"] == output_dict["tag"]
+    assert version_info["commit"] == output_dict["commit"]
+    assert version_info["commit_str"] == output_dict["commit_str"]
+    assert version_info["branch"] == output_dict["branch"]
+    assert version_info["dirty_flag"] == output_dict["dirty_flag"]
+
+
+@pytest.mark.github_actions
+@pytest.mark.parametrize(
+    ("options", "config", "warn_msg"),
+    [
+        (["--silent"], {"silent": True}, None),
+        (["--no-log-file"], {"log_file": False}, None),
+        (
+            ["--recalculate-all"],
+            {"recalculate_beam": True, "recalculate_grid": True},
+            None,
+        ),
+        (
+            ["--snapshot-healpix-export", "--no-save-visibilities"],
+            {"save_visibilities": True},
+            "If we're exporting healpix we should also save the visibilities "
+            "that created them. Setting save_visibilities to True",
+        ),
+        (
+            ["--grid-uniform", "--recalculate-mapfn"],
+            {"grid_uniform": True, "recalculate_mapfn": False},
+            "The grid_uniform and recalculate_mapfn options are incompatible. "
+            "Setting recalculate_mapfn to False.",
+        ),
+    ],
+)
+def test_configuration(options, config, warn_msg):
     """
     Test the configuration setup for pyfhd.
     This function checks if the configuration parser is correctly initialized.
@@ -26,7 +117,7 @@ def test_configuration():
         "--silent",
         "--no-log-file",
         "1088285600",
-    ]
+    ] + options
     # Initialize the configuration parser
     configargparser = pyfhd_parser()
     options = configargparser.parse_args()
@@ -40,10 +131,10 @@ def test_configuration():
     # Check if the parser is an instance of ArgumentParser
     assert isinstance(configargparser, configargparse.ArgumentParser)
     assert isinstance(pyfhd_config, dict)
-    assert "obs_id" in pyfhd_config
-    assert pyfhd_config["obs_id"] == "1088285600"
-    assert "silent" in pyfhd_config
-    assert pyfhd_config["silent"] is True
-    assert "log_file" in pyfhd_config
-    assert pyfhd_config["log_file"] is False
-    assert "version" in pyfhd_config
+
+    config.update({"obs_id": "1088285600", "silent": True, "log_file": False})
+
+    # TODO: add warning checking once logging fix is in.
+
+    for key, value in config.items():
+        assert pyfhd_config[key] == value
