@@ -240,7 +240,7 @@ def visibility_degrid(
             _, baseline_inds = np.unravel_index(bt_index_full, (n_samples, n_baselines))
             fbin = freq_bin_i[freq_i]
             vis_arr_inds = np.ravel_multi_index(
-                (fbin, bt_index_full), (n_freq, vis_dimension)
+                (freq_i, bt_index_full), (n_freq, vis_dimension)
             )
             box_matrix = np.zeros((vis_n, psf_dim3), dtype=np.complex128)
             box_arr = image_uv[
