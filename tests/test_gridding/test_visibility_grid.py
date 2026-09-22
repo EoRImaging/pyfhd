@@ -714,14 +714,14 @@ def test_visibility_grid_in_vis_model_freq_split(
 
 @pytest.mark.github_actions
 @pytest.mark.parametrize(
-    ("pol_i", "ones", "interp", "flagging"),
+    ("pol_i", "ones", "interp", "flagging", "singlebeam"),
     [
-        (0, True, False, False),
-        (1, True, True, False),
-        (0, False, True, False),
-        (1, False, False, False),
-        (0, False, True, True),
-        (1, True, False, True),
+        (0, True, False, False, False),
+        (1, True, True, False, False),
+        (0, False, True, False, True),
+        (1, False, False, False, False),
+        (0, False, True, True, False),
+        (1, True, False, True, True),
     ],
 )
 def test_mapfn_zenith_2013(
@@ -732,6 +732,7 @@ def test_mapfn_zenith_2013(
     ones,
     interp,
     flagging,
+    singlebeam,
 ):
     """
     Test that the mapping function is equivalent to degridding then gridding.
@@ -741,6 +742,7 @@ def test_mapfn_zenith_2013(
         ones: use a uv plane of all ones (i.e. weights) vs a "realistic" uv plane
         interp: option to interpolate the kernel
         flagging: apply a complex flagging structure
+        singlebeam: test having fewer beams than frequencies
     """
     _, psf, obs, pyfhd_config = mwa_aee_beam_zenith_2013
     params = zenith_params_2013
@@ -758,6 +760,9 @@ def test_mapfn_zenith_2013(
     pyfhd_config_use["grid_spectral"] = False
     pyfhd_config_use["grid_weights"] = True
     pyfhd_config_use["grid_variance"] = False
+
+    if singlebeam:
+        obs["baseline_info"]["fbin_i"] = np.array(np.zeros(obs["n_freq"]), dtype=int)
 
     if flagging:
         vis_weights = np.zeros(
