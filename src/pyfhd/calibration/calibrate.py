@@ -170,11 +170,13 @@ def calibrate(
         )
 
     # Do the calibration with vis_calibrate_subroutine
-    logger.info("Gain initialized beginning vis_calibrate subroutine")
+    logger.info("Gain initialized, beginning per-frequency raw calibration")
+    cal_start = time.time()
     cal = vis_calibrate_subroutine(
         vis_arr, vis_model_arr, vis_weights, obs, cal, params, pyfhd_config, logger
     )
-    logger.info("Function vis_calibrate_subroutine has completed.")
+    cal_end = time.time()
+    _print_time_diff(cal_start, cal_end, "per-frequency raw calibration", logger)
     if pyfhd_config["flag_calibration"]:
         logger.info(
             "Flagging Calibration has been activated and calibration will now be "
