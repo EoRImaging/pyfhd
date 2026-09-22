@@ -76,7 +76,7 @@ def visibility_grid(
         Do not perform the conjugate mirror to fill half of the {u,v} plane, by
         default False
     model : NDArray[np.complex128] | None, optional
-        Simulated model visibilites, by default None
+        Simulated model visibilities, by default None
     fi_use : NDArray[np.integer] | None, optional
         Frequency index array for gridding, i.e. gridding all frequencies for
         continuum images, by default None

@@ -70,426 +70,16 @@ This will run the entire pyfhd pipeline in this order:
 11. Finishing the run and cleaning up
 
 If the command runs successfully you should get a log to your terminal (stdout)
-that looks something like this:
-
-.. raw:: html
-
-  <details>
-  <summary>Sample Data pyfhd Collapsible Log</summary>
-  <p>
-
-.. code-block:: text
-
-  ooooooooo.               oooooooooooo ooooo   ooooo oooooooooo.
-  8888   `Y88.             8888       8 8888    888   888     Y8b
-  888   .d88' oooo    ooo  888          888     888   888      888
-  888ooo88P'   `88.  .8'   888oooo8     888ooooo888   888      888
-  888           `88..8'    888          888     888   888      888
-  888            `888'     888          888     888   888     d88'
-  o888o            .8'     o888o        o888o   o888o o888bood8P'
-              .o..P'
-              `Y8P'
-
-  Python Fast Holographic Deconvolution
-
-  Translated from IDL to Python as a collaboration between Astronomy Data and
-  Computing Services (ADACS) and the Epoch of Reionisation (EoR) Team.
-
-  Repository: https://github.com/EoRImaging/pyfhd
-
-  Documentation: https://pyfhd.readthedocs.io/en/latest/
-
-  Git Commit Hash: 467cb91bcba3f06cded5405f3ffcc9638bd13c26
-
-
-  pyfhd Run Started At: Fri May 30 09:52:35 2025
-
-  Observation ID: 1088285600
-
-  Confifuration File: ./input/1088285600 example/1088285600 example.yaml
-
-  Validating your input...
-
-  2025-05-30 09:52:35 - INFO:
-    Logging and configuration file created and copied to here: /home/skywatcher/projects/pyfhd/output/pyfhd_1088285600_example
-  2025-05-30 09:52:35 - INFO:
-    Input validated, starting pyfhd run now
-  2025-05-30 09:52:35 - INFO:
-    Reading in visibilities from: input/1088285600_example/1088285600.uvfits
-  2025-05-30 09:52:35 - WARNING:
-    OBSRA not found in UVFITS file
-  2025-05-30 09:52:35 - WARNING:
-    OBSDEC not found in UVFITS file
-  2025-05-30 09:52:35 - INFO:
-    Setting mwa instrument location to: lon 116.67, lat -26.70, alt 377.83
-  2025-05-30 09:52:35 - INFO:
-    pyfhd Header Created completed in: 44.74807 milliseconds
-  2025-05-30 09:52:35 - INFO:
-    Params Created completed in: 0.27895 milliseconds
-  2025-05-30 09:52:35 - INFO:
-    Visibilities Extracted completed in: 9.38296 milliseconds
-  2025-05-30 09:52:35 - INFO:
-    Writing the visibilities array to output/pyfhd_1088285600_example/visibilities/1088285600_raw_vis_arr.h5
-  2025-05-30 09:52:35 - INFO:
-    Writing the weights array to output/pyfhd_1088285600_example/visibilities/1088285600_raw_vis_weights.h5
-  2025-05-30 09:52:35 - WARNING:
-    Number of Leap Seconds is missing and the time system isn't IAT so we can't know the leap seconds, setting as -1
-  2025-05-30 09:52:35 - WARNING:
-    PolA params is missing from the UVFITS, set to array of zeros of length n_pol_cal_params or 0
-  2025-05-30 09:52:35 - WARNING:
-    PolB params is missing from the UVFITS, set to array of zeros of length n_pol_cal_params or 0
-  2025-05-30 09:52:35 - INFO:
-    Diameters not in UVFITS file continuing.
-  2025-05-30 09:52:35 - INFO:
-    Beam Full Width Half maximum not present in UVFITS continuing.
-  2025-05-30 09:52:35 - INFO:
-    Writing the layout dict to output/pyfhd_1088285600_example/layout.h5, each key will be a dataset, if the key contains a dict then it will be a group.
-  2025-05-30 09:52:35 - INFO:
-    Layout Dictionary Extracted completed in: 7.91407 milliseconds
-  2025-05-30 09:52:38 - INFO:
-    Obs Dictionary Created completed in: 2.92785 seconds
-  2025-05-30 09:52:38 - INFO:
-    Writing the obs_checkpoint dict to output/pyfhd_1088285600_example/checkpoints/1088285600_example_obs_checkpoint.h5, each key will be a dataset, if the key contains a dict then it will be a group.
-  2025-05-30 09:52:39 - INFO:
-    Checkpoint Saved: Uncalibrated visibility parameters, array and weights and the observation metadata dictionary saved into output/pyfhd_1088285600_example/obs_checkpoint.h5
-  2025-05-30 09:52:39 - INFO:
-    Reading in the HDF5 file input/1088285600_example/gauss_beam_pointing0_167635008Hz.h5
-  2025-05-30 09:52:39 - INFO:
-    Loading input/1088285600_example/gauss_beam_pointing0_167635008Hz.h5 into a dictionary
-  2025-05-30 09:52:39 - INFO:
-    Beam and PSF dictionary imported. completed in: 301.2073 milliseconds
-  2025-05-30 09:52:39 - INFO:
-    Basic Flagging Completed completed in: 2.48504 milliseconds
-  2025-05-30 09:52:40 - INFO:
-    Visibilities Weights Updated After Basic Flagging completed in: 1.17173 seconds
-  2025-05-30 09:52:40 - INFO:
-    Reading in model visibilities from: /home/skywatcher/projects/pyfhd/input/1088285600_example/1088285600_model.uvfits
-  2025-05-30 09:52:40 - INFO:
-    Setting mwa instrument location to: lon 116.67, lat -26.70, alt 377.83
-  2025-05-30 09:52:40 - WARNING:
-    Model time stamps are offset from data by an average of 1.0. Accounting for this to match model time steps to data
-  2025-05-30 09:52:40 - INFO:
-    Found flagged tiles [4, 124] in the data, flagging from the model
-  2025-05-30 09:52:40 - INFO:
-    Model Imported and Flagged From UVFITS completed in: 20.36548 milliseconds
-  2025-05-30 09:52:40 - INFO:
-    Beginning Calibration
-  2025-05-30 09:52:40 - INFO:
-    Gain initialized beginning vis_calibrate subroutine
-  2025-05-30 09:52:40 - INFO:
-    Beginning Calibration for polarization 0 (XX)
-  2025-05-30 09:52:40 - INFO:
-    Convergence was reached for polarization: XX (0) and frequency: 1, with a convergence of: 9.98593970029745e-08 and the threshold was: 1e-07
-  2025-05-30 09:52:40 - INFO:
-    Convergence was reached for polarization: XX (0) and frequency: 2, with a convergence of: 9.999992919655905e-08 and the threshold was: 1e-07
-  2025-05-30 09:52:40 - INFO:
-    Convergence was reached for polarization: XX (0) and frequency: 3, with a convergence of: 8.344520524730864e-08 and the threshold was: 1e-07
-  2025-05-30 09:52:41 - INFO:
-    Convergence was reached for polarization: XX (0) and frequency: 4, with a convergence of: 9.884876342819337e-08 and the threshold was: 1e-07
-  2025-05-30 09:52:41 - INFO:
-    Convergence was reached for polarization: XX (0) and frequency: 5, with a convergence of: 8.003533551747955e-08 and the threshold was: 1e-07
-  2025-05-30 09:52:41 - INFO:
-    Convergence was reached for polarization: XX (0) and frequency: 6, with a convergence of: 8.544033568047118e-08 and the threshold was: 1e-07
-  2025-05-30 09:52:41 - INFO:
-    Convergence was reached for polarization: XX (0) and frequency: 7, with a convergence of: 8.130504801062689e-08 and the threshold was: 1e-07
-  2025-05-30 09:52:41 - INFO:
-    Convergence was reached for polarization: XX (0) and frequency: 8, with a convergence of: 9.104656101282636e-08 and the threshold was: 1e-07
-  2025-05-30 09:52:41 - INFO:
-    Convergence was reached for polarization: XX (0) and frequency: 9, with a convergence of: 8.354614840674757e-08 and the threshold was: 1e-07
-  2025-05-30 09:52:41 - INFO:
-    Convergence was reached for polarization: XX (0) and frequency: 10, with a convergence of: 9.918106515438548e-08 and the threshold was: 1e-07
-  2025-05-30 09:52:41 - INFO:
-    Convergence was reached for polarization: XX (0) and frequency: 11, with a convergence of: 9.869434977124244e-08 and the threshold was: 1e-07
-  2025-05-30 09:52:42 - INFO:
-    Convergence was reached for polarization: XX (0) and frequency: 12, with a convergence of: 8.895645139753463e-08 and the threshold was: 1e-07
-  2025-05-30 09:52:42 - INFO:
-    Convergence was reached for polarization: XX (0) and frequency: 13, with a convergence of: 9.459813804237299e-08 and the threshold was: 1e-07
-  2025-05-30 09:52:42 - INFO:
-    Beginning Calibration for polarization 1 (YY)
-  2025-05-30 09:52:42 - INFO:
-    Convergence was reached for polarization: YY (1) and frequency: 1, with a convergence of: 8.583005611987811e-08 and the threshold was: 1e-07
-  2025-05-30 09:52:42 - INFO:
-    Convergence was reached for polarization: YY (1) and frequency: 2, with a convergence of: 8.466878902748548e-08 and the threshold was: 1e-07
-  2025-05-30 09:52:42 - INFO:
-    Convergence was reached for polarization: YY (1) and frequency: 3, with a convergence of: 9.921026305432663e-08 and the threshold was: 1e-07
-  2025-05-30 09:52:42 - INFO:
-    Convergence was reached for polarization: YY (1) and frequency: 4, with a convergence of: 8.426838709848088e-08 and the threshold was: 1e-07
-  2025-05-30 09:52:42 - INFO:
-    Convergence was reached for polarization: YY (1) and frequency: 5, with a convergence of: 8.969077306790065e-08 and the threshold was: 1e-07
-  2025-05-30 09:52:42 - INFO:
-    Convergence was reached for polarization: YY (1) and frequency: 6, with a convergence of: 9.584932160621179e-08 and the threshold was: 1e-07
-  2025-05-30 09:52:43 - INFO:
-    Convergence was reached for polarization: YY (1) and frequency: 7, with a convergence of: 9.976283744227554e-08 and the threshold was: 1e-07
-  2025-05-30 09:52:43 - INFO:
-    Convergence was reached for polarization: YY (1) and frequency: 8, with a convergence of: 9.165962316245378e-08 and the threshold was: 1e-07
-  2025-05-30 09:52:43 - INFO:
-    Convergence was reached for polarization: YY (1) and frequency: 9, with a convergence of: 8.711660483214532e-08 and the threshold was: 1e-07
-  2025-05-30 09:52:43 - INFO:
-    Convergence was reached for polarization: YY (1) and frequency: 10, with a convergence of: 8.482012447714498e-08 and the threshold was: 1e-07
-  2025-05-30 09:52:43 - INFO:
-    Convergence was reached for polarization: YY (1) and frequency: 11, with a convergence of: 8.962296769672843e-08 and the threshold was: 1e-07
-  2025-05-30 09:52:43 - INFO:
-    Convergence was reached for polarization: YY (1) and frequency: 12, with a convergence of: 8.715709933918354e-08 and the threshold was: 1e-07
-  2025-05-30 09:52:43 - INFO:
-    Convergence was reached for polarization: YY (1) and frequency: 13, with a convergence of: 8.780971269246983e-08 and the threshold was: 1e-07
-  2025-05-30 09:52:43 - INFO:
-    Function vis_calibrate_subroutine has completed.
-  2025-05-30 09:52:43 - INFO:
-    Flagging Calibration has been activated and calibration will now be flagged
-  2025-05-30 09:52:43 - INFO:
-    You have chosen to perform a bandpass calculation and calibration
-  2025-05-30 09:52:43 - WARNING:
-    /home/skywatcher/projects/pyfhd/src/pyfhd/pyfhd_tools/pyfhd_utils.py:709: RuntimeWarning: overflow encountered in divide
-    result[i_use] = 1 / weights[i_use]
-
-  2025-05-30 09:52:43 - INFO:
-    You have selected to perform polynomial fits over the frequency band
-  2025-05-30 09:52:44 - INFO:
-    Applying the calibration
-  2025-05-30 09:52:44 - INFO:
-    Saving the ratio and sigma average variance
-  2025-05-30 09:52:44 - INFO:
-    Calculating statistics from calibration
-  2025-05-30 09:52:44 - INFO:
-    Plotting the calibration solutions into output/pyfhd_1088285600_example/plots/calibration
-  2025-05-30 09:52:55 - INFO:
-    Visibilities calibrated and cal dictionary with gains created completed in: 15.02258 seconds
-  2025-05-30 09:52:55 - INFO:
-    Visibilities Weights Updated After Calibration completed in: 50.36974 milliseconds
-  2025-05-30 09:52:55 - INFO:
-    Noise Calculated and added to obs completed in: 7.34496 milliseconds
-  2025-05-30 09:52:55 - INFO:
-    Writing the calibrate_checkpoint dict to output/pyfhd_1088285600_example/checkpoints/1088285600_example_calibrate_checkpoint.h5, each key will be a dataset, if the key contains a dict then it will be a group.
-  2025-05-30 09:52:56 - INFO:
-    Checkpoint Saved: Calibrated and Flagged visibility parameters, array and weights, the flagged observation metadata dictionary and the calibration dictionary saved into output/pyfhd_1088285600_example/calibrate_checkpoint.h5
-  2025-05-30 09:52:56 - INFO:
-    Gridding has begun for polarization XX
-  2025-05-30 09:52:57 - INFO:
-    Gridding  visibilities for baseline 2782 of 27825 for polarization XX
-  2025-05-30 09:52:57 - INFO:
-    Gridding  visibilities for baseline 5564 of 27825 for polarization XX
-  2025-05-30 09:52:58 - INFO:
-    Gridding  visibilities for baseline 8346 of 27825 for polarization XX
-  2025-05-30 09:52:59 - INFO:
-    Gridding  visibilities for baseline 11128 of 27825 for polarization XX
-  2025-05-30 09:52:59 - INFO:
-    Gridding  visibilities for baseline 13910 of 27825 for polarization XX
-  2025-05-30 09:53:00 - INFO:
-    Gridding  visibilities for baseline 16692 of 27825 for polarization XX
-  2025-05-30 09:53:01 - INFO:
-    Gridding  visibilities for baseline 19474 of 27825 for polarization XX
-  2025-05-30 09:53:02 - INFO:
-    Gridding  visibilities for baseline 22256 of 27825 for polarization XX
-  2025-05-30 09:53:03 - INFO:
-    Gridding  visibilities for baseline 25038 of 27825 for polarization XX
-  2025-05-30 09:53:04 - INFO:
-    Gridding  visibilities for baseline 27820 of 27825 for polarization XX
-  2025-05-30 09:53:04 - INFO:
-    Gridding has finished for polarization XX
-  2025-05-30 09:53:04 - INFO:
-    Gridding has begun for polarization YY
-  2025-05-30 09:53:05 - INFO:
-    Gridding  visibilities for baseline 2782 of 27825 for polarization YY
-  2025-05-30 09:53:06 - INFO:
-    Gridding  visibilities for baseline 5564 of 27825 for polarization YY
-  2025-05-30 09:53:06 - INFO:
-    Gridding  visibilities for baseline 8346 of 27825 for polarization YY
-  2025-05-30 09:53:07 - INFO:
-    Gridding  visibilities for baseline 11128 of 27825 for polarization YY
-  2025-05-30 09:53:08 - INFO:
-    Gridding  visibilities for baseline 13910 of 27825 for polarization YY
-  2025-05-30 09:53:08 - INFO:
-    Gridding  visibilities for baseline 16692 of 27825 for polarization YY
-  2025-05-30 09:53:09 - INFO:
-    Gridding  visibilities for baseline 19474 of 27825 for polarization YY
-  2025-05-30 09:53:10 - INFO:
-    Gridding  visibilities for baseline 22256 of 27825 for polarization YY
-  2025-05-30 09:53:11 - INFO:
-    Gridding  visibilities for baseline 25038 of 27825 for polarization YY
-  2025-05-30 09:53:13 - INFO:
-    Gridding  visibilities for baseline 27820 of 27825 for polarization YY
-  2025-05-30 09:53:13 - INFO:
-    Gridding has finished for polarization YY
-  2025-05-30 09:53:13 - INFO:
-    Plotting the continuum gridding outputs into output/pyfhd_1088285600_example/plots/gridding
-  2025-05-30 09:53:19 - INFO:
-    Writing the gridding_checkpoint dict to output/pyfhd_1088285600_example/checkpoints/1088285600_example_gridding_checkpoint.h5, each key will be a dataset, if the key contains a dict then it will be a group.
-  2025-05-30 09:53:25 - INFO:
-    Checkpoint Saved: The Gridded UV Planes saved into output/pyfhd_1088285600_example/gridding_checkpoint.h5
-  2025-05-30 09:53:25 - INFO:
-    Visibilities gridded completed in: 29.42883 seconds
-  2025-05-30 09:53:25 - INFO:
-    Saving the obs dictionary to output/pyfhd_1088285600_example/metadata/1088285600_obs.h5
-  2025-05-30 09:53:25 - INFO:
-    Writing the obs dict to output/pyfhd_1088285600_example/metadata/1088285600_obs.h5, each key will be a dataset, if the key contains a dict then it will be a group.
-  2025-05-30 09:53:25 - INFO:
-    Saving params dictionary to output/pyfhd_1088285600_example/metadata/1088285600_params.h5
-  2025-05-30 09:53:25 - INFO:
-    Writing the params dict to output/pyfhd_1088285600_example/metadata/1088285600_params.h5, each key will be a dataset, if the key contains a dict then it will be a group.
-  2025-05-30 09:53:25 - INFO:
-    Saving the gridded uv planes to output/pyfhd_1088285600_example/gridding
-  2025-05-30 09:53:25 - INFO:
-    Writing the image_uv array to output/pyfhd_1088285600_example/gridding/1088285600_image_uv.h5
-  2025-05-30 09:53:27 - INFO:
-    Writing the weights_uv array to output/pyfhd_1088285600_example/gridding/1088285600_weights_uv.h5
-  2025-05-30 09:53:28 - INFO:
-    Writing the variance_uv array to output/pyfhd_1088285600_example/gridding/1088285600_variance_uv.h5
-  2025-05-30 09:53:29 - INFO:
-    Writing the uniform_filter_uv array to output/pyfhd_1088285600_example/gridding/1088285600_uniform_filter_uv.h5
-  2025-05-30 09:53:29 - INFO:
-    Writing the model_uv array to output/pyfhd_1088285600_example/gridding/1088285600_model_uv.h5
-  2025-05-30 09:53:31 - INFO:
-    Saving the calibrated visibilities to output/pyfhd_1088285600_example/visibilities/1088285600_calibrated_vis_arr.h5
-  2025-05-30 09:53:31 - INFO:
-    Writing the visibilities array to output/pyfhd_1088285600_example/visibilities/1088285600_calibrated_vis_arr.h5
-  2025-05-30 09:53:31 - INFO:
-    Saving the calibration dictionary to output/pyfhd_1088285600_example/calibration/1088285600_cal.h5
-  2025-05-30 09:53:31 - INFO:
-    Writing the cal dict to output/pyfhd_1088285600_example/calibration/1088285600_cal.h5, each key will be a dataset, if the key contains a dict then it will be a group.
-  2025-05-30 09:53:31 - INFO:
-    Saving the calibrated weights to output/pyfhd_1088285600_example/visibilities/1088285600_calibrated_vis_weights.h5
-  2025-05-30 09:53:31 - INFO:
-    Writing the weights array to output/pyfhd_1088285600_example/visibilities/1088285600_calibrated_vis_weights.h5
-  2025-05-30 09:53:34 - INFO:
-    Using filter_uv_uniform for dirty_image_generate
-  2025-05-30 09:53:34 - INFO:
-    Using filter_uv_uniform for dirty_image_generate
-  2025-05-30 09:53:36 - INFO:
-    Building the FITS Header for all the FITS files
-  2025-05-30 09:53:36 - INFO:
-    Saving the FITS files for polarization XX
-  2025-05-30 09:53:36 - INFO:
-    Plotting the continuum images for polarization XX into output/pyfhd_1088285600_example/plots/images
-  2025-05-30 09:53:36 - WARNING:
-    /home/skywatcher/projects/pyfhd/.venv/lib/python3.13/site-packages/astropy/wcs/wcs.py:537: FITSFixedWarning: RADECSYS= 'ICRS ' / Reference Frame
-  the RADECSYS keyword is deprecated, use RADESYSa.
-    wcsprm = _wcs.Wcsprm(
-
-  2025-05-30 09:53:37 - WARNING:
-    /home/skywatcher/projects/pyfhd/.venv/lib/python3.13/site-packages/astropy/wcs/wcs.py:537: FITSFixedWarning: RADECSYS= 'ICRS ' / Reference Frame
-  the RADECSYS keyword is deprecated, use RADESYSa.
-    wcsprm = _wcs.Wcsprm(
-
-  2025-05-30 09:53:38 - WARNING:
-    /home/skywatcher/projects/pyfhd/.venv/lib/python3.13/site-packages/astropy/wcs/wcs.py:537: FITSFixedWarning: RADECSYS= 'ICRS ' / Reference Frame
-  the RADECSYS keyword is deprecated, use RADESYSa.
-    wcsprm = _wcs.Wcsprm(
-
-  2025-05-30 09:53:38 - WARNING:
-    /home/skywatcher/projects/pyfhd/.venv/lib/python3.13/site-packages/astropy/wcs/wcs.py:537: FITSFixedWarning: RADECSYS= 'ICRS ' / Reference Frame
-  the RADECSYS keyword is deprecated, use RADESYSa.
-    wcsprm = _wcs.Wcsprm(
-
-  2025-05-30 09:53:39 - WARNING:
-    FITS data must be a 2D array, no image made for output/pyfhd_1088285600_example/fits/1088285600_uv_weights_XX.fits.
-  2025-05-30 09:53:39 - INFO:
-    Saving the FITS files for polarization YY
-  2025-05-30 09:53:39 - INFO:
-    Plotting the continuum images for polarization YY into output/pyfhd_1088285600_example/plots/images
-  2025-05-30 09:53:39 - WARNING:
-    /home/skywatcher/projects/pyfhd/.venv/lib/python3.13/site-packages/astropy/wcs/wcs.py:537: FITSFixedWarning: RADECSYS= 'ICRS ' / Reference Frame
-  the RADECSYS keyword is deprecated, use RADESYSa.
-    wcsprm = _wcs.Wcsprm(
-
-  2025-05-30 09:53:40 - WARNING:
-    /home/skywatcher/projects/pyfhd/.venv/lib/python3.13/site-packages/astropy/wcs/wcs.py:537: FITSFixedWarning: RADECSYS= 'ICRS ' / Reference Frame
-  the RADECSYS keyword is deprecated, use RADESYSa.
-    wcsprm = _wcs.Wcsprm(
-
-  2025-05-30 09:53:41 - WARNING:
-    /home/skywatcher/projects/pyfhd/.venv/lib/python3.13/site-packages/astropy/wcs/wcs.py:537: FITSFixedWarning: RADECSYS= 'ICRS ' / Reference Frame
-  the RADECSYS keyword is deprecated, use RADESYSa.
-    wcsprm = _wcs.Wcsprm(
-
-  2025-05-30 09:53:42 - WARNING:
-    /home/skywatcher/projects/pyfhd/.venv/lib/python3.13/site-packages/astropy/wcs/wcs.py:537: FITSFixedWarning: RADECSYS= 'ICRS ' / Reference Frame
-  the RADECSYS keyword is deprecated, use RADESYSa.
-    wcsprm = _wcs.Wcsprm(
-
-  2025-05-30 09:53:43 - WARNING:
-    FITS data must be a 2D array, no image made for output/pyfhd_1088285600_example/fits/1088285600_uv_weights_YY.fits.
-  2025-05-30 09:53:43 - INFO:
-    Loading /home/skywatcher/projects/pyfhd/src/pyfhd/templates/EoR0_high_healpix_inds.h5 into a dictionary
-  2025-05-30 09:53:44 - WARNING:
-    All data flagged or cut!
-  2025-05-30 09:53:44 - ERROR:
-    All data has been flagged
-  2025-05-30 09:53:44 - WARNING:
-    No visibilities gridded for frequency channel [14 15] and polarization XX (0)
-  2025-05-30 09:53:44 - INFO:
-    Writing the 1088285600_even_XX_dirty_uv_arr_gridded_uvf.h5 dict to output/pyfhd_1088285600_example/healpix/uvf_grid/1088285600_even_XX_dirty_uv_arr_gridded_uvf.h5, each key will be a dataset, if the key contains a dict then it will be a group.
-  2025-05-30 09:53:45 - INFO:
-    Writing the 1088285600_even_XX_weights_uv_gridded_uvf.h5 dict to output/pyfhd_1088285600_example/healpix/uvf_grid/1088285600_even_XX_weights_uv_gridded_uvf.h5, each key will be a dataset, if the key contains a dict then it will be a group.
-  2025-05-30 09:53:46 - INFO:
-    Writing the 1088285600_even_XX_variance_uv_arr_gridded_uvf.h5 dict to output/pyfhd_1088285600_example/healpix/uvf_grid/1088285600_even_XX_variance_uv_arr_gridded_uvf.h5, each key will be a dataset, if the key contains a dict then it will be a group.
-  2025-05-30 09:53:47 - INFO:
-    Writing the 1088285600_even_XX_model_uv_arr_gridded_uvf.h5 dict to output/pyfhd_1088285600_example/healpix/uvf_grid/1088285600_even_XX_model_uv_arr_gridded_uvf.h5, each key will be a dataset, if the key contains a dict then it will be a group.
-  2025-05-30 09:53:49 - INFO:
-    Writing the 1088285600_hpx_even_XX dict to output/pyfhd_1088285600_example/healpix/1088285600_hpx_even_XX.h5, each key will be a dataset, if the key contains a dict then it will be a group.
-  2025-05-30 09:53:51 - WARNING:
-    All data flagged or cut!
-  2025-05-30 09:53:51 - ERROR:
-    All data has been flagged
-  2025-05-30 09:53:51 - WARNING:
-    No visibilities gridded for frequency channel [14 15] and polarization YY (1)
-  2025-05-30 09:53:51 - INFO:
-    Writing the 1088285600_even_YY_dirty_uv_arr_gridded_uvf.h5 dict to output/pyfhd_1088285600_example/healpix/uvf_grid/1088285600_even_YY_dirty_uv_arr_gridded_uvf.h5, each key will be a dataset, if the key contains a dict then it will be a group.
-  2025-05-30 09:53:52 - INFO:
-    Writing the 1088285600_even_YY_weights_uv_gridded_uvf.h5 dict to output/pyfhd_1088285600_example/healpix/uvf_grid/1088285600_even_YY_weights_uv_gridded_uvf.h5, each key will be a dataset, if the key contains a dict then it will be a group.
-  2025-05-30 09:53:53 - INFO:
-    Writing the 1088285600_even_YY_variance_uv_arr_gridded_uvf.h5 dict to output/pyfhd_1088285600_example/healpix/uvf_grid/1088285600_even_YY_variance_uv_arr_gridded_uvf.h5, each key will be a dataset, if the key contains a dict then it will be a group.
-  2025-05-30 09:53:54 - INFO:
-    Writing the 1088285600_even_YY_model_uv_arr_gridded_uvf.h5 dict to output/pyfhd_1088285600_example/healpix/uvf_grid/1088285600_even_YY_model_uv_arr_gridded_uvf.h5, each key will be a dataset, if the key contains a dict then it will be a group.
-  2025-05-30 09:53:55 - INFO:
-    Writing the 1088285600_hpx_even_YY dict to output/pyfhd_1088285600_example/healpix/1088285600_hpx_even_YY.h5, each key will be a dataset, if the key contains a dict then it will be a group.
-  2025-05-30 09:53:57 - WARNING:
-    All data flagged or cut!
-  2025-05-30 09:53:57 - ERROR:
-    All data has been flagged
-  2025-05-30 09:53:57 - WARNING:
-    No visibilities gridded for frequency channel [14 15] and polarization XX (0)
-  2025-05-30 09:53:57 - INFO:
-    Writing the 1088285600_odd_XX_dirty_uv_arr_gridded_uvf.h5 dict to output/pyfhd_1088285600_example/healpix/uvf_grid/1088285600_odd_XX_dirty_uv_arr_gridded_uvf.h5, each key will be a dataset, if the key contains a dict then it will be a group.
-  2025-05-30 09:53:58 - INFO:
-    Writing the 1088285600_odd_XX_weights_uv_gridded_uvf.h5 dict to output/pyfhd_1088285600_example/healpix/uvf_grid/1088285600_odd_XX_weights_uv_gridded_uvf.h5, each key will be a dataset, if the key contains a dict then it will be a group.
-  2025-05-30 09:53:59 - INFO:
-    Writing the 1088285600_odd_XX_variance_uv_arr_gridded_uvf.h5 dict to output/pyfhd_1088285600_example/healpix/uvf_grid/1088285600_odd_XX_variance_uv_arr_gridded_uvf.h5, each key will be a dataset, if the key contains a dict then it will be a group.
-  2025-05-30 09:54:00 - INFO:
-    Writing the 1088285600_odd_XX_model_uv_arr_gridded_uvf.h5 dict to output/pyfhd_1088285600_example/healpix/uvf_grid/1088285600_odd_XX_model_uv_arr_gridded_uvf.h5, each key will be a dataset, if the key contains a dict then it will be a group.
-  2025-05-30 09:54:02 - INFO:
-    Writing the 1088285600_hpx_odd_XX dict to output/pyfhd_1088285600_example/healpix/1088285600_hpx_odd_XX.h5, each key will be a dataset, if the key contains a dict then it will be a group.
-  2025-05-30 09:54:04 - WARNING:
-    All data flagged or cut!
-  2025-05-30 09:54:04 - ERROR:
-    All data has been flagged
-  2025-05-30 09:54:04 - WARNING:
-    No visibilities gridded for frequency channel [14 15] and polarization YY (1)
-  2025-05-30 09:54:04 - INFO:
-    Writing the 1088285600_odd_YY_dirty_uv_arr_gridded_uvf.h5 dict to output/pyfhd_1088285600_example/healpix/uvf_grid/1088285600_odd_YY_dirty_uv_arr_gridded_uvf.h5, each key will be a dataset, if the key contains a dict then it will be a group.
-  2025-05-30 09:54:05 - INFO:
-    Writing the 1088285600_odd_YY_weights_uv_gridded_uvf.h5 dict to output/pyfhd_1088285600_example/healpix/uvf_grid/1088285600_odd_YY_weights_uv_gridded_uvf.h5, each key will be a dataset, if the key contains a dict then it will be a group.
-  2025-05-30 09:54:06 - INFO:
-    Writing the 1088285600_odd_YY_variance_uv_arr_gridded_uvf.h5 dict to output/pyfhd_1088285600_example/healpix/uvf_grid/1088285600_odd_YY_variance_uv_arr_gridded_uvf.h5, each key will be a dataset, if the key contains a dict then it will be a group.
-  2025-05-30 09:54:07 - INFO:
-    Writing the 1088285600_odd_YY_model_uv_arr_gridded_uvf.h5 dict to output/pyfhd_1088285600_example/healpix/uvf_grid/1088285600_odd_YY_model_uv_arr_gridded_uvf.h5, each key will be a dataset, if the key contains a dict then it will be a group.
-  2025-05-30 09:54:08 - INFO:
-    Writing the 1088285600_hpx_odd_YY dict to output/pyfhd_1088285600_example/healpix/1088285600_hpx_odd_YY.h5, each key will be a dataset, if the key contains a dict then it will be a group.
-  2025-05-30 09:54:09 - INFO:
-    Writing the pyfhd_config dict to output/pyfhd_1088285600_example/config/pyfhd_config.h5, each key will be a dataset, if the key contains a dict then it will be a group.
-  2025-05-30 09:54:09 - INFO:
-    pyfhd Run Completed for 1088285600
-  Total Runtime (Days:Hours:Minutes:Seconds.Millseconds): 0:01:33.849671
-
-.. raw:: html
-
-  </p>
-  </details>
+with detailed info about all the steps as they occur. This same log will also be
+saved to the output directory.
 
 Take note of the line:
 
 .. code-block:: text
 
   Logging and configuration file created and copied to here: <your current working directory>/output/pyfhd_1088285600_example
+
+That gives the location of the log file.
 
 More details about the output of the pyfhd pipeline and the required inputs is
 clarified in the next section.
@@ -531,7 +121,7 @@ All boolean options have the ``no-`` prefix available to you, in case you wish
 to temporarily negate the options set in the configuration file via the command line.
 
 You can adjust the configuration of ``pyfhd`` at run time by using command line
-arguments like ``--calibrate-checkpoint`` to override what is set in the yaml
+arguments like ``--recalculate-grid`` to override what is set in the yaml
 config file (these changes will be captured in the final yaml file described below).
 
 .. tip::
@@ -548,10 +138,9 @@ config file (these changes will be captured in the final yaml file described bel
 
   The command line argument will override the YAML file, and the code will
   override the command line argument in certain situations. In situations where
-  the code overrides the command line or YAML, ideally, a warning should be
+  the code overrides the command line or YAML, a warning should be
   triggered or some error should be found. If no warning is logged when the
-  code overrides the YAML or command line options, either add the warning to
-  the code yourself and do a Pull request or open an issue on the repository.
+  code overrides the YAML this is a bug, please report it in our issues!
 
 ``pyfhd`` outputs
 +++++++++++++++++
@@ -573,13 +162,10 @@ structure will look like this:
   output
   └── pyfhd_1088285600_example
       ├── beams
+      │   ├── 1088285600_antenna.h5
       │   └── 1088285600_beam.h5
       ├── calibration
       │   └── 1088285600_cal.h5
-      ├── checkpoints
-      │   ├── 1088285600_example_calibrate_checkpoint.h5
-      │   ├── 1088285600_example_gridding_checkpoint.h5
-      │   └── 1088285600_example_obs_checkpoint.h5
       ├── config
       │   ├── pyfhd_1088285600_example_2025_05_30_09_52_35-final.yaml
       │   ├── pyfhd_1088285600_example_2025_05_30_09_52_35.yaml
@@ -595,12 +181,12 @@ structure will look like this:
       │   ├── 1088285600_uniform_residual_YY.fits
       │   ├── 1088285600_uv_weights_XX.fits
       │   └── 1088285600_uv_weights_YY.fits
-      ├── gridding
-      │   ├── 1088285600_image_uv.h5
-      │   ├── 1088285600_model_uv.h5
-      │   ├── 1088285600_uniform_filter_uv.h5
-      │   ├── 1088285600_variance_uv.h5
-      │   └── 1088285600_weights_uv.h5
+      ├── grid_data
+      │   ├── 1088285600_uv_data.h5
+      │   ├── 1088285600_uv_model.h5
+      │   ├── 1088285600_uv_variance.h5
+      │   ├── 1088285600_uv_weights.h5
+      │   └── 1088285600_vis_count.h5
       ├── healpix
       │   ├── 1088285600_hpx_even_XX.h5
       │   ├── 1088285600_hpx_even_YY.h5
@@ -623,10 +209,14 @@ structure will look like this:
       │       ├── 1088285600_odd_YY_model_uv_arr_gridded_uvf.h5
       │       ├── 1088285600_odd_YY_variance_uv_arr_gridded_uvf.h5
       │       └── 1088285600_odd_YY_weights_uv_gridded_uvf.h5
-      ├── layout.h5
       ├── metadata
+      │   ├── 1088285600_layout.h5
       │   ├── 1088285600_obs.h5
       │   └── 1088285600_params.h5
+      ├── model
+      │   ├── 1088285600_cal_model_uv.h5
+      │   ├── 1088285600_cal_model_vis_arr.h5
+      │   └── 1088285600_cal_skymodel.h5
       ├── plots
       │   ├── calibration
       │   │   ├── 1088285600_cal_amp.png
@@ -654,9 +244,7 @@ structure will look like this:
       ├── pyfhd_1088285600_example_2025_05_30_09_52_35.log
       └── visibilities
           ├── 1088285600_calibrated_vis_arr.h5
-          ├── 1088285600_calibrated_vis_weights.h5
-          ├── 1088285600_raw_vis_arr.h5
-          └── 1088285600_raw_vis_weights.h5
+          └── 1088285600_calibrated_vis_weights.h5
 
 The difference between the final and non-final yaml is that the final yaml is
 generated at the end of the run so you can observe any changes made to
@@ -795,11 +383,11 @@ in the Gridding section of the :doc:`API documentation page <../documentation/do
 Running Gridding with the sample data
 +++++++++++++++++++++++++++++++++++++
 
-We'll use the calibrate-checkpoint example earlier to run it
+We'll use recalculate-grid to run it
 
 .. code-block:: bash
 
-  pyfhd -c ./input/1088285600_example/1088285600_example.yaml --calibrate-checkpoint 1088285600
+  pyfhd -c ./input/1088285600_example/1088285600_example.yaml --recalculate-grid 1088285600
 
 This would be the same as runnning the command below:
 
@@ -809,7 +397,6 @@ This would be the same as runnning the command below:
     --input-path "./input/1088285600_example/" \
     --description "1088285600_gridding_example" \
     --saved-beam-file-path "./input/1088285600_example/gauss_beam_pointing0_167635008Hz.h5" \
-    --calibrate-checkpoint \
     --recalculate-grid \
     --image-filter 'filter_uv_uniform' \
     --no-mask-mirror-indices \
@@ -861,46 +448,45 @@ We can also plot the variance of the gridded visibilities.
 
 Checkpointing
 -------------
-The checkpointing system in ``pyfhd`` is designed to save the state of the
-pipeline after important, potentially long running steps. The checkpoints are
-stored in the ``checkpoints`` directory and they are saved at the following points:
+``pyfhd`` saves important products as they are made so that later runs can start
+from where earlier runs left off. When you run ``pyfhd`` it figures out what steps
+need to run based on the options selected in the config and the outputs (if any)
+that already exist in the output directory. You can request particular steps to
+be rerun with ``recalculate`` options, which will flow down to later steps
+(i.e. if you request a step to be recalculated, any later steps that depend on
+the outputs of that step will also be recalculated). To recalculate everything
+use the ``recalculate-all`` option. The ``recalculate`` options include:
 
-- ``obs_checkpoint``: ``obs`` dict creation, reading of visibilities and weights,
-  creation of the ``params`` dict.
-- ``beam_checkpoint``: beam setup, creation of the ``antenna`` and ``psf`` dicts.
-- ``calibrate_checkpoint``: End of calibration, creation of the ``cal`` dict
-  which saves the observations, params, calibrated visibilities, model visibilities,
-  and visibility weights.
-- ``gridding_checkpoint``: End of gridding, creation of the ``gridding`` dict
-  which holds the gridded visibilities, associated weights, variances, models, etc.
+- ``recalculate-all``: Recalculate everything.
+- ``recalculate-beam``: Recalculate the beam. Will also require recalcuating
+  calibration model visibilities and gridding (to continuum or uvf cubes).
+- ``recalculate-cal-model-vis``: Recalculate the calibration model visibilities.
+  Will also require recalcuating calibration and gridding.
+- ``recalculate-cal``: Recalculate the calibration. Will also require
+  recalcuating gridding.
+- ``recalculate-grid``: Recalculate the continuum gridding.
+- ``recalculate-healpix``: Recalculate the uvf gridding and conversion to healpix.
 
-In the case that you wish to skip a step in the pipeline, you can use the
-``--calibrate-checkpoint`` or ``--gridding-checkpoint`` boolean options to skip the
-calibration or gridding steps respectively. Set them to True to skip the calculations
-and load the previously calcuated products from the checkpoint file in the
-checkpoint directory.
+There are several options to control which outputs are saved (all are saved by
+default). Setting any of these to False can reduce the amount of space on disk
+taken up by outputs, but they will also have to be recalculated for any subsequent
+re-runs. Some smaller outputs are always saved (e.g. obs, cal and params dicts).
 
-.. attention::
-  The ``--obs-checkpoint`` and ``--calibrate-checkpoint`` will check for each
-  other's existence and if both are used ``--calibrate-checkpoint`` will be
-  prioritised and ``obs-checkpoint`` will be ignored.
+- ``save-beam``: Save the antenna and psf dicts.
+- ``save-skymodel``: Save the skymodel used to form visibilities for calibration
+  and subtraction (if different).
+- ``save-model-uv``: Save the model uv used to form visibilities for calibration
+  and subtraction (if different).
+- ``save-visibilities``: Save the calibrated data visibilities, the model
+  visibilities (if calculated) and the visibility weights.
 
-In the example below, we will run ``pyfhd`` with the ``--calibrate-checkpoint``
-option, which will skip the calibration and visibility step and go straight to
+In the example below, we will run ``pyfhd`` with the ``--recalculate-grid``
+option, which will skip the setup and calibration steps and go straight to
 gridding.
 
 .. code-block:: bash
 
-  pyfhd -c ./input/1088285600_example/1088285600_example.yaml --calibrate-checkpoint 1088285600
-
-Within the logs of the ``pyfhd`` you should see the following message::
-
-.. code-block:: text
-
-  yyyy-mm-dd HH:MM:SS - INFO:
-      Checkpoint Loaded: Calibrated and Flagged visibility parameters, array and weights, the flagged observation metadata dictionary and the calibration dictionary loaded from output/pyfhd_1088285600_example/calibrate_checkpoint.h5
-
-Do note if you wish to use the ``gridding-checkpoint`` then you also need ``calibrate-checkpoint``.
+  pyfhd -c ./input/1088285600_example/1088285600_example.yaml --recalculate-grid 1088285600
 
 
 Other Telescopes

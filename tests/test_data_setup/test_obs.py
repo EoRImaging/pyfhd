@@ -70,7 +70,7 @@ def check_sav_file(path: Path, run: int, pyfhd_config: dict) -> Path:
     return h5_file
 
 
-def test_2_pol_obs_creation(obs_id, data_dir, obs_dir):
+def test_2_pol_obs_creation(tmp_path, obs_id, data_dir, obs_dir):
     # The obs creation test is more of an integration test, since we will be
     # using the extract_header, create_params, and create_layout to create the
     # obs dictionary.
@@ -91,7 +91,7 @@ def test_2_pol_obs_creation(obs_id, data_dir, obs_dir):
         "beam_nfreq_avg": 16,
         "dft_threshold": False,
         "healpix_inds": 1,
-        "output_dir": ".",
+        "output_dir": tmp_path,
         "override_target_phasera": None,
         "override_target_phasedec": None,
     }
@@ -107,14 +107,14 @@ def test_2_pol_obs_creation(obs_id, data_dir, obs_dir):
         pyfhd_config["obs_id"] = "1088716176"
     else:
         pyfhd_config["input_path"] = Path(data_dir, obs_id)
+    uvfits_path = Path(pyfhd_config["input_path"], pyfhd_config["obs_id"] + ".uvfits")
+
     pyfhd_header, params_data, antenna_header, antenna_data = extract_header(
-        pyfhd_config
+        uvfits_path=uvfits_path
     )
     params = create_params(pyfhd_header, params_data)
     layout = create_layout(antenna_header, antenna_data, pyfhd_config)
     obs = create_obs(pyfhd_header, params, layout, pyfhd_config)
-
-    Path(pyfhd_config["output_dir"], "layout.h5").unlink()
 
     # Check the basic obs info
     assert obs["n_pol"] == obs_fhd["n_pol"]
@@ -170,7 +170,7 @@ def test_2_pol_obs_creation(obs_id, data_dir, obs_dir):
     assert obs["healpix"]["n_zero"] == obs_fhd["healpix"]["n_zero"]
 
 
-def test_4_pol_obs_creation(obs_id, data_dir, obs_dir):
+def test_4_pol_obs_creation(tmp_path, obs_id, data_dir, obs_dir):
     # The obs creation test is more of an integration test, since we will be
     # using the extract_header, create_params, and create_layout to create the
     # obs dictionary.
@@ -194,7 +194,7 @@ def test_4_pol_obs_creation(obs_id, data_dir, obs_dir):
         "beam_nfreq_avg": 16,
         "dft_threshold": False,
         "healpix_inds": 1,
-        "output_dir": ".",
+        "output_dir": tmp_path,
         "override_target_phasera": None,
         "override_target_phasedec": None,
     }
@@ -210,14 +210,13 @@ def test_4_pol_obs_creation(obs_id, data_dir, obs_dir):
         pyfhd_config["obs_id"] = "1088716176"
     else:
         pyfhd_config["input_path"] = Path(data_dir, obs_id)
+    uvfits_path = Path(pyfhd_config["input_path"], pyfhd_config["obs_id"] + ".uvfits")
     pyfhd_header, params_data, antenna_header, antenna_data = extract_header(
-        pyfhd_config
+        uvfits_path=uvfits_path
     )
     params = create_params(pyfhd_header, params_data)
     layout = create_layout(antenna_header, antenna_data, pyfhd_config)
     obs = create_obs(pyfhd_header, params, layout, pyfhd_config)
-
-    Path(pyfhd_config["output_dir"], "layout.h5").unlink()
 
     # Check the basic obs info
     assert obs["n_pol"] == obs_fhd["n_pol"]

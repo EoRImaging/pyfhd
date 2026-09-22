@@ -21,9 +21,9 @@ from pyfhd.pyfhd_tools.pyfhd_utils import (
 
 
 def healpix_snapshot_cube_generate(
+    *,
     obs: dict,
     psf: dict | h5py.File,
-    cal: dict,
     params: dict,
     vis_arr: NDArray[np.complex128],
     vis_model_arr: NDArray[np.complex128],
@@ -43,8 +43,6 @@ def healpix_snapshot_cube_generate(
         Observation metadata dictionary.
     psf : dict | h5py.File
         Beam dictionary
-    cal : dict
-        Calibration dictionary
     params : dict
         Visibility metadata dictionary
     vis_arr : NDArray[np.complex128]
@@ -125,7 +123,9 @@ def healpix_snapshot_cube_generate(
             obs_out, vis_weights, pyfhd_config["ps_tile_flag_list"]
         )
 
-    vis_weights, obs_out = vis_weights_update(vis_weights, obs_out, psf, params)
+    vis_weights, obs_out = vis_weights_update(
+        vis_weights, obs=obs_out, psf_dim=psf["dim"], params=params
+    )
 
     if pyfhd_config["split_ps_export"]:
         n_iter = 2

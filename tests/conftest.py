@@ -93,6 +93,7 @@ def mwa_aee_beam_zenith_2013(zenith_obs_2013_main, tmp_path_factory):
 
     pyfhd_config = {
         "instrument": "mwa",
+        "antenna_size": 5,
         "psf_dim": 14,
         "psf_resolution": 10,
         "beam_mask_threshold": 1e2,
@@ -109,6 +110,7 @@ def mwa_aee_beam_zenith_2013(zenith_obs_2013_main, tmp_path_factory):
         "cal_stop": False,
         "conserve_memory": True,
         "memory_threshold": 1e10,
+        "save_beam": False,
     }
 
     psf, antenna = create_psf(obs, pyfhd_config)
