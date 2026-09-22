@@ -103,12 +103,6 @@ def test_gen_cal_sky(fixed_obs, zenith_psf_2013_cut, refraction):
         fhd_cal_sources_file, extra_columns={"x": "image_x", "y": "image_y"}
     )
 
-    # take this out once pyradiosky fix is in:
-    if expected_sky.extended_model_group is not None:
-        extended_comps = np.nonzero(expected_sky.extended_model_group != "")[0]
-        if extended_comps.size == 0:
-            expected_sky.extended_model_group = None
-
     expected_sky.at_frequencies(np.atleast_1d(expected_sky.reference_frequency[0]))
 
     sky = generate_source_cal_skymodel(
