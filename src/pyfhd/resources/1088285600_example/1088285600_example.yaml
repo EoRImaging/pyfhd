@@ -23,6 +23,8 @@ recalculate-healpix: false
 
 # Instrument
 instrument: 'mwa'
+# antenna size in meters. Defaults sensibly if the instrument is "mwa" or "hera"
+antenna-size: ~
 override-target-phasera: ~
 override-target-phasedec: ~
 
