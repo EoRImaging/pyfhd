@@ -1,12 +1,16 @@
+from math import pi
+import logging
+
+from astropy.convolution import Box2DKernel
+import h5py
 import numpy as np
 from numpy.typing import NDArray
+from scipy.signal import convolve
+
 import pyfhd.gridding.filters as filters
 from pyfhd.pyfhd_tools.pyfhd_utils import rebin, histogram, array_match, meshgrid
-from scipy.signal import convolve
-from astropy.convolution import Box2DKernel
-from math import pi
-from logging import Logger
-import h5py
+
+logger = logging.getLogger(__name__)
 
 
 def interpolate_kernel(
@@ -92,7 +96,6 @@ def baseline_grid_locations(
     obs: dict,
     psf: dict,
     params: dict,
-    logger: Logger,
     vis_weights: NDArray[np.float64] | None,
     bi_use: NDArray[np.integer] | None = None,
     fi_use: NDArray[np.integer] | None = None,
@@ -114,8 +117,6 @@ def baseline_grid_locations(
         Beam metadata dictionary
     params : dict
         Visibility metadata dictionary
-    logger : Logger
-        pyfhd's logger
     vis_weights : NDArray[np.float64]
         Weights (flags) of the visibilities. Can be None if fill_model_visibilities
         is True.
@@ -314,7 +315,6 @@ def baseline_grid_locations(
 def dirty_image_generate(
     dirty_image_uv: NDArray[np.complex128],
     pyfhd_config: dict,
-    logger: Logger,
     uniform_filter_uv: NDArray[np.float64] | None = None,
     mask: NDArray[np.integer] | None = None,
     baseline_threshold: int | float | None = None,
@@ -340,8 +340,6 @@ def dirty_image_generate(
         A 2D {u,v} plane which generally includes the beam via a gridding kernel
     pyfhd_config : dict
         pyfhd's configuration dictionary containing all the options set for a pyfhd run
-    logger : Logger
-        pyfhd's logger
     uniform_filter_uv : NDArray[np.float64] | None, optional
         A 2D {u,v} gridded visibility number, by default None
     mask : NDArray[np.integer] | None, optional
@@ -526,7 +524,6 @@ def grid_beam_per_baseline(
     *,
     psf: dict,
     pyfhd_config: dict,
-    logger: Logger,
     uu: NDArray[np.float64],
     vv: NDArray[np.float64],
     ww: NDArray[np.float64],
@@ -563,8 +560,6 @@ def grid_beam_per_baseline(
         Beam metadata dictionary
     pyfhd_config : dict
         pyfhd's configuration dictionary containing all the options set for a pyfhd run
-    logger : Logger
-        pyfhd's logger
     uu : NDArray[np.float64]
         1D array of the u-coordinate of selected baselines in light travel time
     vv : NDArray[np.float64]
@@ -642,7 +637,6 @@ def grid_beam_per_baseline(
             psf["image_info"]["image_power_beam_arr"][polarization]
             * np.exp(2 * pi * (0 + 1j) * (-w_n_tracked + deltau_l + deltav_m)),
             pyfhd_config,
-            logger,
             not_real=True,
         )
         psf_base_superres = psf_base_superres[
@@ -725,7 +719,6 @@ def visibility_count(
     psf: dict,
     params: dict,
     vis_weights: NDArray[np.float64],
-    logger: Logger,
     fi_use: NDArray[np.integer] | None = None,
     bi_use: NDArray[np.integer] | None = None,
     mask_mirror_indices: bool = False,
@@ -745,8 +738,6 @@ def visibility_count(
         Weights (flags) of the visibilities
     pyfhd_config : dict
         pyfhd's configuration dictionary containing all the options set for a pyfhd run
-    logger : Logger
-        pyfhd's logger
     fi_use : NDArray[np.integer] | None, optional
         Frequency index array for gridding (used e.g. when gridding all frequencies
         for continuum images), by default None
@@ -778,7 +769,6 @@ def visibility_count(
         psf=psf,
         params=params,
         vis_weights=vis_weights,
-        logger=logger,
         bi_use=bi_use,
         fi_use=fi_use,
         mask_mirror_indices=mask_mirror_indices,

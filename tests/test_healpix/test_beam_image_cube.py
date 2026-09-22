@@ -3,7 +3,6 @@ from pathlib import Path
 import numpy as np
 import numpy.testing as npt
 import pytest
-from logging import Logger
 from pyfhd.io.pyfhd_io import convert_sav_to_dict, load, recarray_to_dict, save
 from pyfhd.healpix.healpix_utils import beam_image_cube
 
@@ -93,7 +92,6 @@ def test_beam_image_cube(before_file, after_file, beam_dir):
     beam_arr, beam_mask = beam_image_cube(
         h5_before["obs"],
         psf,
-        Logger(1),
         n_freq_bin=h5_before["n_freq_bin"],
         beam_threshold=h5_before["beam_threshold"],
         square=h5_before["square"],

@@ -18,13 +18,11 @@ from pyfhd.pyfhd_tools.pyfhd_utils import (
 )
 from pyfhd.pyfhd_tools.unit_conv import altaz_to_radec, radec_to_pixel, radec_to_altaz
 
+logger = logging.getLogger(__name__)
+
 
 def create_obs(
-    pyfhd_header: dict,
-    params: dict,
-    layout: dict,
-    pyfhd_config: dict,
-    logger: logging.Logger,
+    pyfhd_header: dict, params: dict, layout: dict, pyfhd_config: dict
 ) -> dict:
     """
     create_obs takes all the data that has been read in and creates the obs
@@ -41,8 +39,6 @@ def create_obs(
         The data dictionary containing data and metadata about the antennas
     pyfhd_config : dict
         pyfhd's configuration dictionary
-    logger : logging.Logger
-        The pyfhd logger
 
     Returns
     -------
@@ -214,7 +210,7 @@ def create_obs(
             pyfhd_config["min_baseline"], np.min(kr_arr[np.nonzero(kr_arr)])
         )
 
-    meta = read_metafits(obs, pyfhd_header, params, pyfhd_config, layout, logger)
+    meta = read_metafits(obs, pyfhd_header, params, pyfhd_config, layout)
 
     baseline_info["time_use"] = np.ones(obs["n_time"], dtype=np.int8)
     # time cut is specified in seconds to cut (rounded up to next time integration
@@ -281,12 +277,7 @@ def create_obs(
 
 
 def read_metafits(
-    obs: dict,
-    pyfhd_header: dict,
-    params: dict,
-    pyfhd_config: dict,
-    layout: dict,
-    logger: logging.Logger,
+    obs: dict, pyfhd_header: dict, params: dict, pyfhd_config: dict, layout: dict
 ) -> dict:
     """
     Read metadata from the metafits file (if available) or UVFITS file.
@@ -307,8 +298,6 @@ def read_metafits(
         pyfhd's configuration dictionary
     layout : dict
         Info from the uvfits antenna table
-    logger : logging.Logger
-        pyfhd's logger
 
     Returns
     -------

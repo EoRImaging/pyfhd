@@ -45,6 +45,7 @@ dependencies = [
 
 [project.scripts]
 pyfhd = "pyfhd.pyfhd:main"
+pyfhd_sample_data = "pyfhd.pyfhd_tools.pyfhd_setup:get_sample_data"
 
 [project.urls]
 "Repository" = "https://github.com/EoRImaging/pyfhd"

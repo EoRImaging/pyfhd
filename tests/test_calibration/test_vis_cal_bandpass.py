@@ -6,7 +6,6 @@ from pyfhd.io.pyfhd_io import convert_sav_to_dict
 from pyfhd.pyfhd_tools.test_utils import sav_file_vis_arr_swap_axes
 import numpy as np
 from pyfhd.io.pyfhd_io import save, load
-from logging import Logger
 import numpy.testing as npt
 import importlib_resources
 
@@ -146,11 +145,7 @@ def test_vis_cal_bandpass(before_file, after_file):
     expected_cal_bandpass = h5_after["cal_bandpass"]
     expected_cal_remainder = h5_after["cal_remainder"]
 
-    logger = Logger(1)
-
-    result_cal_bandpass, result_cal_remainder = vis_cal_bandpass(
-        obs, cal, pyfhd_config, logger
-    )
+    result_cal_bandpass, result_cal_remainder = vis_cal_bandpass(obs, cal, pyfhd_config)
 
     # The FHD function does some dividing by zeros, so we end up with NaNs
     # in both the expected and result data. To check we are replicating

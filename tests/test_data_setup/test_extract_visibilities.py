@@ -3,7 +3,6 @@ import numpy as np
 import numpy.testing as npt
 from os import environ as env
 from pathlib import Path
-import logging
 from pyfhd.data_setup.uvfits import extract_header, extract_visibilities
 from pyfhd.pyfhd_tools.test_utils import get_savs
 
@@ -19,13 +18,10 @@ def uvfits_dir():
 
 
 def test_1061316296(data_dir, uvfits_dir):
-    dummy_log = logging.getLogger("dummy")
     pyfhd_config = np.load(Path(data_dir, "config.npy"), allow_pickle=True).item()
     pyfhd_config["input_path"] = Path(uvfits_dir, "1061316296")
-    pyfhd_header, fits_data, _, _ = extract_header(pyfhd_config, dummy_log)
-    vis_arr, vis_weights = extract_visibilities(
-        pyfhd_header, fits_data, pyfhd_config, dummy_log
-    )
+    pyfhd_header, fits_data, _, _ = extract_header(pyfhd_config)
+    vis_arr, vis_weights = extract_visibilities(pyfhd_header, fits_data, pyfhd_config)
 
     output = get_savs(data_dir, "output.sav")
 

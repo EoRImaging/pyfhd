@@ -6,7 +6,6 @@ from pyfhd.io.pyfhd_io import convert_sav_to_dict
 from pyfhd.pyfhd_tools.test_utils import sav_file_vis_arr_swap_axes
 import numpy as np
 from pyfhd.io.pyfhd_io import save, load
-from logging import Logger
 import importlib_resources
 
 
@@ -116,9 +115,7 @@ def test_vis_calibration_flag(before_file, after_file):
     cal = h5_before["cal"]
     pyfhd_config = h5_before["pyfhd_config"]
 
-    logger = Logger(1)
-
-    result_obs = vis_calibration_flag(obs_in, cal, pyfhd_config, logger)
+    result_obs = vis_calibration_flag(obs_in, cal, pyfhd_config)
 
     # Check the values of tile_use and freq_use inside baseline_info
     assert np.array_equal(

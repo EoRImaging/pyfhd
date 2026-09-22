@@ -1,5 +1,5 @@
 import importlib_resources
-from logging import Logger
+import logging
 from typing import Literal
 
 import numpy as np
@@ -247,7 +247,10 @@ def get_beam_values(
     return beam_vals
 
 
-def init_beam(obs: dict, pyfhd_config: dict, logger: Logger) -> dict:
+logger = logging.getLogger(__name__)
+
+
+def init_beam(obs: dict, pyfhd_config: dict) -> dict:
     """
     Build an antenna-specific metadata dictionary and a full station/tile power
     beam model and dictionary. Currently, the jones matrix of the antenna is
@@ -264,8 +267,6 @@ def init_beam(obs: dict, pyfhd_config: dict, logger: Logger) -> dict:
         Observation metadata dictionary.
     pyfhd_config : dict
         pyfhd's configuration dictionary containing all the options for a run
-    logger : Logger
-        pyfhd's logger.
 
     Returns
     -------

@@ -90,6 +90,10 @@ fully propagated, causing shape errors.
 * Fixed a bug that could cause an undefined variable error in image plotting.
 * Fixed a bug in `pyfhd_io.load` that did not properly read HDF5 files created by other writers.
 
+## Refactoring/Restructuring Changes
+* Major re-working of the logging to avoid passing loggers between functions and
+use a context manager for the logger in the main function.
+
 ### Test Changes
 * Fixed two tests in `test_weight_invert` to handle floating point errors.
 * Fixed fixtures in `test_vis_model_transfer` and `test_quickview` to handle

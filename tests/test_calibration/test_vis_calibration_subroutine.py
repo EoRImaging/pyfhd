@@ -4,7 +4,6 @@ import numpy as np
 from os import environ as env
 from pathlib import Path
 from pyfhd.calibration.vis_calibrate_subroutine import vis_calibrate_subroutine
-from logging import Logger
 from pyfhd.pyfhd_tools.test_utils import get_data_items, sav_file_vis_arr_swap_axes
 from pyfhd.io.pyfhd_io import convert_sav_to_dict
 from numpy.testing import assert_allclose
@@ -163,10 +162,8 @@ def test_points(before_file, after_file):
     params = h5_before["params"]
     pyfhd_config = h5_before["pyfhd_config"]
 
-    logger = Logger(1)
-
     cal_return = vis_calibrate_subroutine(
-        vis_ptr, vis_model_ptr, vis_weight_ptr, obs, cal, params, pyfhd_config, logger
+        vis_ptr, vis_model_ptr, vis_weight_ptr, obs, cal, params, pyfhd_config
     )
 
     assert expected_cal["n_vis_cal"] == cal_return["n_vis_cal"]
@@ -271,8 +268,6 @@ def test_vis_calibration_x(subroutine_before, subroutine_after):
     params = h5_before["params"]
     pyfhd_config = h5_before["pyfhd_config"]
 
-    logger = Logger(1)
-
     cal_return = vis_calibrate_subroutine(
         vis_ptr,
         vis_model_ptr,
@@ -281,7 +276,6 @@ def test_vis_calibration_x(subroutine_before, subroutine_after):
         cal,
         params,
         pyfhd_config,
-        logger,
         calibration_weights=calibration_weights,
     )
 

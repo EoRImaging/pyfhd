@@ -1,18 +1,22 @@
+import importlib_resources
+import logging
+from copy import deepcopy
+
 import numpy as np
+from astropy.io import fits
+from astropy.constants import c
 from numpy.typing import NDArray
-from logging import Logger
+from pathlib import Path
+from scipy.ndimage import uniform_filter
+
 from pyfhd.pyfhd_tools.pyfhd_utils import (
     resistant_mean,
     weight_invert,
     rebin,
     histogram,
 )
-from copy import deepcopy
-from astropy.io import fits
-from astropy.constants import c
-from pathlib import Path
-from scipy.ndimage import uniform_filter
-import importlib_resources
+
+logger = logging.getLogger(__name__)
 
 
 def vis_extract_autocorr(
@@ -166,9 +170,7 @@ def vis_cal_auto_init(
     return auto_gain
 
 
-def vis_calibration_flag(
-    obs: dict, cal: dict, pyfhd_config: dict, logger: Logger
-) -> dict:
+def vis_calibration_flag(obs: dict, cal: dict, pyfhd_config: dict) -> dict:
     """
     Flag tile and frequency outliers based on the calibration solutions. First,
     iteratively flag a maximum of three times on amplitude with three tests:
@@ -186,8 +188,6 @@ def vis_calibration_flag(
         Calibration dictionary
     pyfhd_config : dict
         pyfhd's configuration dictionary containing all the options set for a pyfhd run
-    logger : Logger
-        pyfhd's logger for displaying errors and info to the log files
 
     Returns
     -------
@@ -326,9 +326,7 @@ def vis_calibration_flag(
     return obs
 
 
-def transfer_bandpass(
-    obs: dict, cal: dict, pyfhd_config: dict, logger: Logger
-) -> tuple[dict, dict]:
+def transfer_bandpass(obs: dict, cal: dict, pyfhd_config: dict) -> tuple[dict, dict]:
     """
     Apply a previously saved bandpass via a calfits file (github:pyuvdata).
     Check adherance to standards, and match the polarizations, frequencies,
@@ -342,8 +340,6 @@ def transfer_bandpass(
         Calibration dictionary
     pyfhd_config : dict
         pyfhd's configuration dictionary containing all the options set for a pyfhd run
-    logger : Logger
-        pyfhd's logger for displaying errors and info to the log files
 
     Returns
     -------
@@ -716,9 +712,7 @@ def transfer_bandpass(
     return cal_bandpass, cal_remainder
 
 
-def vis_cal_bandpass(
-    obs: dict, cal: dict, pyfhd_config: dict, logger: Logger
-) -> tuple[dict, dict]:
+def vis_cal_bandpass(obs: dict, cal: dict, pyfhd_config: dict) -> tuple[dict, dict]:
     """
     Reduce the degrees of freedom on the per-frequency calibration amplitudes
     by averaging solutions together. Options include averaging over tiles which
@@ -733,8 +727,6 @@ def vis_cal_bandpass(
         Calibration dictionary
     pyfhd_config : dict
         pyfhd's configuration dictionary containing all the options set for a pyfhd run
-    logger : Logger
-        pyfhd's logger for displaying errors and info to the log files
 
     Returns
     -------
@@ -751,7 +743,7 @@ def vis_cal_bandpass(
     # Initialize cal_bandpass and cal_remainder and transfer them in, if a file
     # has been set (fits only supported right now)
     if pyfhd_config["cal_bp_transfer"] is not None:
-        cal_bandpass, cal_remainder = transfer_bandpass(obs, cal, pyfhd_config, logger)
+        cal_bandpass, cal_remainder = transfer_bandpass(obs, cal, pyfhd_config)
         if len(cal_bandpass.keys()) != 0 and len(cal_remainder.keys()) != 0:
             logger.info(
                 f"Calibration Bandpass FITS file {pyfhd_config['cal_bp_transfer']} "
@@ -899,11 +891,7 @@ def vis_cal_bandpass(
 
 
 def vis_cal_polyfit(
-    obs: dict,
-    cal: dict,
-    auto_ratio: NDArray[np.float64] | None,
-    pyfhd_config: dict,
-    logger: Logger,
+    obs: dict, cal: dict, auto_ratio: NDArray[np.float64] | None, pyfhd_config: dict
 ) -> dict:
     """
     Reduce the degrees of freedom on the per-frequency calibration amplitudes
@@ -931,8 +919,6 @@ def vis_cal_polyfit(
         visibilities normalized via a reference tile
     pyfhd_config : dict
         pyfhd's configuration dictionary containing all the options set for a pyfhd run
-    logger : Logger
-        pyfhd's logger for displaying errors and info to the log files
 
     Returns
     -------
@@ -1457,7 +1443,6 @@ def vis_calibration_apply(
     cal: dict,
     vis_model_arr: NDArray[np.complex128],
     vis_weights: NDArray[np.float64],
-    logger: Logger,
 ) -> tuple[NDArray[np.complex128], dict]:
     """
     Apply the calibration solutions to the input data visibilities to create
@@ -1485,8 +1470,6 @@ def vis_calibration_apply(
         Simulated model visibilites
     vis_weights : NDArray[np.float64]
         Weights (flags) of the visibilities
-    logger : Logger
-        pyfhd's logger for displaying errors and info to the log files
 
     Returns
     -------

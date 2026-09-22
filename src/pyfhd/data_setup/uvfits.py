@@ -11,9 +11,11 @@ from numpy.typing import NDArray
 
 from pyfhd.io.pyfhd_io import save
 
+logger = logging.getLogger(__name__)
+
 
 def extract_header(
-    pyfhd_config: dict, logger: logging.Logger, model_uvfits=False
+    pyfhd_config: dict, model_uvfits: bool = False
 ) -> tuple[dict, np.recarray, FITS_rec, Header]:
     """
     Extract data from the uvfits header, the data extracted will contain
@@ -25,8 +27,6 @@ def extract_header(
         Path to the uvfits to open (either the data or the model)
     pyfhd_config : dict
         This is the config created from the argparse
-    logger : logging.Logger
-        The pyfhd logger
     model_uvfits : bool
         If True, load in the model uvfits. If False, load in a data uvfits file,
         by default False
@@ -238,9 +238,7 @@ def extract_header(
     return pyfhd_header, params_data, antenna_header, antenna_data
 
 
-def create_params(
-    pyfhd_header: dict, params_data: np.recarray, logger: logging.Logger
-) -> dict:
+def create_params(pyfhd_header: dict, params_data: np.recarray) -> dict:
     """
     Given the extracted header, params data from the uvfits file, create the
     params dictionary to store the relevant visibility metadata
@@ -251,8 +249,6 @@ def create_params(
         The resulting header fom the fits file stored in a dictonary
     params_data : np.recarray
         The data from the fits file as taken from astropy.io.fits.getdata
-    logger : logging.Logger
-        The pyfhd logger
 
     Returns
     -------
@@ -311,10 +307,7 @@ def create_params(
 
 
 def extract_visibilities(
-    pyfhd_header: dict,
-    params_data: np.recarray,
-    pyfhd_config: dict,
-    logger: logging.Logger,
+    pyfhd_header: dict, params_data: np.recarray, pyfhd_config: dict
 ) -> tuple[NDArray[np.complex128], NDArray[np.float64]]:
     """
     Extract the visibilities and their weights from the UVFITS data.
@@ -327,8 +320,6 @@ def extract_visibilities(
         The data from the fits file as taken from astropy.io.fits.getdata
     pyfhd_config : dict
         This is the config created from the argprase
-    logger : logging.Logger
-        The pyfhd Logger
 
     Returns
     -------
@@ -369,9 +360,7 @@ def extract_visibilities(
     )
 
 
-def _check_layout_valid(
-    layout: dict, key: str, logger: logging.Logger, check_min_max=False
-):
+def _check_layout_valid(layout: dict, key: str, check_min_max=False):
     """
     Check if the key given is a valid part of the layout, if not give an error
     in the log. The errors do not stop the run as it might only affect
@@ -384,8 +373,6 @@ def _check_layout_valid(
         The current layout
     key : str
         The key we're interested in validating
-    logger : logging.Logger
-        The logger
     check_min_max : bool, optional
         When True check if the min is the same as max, if so changes the value
         so its only one number, by default False
@@ -407,10 +394,7 @@ def _check_layout_valid(
 
 
 def create_layout(
-    antenna_header: Header,
-    antenna_data: FITS_rec,
-    pyfhd_config: dict,
-    logger: logging.Logger,
+    antenna_header: Header, antenna_data: FITS_rec, pyfhd_config: dict
 ) -> dict:
     """
     Create a very explicit antenna and telescope position dictionary, incorperating
@@ -427,8 +411,6 @@ def create_layout(
         The data from the second table of the observation
     pyfhd_config : dict
         pyfhd's configuration dictionary containing all the options for a run
-    logger : logging.Logger
-        pyfhd's logger
 
     Returns
     -------
@@ -681,15 +663,15 @@ def create_layout(
         logger.info("Beam Full Width Half maximum not present in UVFITS continuing.")
 
     # Layout Validation
-    _check_layout_valid(layout, "antenna_names", logger)
-    _check_layout_valid(layout, "antenna_numbers", logger)
-    _check_layout_valid(layout, "mount_type", logger, check_min_max=True)
-    _check_layout_valid(layout, "axis_offset", logger, check_min_max=True)
-    _check_layout_valid(layout, "pola", logger)
-    _check_layout_valid(layout, "pola_orientation", logger, check_min_max=True)
-    _check_layout_valid(layout, "polb", logger)
-    _check_layout_valid(layout, "polb_orientation", logger, check_min_max=True)
+    _check_layout_valid(layout, "antenna_names")
+    _check_layout_valid(layout, "antenna_numbers")
+    _check_layout_valid(layout, "mount_type", check_min_max=True)
+    _check_layout_valid(layout, "axis_offset", check_min_max=True)
+    _check_layout_valid(layout, "pola")
+    _check_layout_valid(layout, "pola_orientation", check_min_max=True)
+    _check_layout_valid(layout, "polb")
+    _check_layout_valid(layout, "polb_orientation", check_min_max=True)
 
-    save(Path(pyfhd_config["output_dir"], "layout.h5"), layout, "layout", logger)
+    save(Path(pyfhd_config["output_dir"], "layout.h5"), layout, "layout")
 
     return layout

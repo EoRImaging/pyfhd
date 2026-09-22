@@ -1,8 +1,11 @@
+import logging
+
 import numpy as np
 from numpy.typing import NDArray
 from pathlib import Path
 from pyfhd.plotting.image import quick_image
-from logging import Logger
+
+logger = logging.getLogger(__name__)
 
 
 def plot_gridding(
@@ -12,7 +15,6 @@ def plot_gridding(
     variance_uv: NDArray[np.float64],
     pyfhd_config: dict,
     model_uv: NDArray[np.complex64] | None,
-    logger: Logger,
     log=True,
     sigma_clip_level=3,
     percentile_clip_level=1,
@@ -34,8 +36,6 @@ def plot_gridding(
         UV-plane of the gridded model
     pyfhd_config : dict
         Run option dictionary
-    logger : Logger
-        PyFHD's logger for displaying errors and info to the log files
     log : bool, optional
         Whether to use log scaling for the plots, by default True
     sigma_clip_level : int, optional

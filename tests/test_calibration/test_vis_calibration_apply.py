@@ -8,7 +8,6 @@ from pyfhd.pyfhd_tools.test_utils import sav_file_vis_arr_swap_axes
 import numpy as np
 from pyfhd.io.pyfhd_io import save, load
 import numpy.testing as npt
-from logging import Logger
 
 # import matplotlib.pyplot as plt
 
@@ -145,10 +144,8 @@ def test_vis_calibration_apply(before_file, after_file):
 
     exptected_vis_cal_ptr = h5_after["vis_cal_ptr"]
 
-    logger = Logger(1)
-
     return_vis_cal_ptr, return_cal = vis_calibration_apply(
-        vis_ptr, obs, cal, vis_model_ptr, vis_weight_ptr, logger
+        vis_ptr, obs, cal, vis_model_ptr, vis_weight_ptr
     )
 
     if vis_ptr.shape[0] == 4:

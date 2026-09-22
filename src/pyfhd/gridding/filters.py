@@ -1,9 +1,12 @@
+import logging
+
 import numpy as np
 from numpy.typing import NDArray
-from logging import Logger
 
 from ..pyfhd_tools.pyfhd_utils import weight_invert
 from . import gridding_utils
+
+logger = logging.getLogger(__name__)
 
 
 def filter_uv_uniform(
@@ -12,7 +15,6 @@ def filter_uv_uniform(
     obs: dict | None = None,
     params: dict | None = None,
     pyfhd_config: dict | None = None,
-    logger: Logger | None = None,
     weights: NDArray[np.float64] | None = None,
     fi_use: NDArray[np.integer] | None = None,
     bi_use: NDArray[np.integer] | None = None,
@@ -33,8 +35,6 @@ def filter_uv_uniform(
         Visibility metadata dictionary, by default None
     pyfhd_config : dict | None, optional
         Run option dictionary, by default None
-    logger : Logger | None, optional
-        pyfhd's logger, by default None
     weights : NDArray[np.float64] | None, optional
         The weights array (aka vis_weights), by default None
     fi_use : NDArray[np.integer] | None, optional
@@ -66,14 +66,7 @@ def filter_uv_uniform(
     if vis_count is None:
         if obs is not None or params is not None:
             vis_count = gridding_utils.visibility_count(
-                obs,
-                params,
-                weights,
-                pyfhd_config,
-                logger,
-                fi_use,
-                bi_use,
-                mask_mirror_indices,
+                obs, params, weights, pyfhd_config, fi_use, bi_use, mask_mirror_indices
             )
         elif weights is not None and np.size(weights) == np.size(image_uv):
             if np.max(weights) == 0:

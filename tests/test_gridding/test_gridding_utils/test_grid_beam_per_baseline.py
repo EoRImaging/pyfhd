@@ -6,7 +6,6 @@ from pyfhd.gridding.gridding_utils import grid_beam_per_baseline
 from pyfhd.pyfhd_tools.test_utils import get_data, get_data_items
 from pyfhd.io.pyfhd_io import save, load
 from numpy.testing import assert_allclose
-from logging import Logger
 
 
 @pytest.fixture
@@ -145,7 +144,6 @@ def test_grid_per_baseline(
     output_box_matrix = grid_beam_per_baseline(
         psf=h5_before["psf"],
         pyfhd_config=h5_before["pyfhd_config"],
-        logger=Logger(1),
         uu=h5_before["uu"],
         vv=h5_before["vv"],
         ww=h5_before["ww"],
