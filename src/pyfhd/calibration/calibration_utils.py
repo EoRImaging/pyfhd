@@ -249,8 +249,8 @@ def vis_calibration_flag(obs: dict, cal: dict, pyfhd_config: dict) -> dict:
 
         n_addl_cut = max(freq_cut_i.size + tile_cut_i.size, 1)
         n_cut = freq_cut_i.size + tile_cut_i.size
-        iter = 0
-        while n_addl_cut > 0 and iter < 3:
+        iter_i = 0
+        while n_addl_cut > 0 and iter_i < 3:
             gain_freq_sigma = np.std(gain_freq_fom[freq_uncut_i])
             gain_tile_sigma = np.std(gain_tile_fom[tile_uncut_i])
             freq_cut_i = np.where(
@@ -276,7 +276,7 @@ def vis_calibration_flag(obs: dict, cal: dict, pyfhd_config: dict) -> dict:
             tile_uncut_i = tile_uncut_i[~np.isin(tile_uncut_i, tile_cut_i)]
             n_addl_cut = (freq_cut_i.size + tile_cut_i.size) - n_cut
             n_cut = freq_cut_i.size + tile_cut_i.size
-            iter += 1
+            iter_i += 1
         if (freq_cut_i.size) > 0:
             freq_use[freq_use_i[freq_cut_i]] = 0
         if (tile_cut_i.size) > 0:
@@ -302,10 +302,10 @@ def vis_calibration_flag(obs: dict, cal: dict, pyfhd_config: dict) -> dict:
             # on, which gives only a zero back for the fit
             phase_slope_arr[tile_i] = phase_params[1] if phase_params.size > 1 else 0
             phase_sigma_arr[tile_i] = phase_sigma2
-        iter = 0
+        iter_i = 0
         n_addl_cut = 1
         n_cut = 0
-        while n_addl_cut > 0 and iter < 3:
+        while n_addl_cut > 0 and iter_i < 3:
             slope_sigma = np.nanstd(phase_slope_arr)
             tile_cut_test1 = (
                 np.abs(phase_slope_arr) - np.median(np.abs(phase_slope_arr))
@@ -316,7 +316,7 @@ def vis_calibration_flag(obs: dict, cal: dict, pyfhd_config: dict) -> dict:
             tile_cut_i = np.where(tile_cut_test1 | tile_cut_test2)[0]
             n_addl_cut = tile_cut_i.size - n_cut
             n_cut = tile_cut_i.size
-            iter += 1
+            iter_i += 1
         if tile_cut_i.size > 0:
             obs["baseline_info"]["tile_use"][tile_use_i[tile_cut_i]] = 0
     # If we decide not to flag the frequencies, ignore any frequency flagging
@@ -1603,7 +1603,7 @@ def vis_baseline_hist(
     # transpose of the original FHD code
     dist_arr = np.outer(kr_arr, obs["baseline_info"]["freq"]).transpose() * obs["kpix"]
     dist_hist, bins, dist_ri = histogram(
-        dist_arr, min=obs["min_baseline"], max=obs["max_baseline"], bin_size=5.0
+        dist_arr, min_val=obs["min_baseline"], max_val=obs["max_baseline"], bin_size=5.0
     )
 
     vis_res_ratio_mean = np.zeros([obs["n_pol"], bins.size])
@@ -1723,7 +1723,7 @@ def cal_auto_ratio_remultiply(
 def calculate_adaptive_gain(
     gain_list: NDArray[np.float64],
     convergence_list: NDArray[np.float64],
-    iter: int,
+    iter_i: int,
     base_gain: int | float,
     final_convergence_estimate: float | None = None,
 ):
@@ -1769,7 +1769,7 @@ def calculate_adaptive_gain(
         in the calibration
         linear least squares solver
     """
-    if iter > 2:
+    if iter_i > 2:
         # To calculate the best gain to use, compare the past gains that have been used
         # with the resulting convergences to estimate the best gain to use.
         # Algorithmically, this is a Kalman filter.
@@ -1781,20 +1781,20 @@ def calculate_adaptive_gain(
         # In calibration, it is expressed as the change in a
         # value, in which case the final value should be zero.
         if final_convergence_estimate is None:
-            est_final_conv = np.zeros(iter - 1)
-            for i in range(iter - 1):
+            est_final_conv = np.zeros(iter_i - 1)
+            for i in range(iter_i - 1):
                 final_convergence_test = (
                     (1 + gain_list[i]) * convergence_list[i + 1] - convergence_list[i]
                 ) / gain_list[i]
                 # The convergence metric is strictly positive, so if the estimated
                 # final convergence is less than zero, force it to zero.
                 est_final_conv[i] = np.max((0, final_convergence_test))
-            # Because the estimate may slowly change over time, only use the most
-            # recent measurements.
-            final_convergence_estimate = np.median(est_final_conv[max(iter - 5, 0) :])
-        last_gain = gain_list[iter - 1]
-        last_conv = convergence_list[iter - 2]
-        new_conv = convergence_list[iter - 1]
+            # Because the estimate may slowly change over time, only use the
+            # most recent measurements.
+            final_convergence_estimate = np.median(est_final_conv[max(iter_i - 5, 0) :])
+        last_gain = gain_list[iter_i - 1]
+        last_conv = convergence_list[iter_i - 2]
+        new_conv = convergence_list[iter_i - 1]
         # The predicted convergence is the value we would get if the new model
         # calculated in the previous iteration was perfect. Recall that the
         # updated model that is actually used is the gain-weighted average of
@@ -1819,6 +1819,6 @@ def calculate_adaptive_gain(
 
     else:
         gain = base_gain
-    gain_list[iter] = gain
+    gain_list[iter_i] = gain
 
     return gain

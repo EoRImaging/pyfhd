@@ -128,8 +128,8 @@ if __name__ == "__main__":
         # Combine files and directories together
         files_dirs = zip(args.files, directories, strict=True)
         # For each pair, call splitter
-        for file, dir in files_dirs:
-            splitter(file, dir)
+        for file, fdir in files_dirs:
+            splitter(file, fdir)
     # No files given!
     else:
         parser.error("Please provide a file or files")

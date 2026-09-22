@@ -292,7 +292,7 @@ def baseline_grid_locations(
         # and store them as a histogram in bin_n with their respective index ri.
         # Setting min equal to 0, excludes flagged data (data set to -1).
         for_hist = xmin + ymin * dimension
-        bin_n, _, ri = histogram(for_hist, min=0)
+        bin_n, _, ri = histogram(for_hist, min_val=0)
         bin_i = np.nonzero(bin_n)[0]
 
         # Update the baselines_dict which gets returned
@@ -325,7 +325,7 @@ def dirty_image_generate(
     not_real: bool = False,
     pad_uv_image: int | float | None = None,
     weights: NDArray[np.float64] | None = None,
-    filter: NDArray[np.float64] | None = None,
+    filter_array: NDArray[np.float64] | None = None,
     beam_ptr: NDArray[np.complex128] | None = None,
 ) -> tuple[
     NDArray[np.complex128], NDArray[np.float64], float | NDArray[np.float64] | None
@@ -364,7 +364,7 @@ def dirty_image_generate(
     weights : NDArray[np.float64] | None, optional
         Gridded {u,v} plane of visibility weights, necessary in some filtering
         schemes, by default None
-    filter : NDArray[np.float64] | None, optional
+    filter_array : NDArray[np.float64] | None, optional
         Image filter to apply, by default None
     beam_ptr : NDArray[np.complex128] | None, optional
         Weight by an additional factor of the beam for optimal weighting, by
@@ -374,7 +374,7 @@ def dirty_image_generate(
     -------
     dirty_image : NDArray[np.complex128]
         A 2D {l,m} directional-cosine image plane
-    filter : NDArray[np.float64]
+    filter_array : NDArray[np.float64]
         The filter applied to the dirty image
     normalization : float | NDArray[np.float64] | None
         The normalization (if any) applied to the dirty image
@@ -424,11 +424,11 @@ def dirty_image_generate(
 
     # If a filter was supplied as a numpy array (we can adjust this to support
     # different formats)
-    if filter is not None:
-        if isinstance(filter, np.ndarray):
+    if filter_array is not None:
+        if isinstance(filter_array, np.ndarray):
             # If the filter is already the right size, use it
-            if np.size(filter) == np.size(di_uv_use):
-                di_uv_use *= filter
+            if np.size(filter_array) == np.size(di_uv_use):
+                di_uv_use *= filter_array
             # Otherwise use a filter function
             else:
                 if pyfhd_config["image_filter"] == "filter_uv_uniform":
@@ -464,7 +464,7 @@ def dirty_image_generate(
                     )
                 # Since we only use filter_uniform at the moment, put the call
                 # to it here.
-                di_uv_use, filter = filters.filter_uv_uniform(
+                di_uv_use, filter_array = filters.filter_uv_uniform(
                     di_uv_use, vis_count=uniform_filter_uv, weights=weights
                 )
 
@@ -517,7 +517,7 @@ def dirty_image_generate(
         dirty_image *= normalization
 
     # Return
-    return dirty_image, filter, normalization
+    return dirty_image, filter_array, normalization
 
 
 def grid_beam_per_baseline(
@@ -859,7 +859,7 @@ def holo_mapfn_convert(map_fn, psf_dim, dimension, elements=None, norm=1, thresh
         return 0
 
     # Get the reverse indices
-    _, _, ri = histogram(i_use, min=0)
+    _, _, ri = histogram(i_use, min_val=0)
     # Create zeros of the same size as what we're using
     sa = np.zeros(i_use_size)
     ija = np.zeros(i_use_size)

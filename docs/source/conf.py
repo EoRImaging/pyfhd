@@ -21,7 +21,7 @@ sys.path.insert(0, os.path.abspath("../.."))
 # -- Project information -----------------------------------------------------
 
 project = "pyfhd"
-copyright = "2025, Radio imaging"
+copyright = "2025, Radio imaging"  # noqa A001
 author = "Joel Dunstan, Jack Line, Nichole Barry and Bryna Hazelton"
 
 # The full version, including alpha/beta/rc tags

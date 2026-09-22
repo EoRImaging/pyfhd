@@ -95,9 +95,9 @@ def create_obs(
     # Let's get the freq_center and the bins we want to use
     freq_hist, _, freq_ri = histogram(baseline_info["freq"], bin_size=freq_bin)
     freq_bin_i = np.zeros(obs["n_freq"])
-    for bin in range(freq_hist.size):
-        if freq_ri[bin] < freq_ri[bin + 1]:
-            freq_bin_i[freq_ri[freq_ri[bin] : freq_ri[bin + 1]]] = bin
+    for bin_i in range(freq_hist.size):
+        if freq_ri[bin_i] < freq_ri[bin_i + 1]:
+            freq_bin_i[freq_ri[freq_ri[bin_i] : freq_ri[bin_i + 1]]] = bin_i
     baseline_info["fbin_i"] = freq_bin_i.astype(np.int64)
     obs["freq_center"] = np.median(baseline_info["freq"])
     antenna_flag = True
@@ -355,8 +355,8 @@ def read_metafits(
         # Simulate the flagging of tiles by taking where tiles don't exist
         tile_A1 = params["antenna1"]
         tile_B1 = params["antenna2"]
-        hist_A1, _, _ = histogram(tile_A1, min=1, max=obs["n_tile"])
-        hist_B1, _, _ = histogram(tile_B1, min=1, max=obs["n_tile"])
+        hist_A1, _, _ = histogram(tile_A1, min_val=1, max_val=obs["n_tile"])
+        hist_B1, _, _ = histogram(tile_B1, min_val=1, max_val=obs["n_tile"])
         hist_AB = hist_A1 + hist_B1
         meta["tile_names"] = layout["antenna_names"]
         # if pyuvdata is available, get antenna heights using pyuvdata utils
@@ -572,9 +572,9 @@ def update_obs(
     freq_bin = beam_nfreq_avg * obs["freq_res"]
     freq_hist, _, freq_ri = histogram(obs["baseline_info"]["freq"], bin_size=freq_bin)
     freq_bin_i = np.zeros(obs["n_freq"], dtype=np.int64)
-    for bin in range(freq_hist.size - 1):
-        if freq_ri[bin] < freq_ri[bin + 1]:
-            freq_bin_i[freq_ri[freq_ri[bin] : freq_ri[bin + 1]]] = bin
+    for bin_i in range(freq_hist.size - 1):
+        if freq_ri[bin_i] < freq_ri[bin_i + 1]:
+            freq_bin_i[freq_ri[freq_ri[bin_i] : freq_ri[bin_i + 1]]] = bin_i
     # Adjust the obs dictionary based on the new dimension and kbinsize
     obs["dimension"] = dimension
     obs["elements"] = dimension

@@ -149,7 +149,7 @@ def healpix_snapshot_cube_generate(
     # Create the healpix dir Path
     healpix_dir = Path(pyfhd_config["output_dir"], "healpix")
     healpix_dir.mkdir(exist_ok=True)
-    for iter in range(n_iter):
+    for cube_i in range(n_iter):
         # To save on memory, pyfhd moved to saving the healpix cubes in a
         # polarization loop rather than trying to store the entirety of the
         # everything in memory consuming over 100GB of memory
@@ -163,8 +163,8 @@ def healpix_snapshot_cube_generate(
                 vis_arr,
                 pol_i,
                 pyfhd_config,
-                uvf_name=uvf_name[iter],
-                bi_use=bi_use[iter],
+                uvf_name=uvf_name[cube_i],
+                bi_use=bi_use[cube_i],
             )
             if dirty_flag:
                 residual_flag = False
@@ -217,8 +217,8 @@ def healpix_snapshot_cube_generate(
             elif dirty_flag:
                 healpix_pol_dict["dirty_cube"] = dirty_or_res_cube
             save(
-                healpix_dir / f"{pyfhd_config['obs_id']}_{cube_name[iter]}_"
+                healpix_dir / f"{pyfhd_config['obs_id']}_{cube_name[cube_i]}_"
                 f"{obs['pol_names'][pol_i]}.h5",
                 healpix_pol_dict,
-                f"{pyfhd_config['obs_id']}_{cube_name[iter]}_{obs['pol_names'][pol_i]}",
+                f"{pyfhd_config['obs_id']}_{cube_name[cube_i]}_{obs['pol_names'][pol_i]}",
             )

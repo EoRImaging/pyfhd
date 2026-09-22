@@ -128,7 +128,7 @@ def create_psf(obs: dict, pyfhd_config: dict) -> dict | File:
             ]
         )
         bi_list = ant_b_list + ant_a_list * baseline_mod
-        bi_hist0, _, _ = histogram(bi_list, min=0, bin_size=1)
+        bi_hist0, _, _ = histogram(bi_list, min_val=0, bin_size=1)
         bi_max = np.max(bi_list)
         pol_arr = np.array([[0, 0], [1, 1], [0, 1], [1, 0]], dtype=np.int8)
         for pol_i in range(obs["n_pol"]):
@@ -142,8 +142,8 @@ def create_psf(obs: dict, pyfhd_config: dict) -> dict | File:
 
             # Histogram group IDs, get reverse indicies, and calculate number of
             # unique beams (again that should be 1)
-            hgroup1, _, gri1 = histogram(group1, min=0)
-            hgroup2, _, gri2 = histogram(group2, min=0)
+            hgroup1, _, gri1 = histogram(group1, min_val=0)
+            hgroup2, _, gri2 = histogram(group2, min_val=0)
             # Histogram matrix between all separate groups of different beams
             group_matrix = np.outer(hgroup2, hgroup1)
             # TODO: actually put in group loop and functionality

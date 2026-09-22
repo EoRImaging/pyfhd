@@ -260,14 +260,18 @@ def healpix_cnv_generate(
     # min_bin off by one
     min_bin = max(np.nanmin(v_floor), 0)
     max_bin = min(np.nanmax(v_ceil), obs["dimension"] * obs["elements"] - 1)
-    h00, _, ri00 = histogram(v_floor, min=min_bin, max=max_bin)
+    h00, _, ri00 = histogram(v_floor, min_val=min_bin, max_val=max_bin)
     h01, _, ri01 = histogram(
-        np.floor(xv_hpx) + obs["dimension"] * np.ceil(yv_hpx), min=min_bin, max=max_bin
+        np.floor(xv_hpx) + obs["dimension"] * np.ceil(yv_hpx),
+        min_val=min_bin,
+        max_val=max_bin,
     )
     h10, _, ri10 = histogram(
-        np.ceil(xv_hpx) + obs["dimension"] * np.floor(yv_hpx), min=min_bin, max=max_bin
+        np.ceil(xv_hpx) + obs["dimension"] * np.floor(yv_hpx),
+        min_val=min_bin,
+        max_val=max_bin,
     )
-    h11, _, ri11 = histogram(v_ceil, min=min_bin, max=max_bin)
+    h11, _, ri11 = histogram(v_ceil, min_val=min_bin, max_val=max_bin)
     htot = h00 + h01 + h10 + h11
     inds = np.nonzero(htot)[0]
 
@@ -394,7 +398,7 @@ def beam_image_cube(
     beam_arr = np.zeros([obs["n_pol"], n_freq_bin, obs["dimension"], obs["elements"]])
 
     bin_arr = obs["baseline_info"]["fbin_i"][freq_i_use]
-    bin_hist, _, bri = histogram(bin_arr, min=0)
+    bin_hist, _, bri = histogram(bin_arr, min_val=0)
     bin_use = np.nonzero(bin_hist)[0]
     if np.size(bin_use) == 0:
         return beam_arr
