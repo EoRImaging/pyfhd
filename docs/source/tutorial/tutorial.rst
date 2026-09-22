@@ -531,7 +531,7 @@ All boolean options have the ``no-`` prefix available to you, in case you wish
 to temporarily negate the options set in the configuration file via the command line.
 
 You can adjust the configuration of ``pyfhd`` at run time by using command line
-arguments like ``--calibrate-checkpoint`` to override what is set in the yaml
+arguments like ``--recalculate-grid`` to override what is set in the yaml
 config file (these changes will be captured in the final yaml file described below).
 
 .. tip::
@@ -548,10 +548,9 @@ config file (these changes will be captured in the final yaml file described bel
 
   The command line argument will override the YAML file, and the code will
   override the command line argument in certain situations. In situations where
-  the code overrides the command line or YAML, ideally, a warning should be
+  the code overrides the command line or YAML, a warning should be
   triggered or some error should be found. If no warning is logged when the
-  code overrides the YAML or command line options, either add the warning to
-  the code yourself and do a Pull request or open an issue on the repository.
+  code overrides the YAML this is a bug, please report it in our issues!
 
 ``pyfhd`` outputs
 +++++++++++++++++
@@ -573,13 +572,10 @@ structure will look like this:
   output
   └── pyfhd_1088285600_example
       ├── beams
+      │   ├── 1088285600_antenna.h5
       │   └── 1088285600_beam.h5
       ├── calibration
       │   └── 1088285600_cal.h5
-      ├── checkpoints
-      │   ├── 1088285600_example_calibrate_checkpoint.h5
-      │   ├── 1088285600_example_gridding_checkpoint.h5
-      │   └── 1088285600_example_obs_checkpoint.h5
       ├── config
       │   ├── pyfhd_1088285600_example_2025_05_30_09_52_35-final.yaml
       │   ├── pyfhd_1088285600_example_2025_05_30_09_52_35.yaml
@@ -595,12 +591,12 @@ structure will look like this:
       │   ├── 1088285600_uniform_residual_YY.fits
       │   ├── 1088285600_uv_weights_XX.fits
       │   └── 1088285600_uv_weights_YY.fits
-      ├── gridding
-      │   ├── 1088285600_image_uv.h5
-      │   ├── 1088285600_model_uv.h5
-      │   ├── 1088285600_uniform_filter_uv.h5
-      │   ├── 1088285600_variance_uv.h5
-      │   └── 1088285600_weights_uv.h5
+      ├── grid_data
+      │   ├── 1088285600_uv_data.h5
+      │   ├── 1088285600_uv_model.h5
+      │   ├── 1088285600_uv_variance.h5
+      │   ├── 1088285600_uv_weights.h5
+      │   └── 1088285600_vis_count.h5
       ├── healpix
       │   ├── 1088285600_hpx_even_XX.h5
       │   ├── 1088285600_hpx_even_YY.h5
@@ -623,10 +619,14 @@ structure will look like this:
       │       ├── 1088285600_odd_YY_model_uv_arr_gridded_uvf.h5
       │       ├── 1088285600_odd_YY_variance_uv_arr_gridded_uvf.h5
       │       └── 1088285600_odd_YY_weights_uv_gridded_uvf.h5
-      ├── layout.h5
       ├── metadata
+      │   ├── 1088285600_layout.h5
       │   ├── 1088285600_obs.h5
       │   └── 1088285600_params.h5
+      ├── model
+      │   ├── 1088285600_cal_model_uv.h5
+      │   ├── 1088285600_cal_model_vis_arr.h5
+      │   └── 1088285600_cal_skymodel.h5
       ├── plots
       │   ├── calibration
       │   │   ├── 1088285600_cal_amp.png
@@ -654,9 +654,7 @@ structure will look like this:
       ├── pyfhd_1088285600_example_2025_05_30_09_52_35.log
       └── visibilities
           ├── 1088285600_calibrated_vis_arr.h5
-          ├── 1088285600_calibrated_vis_weights.h5
-          ├── 1088285600_raw_vis_arr.h5
-          └── 1088285600_raw_vis_weights.h5
+          └── 1088285600_calibrated_vis_weights.h5
 
 The difference between the final and non-final yaml is that the final yaml is
 generated at the end of the run so you can observe any changes made to
@@ -795,11 +793,11 @@ in the Gridding section of the :doc:`API documentation page <../documentation/do
 Running Gridding with the sample data
 +++++++++++++++++++++++++++++++++++++
 
-We'll use the calibrate-checkpoint example earlier to run it
+We'll use recalculate-grid to run it
 
 .. code-block:: bash
 
-  pyfhd -c ./input/1088285600_example/1088285600_example.yaml --calibrate-checkpoint 1088285600
+  pyfhd -c ./input/1088285600_example/1088285600_example.yaml --recalculate-grid 1088285600
 
 This would be the same as runnning the command below:
 
@@ -809,7 +807,6 @@ This would be the same as runnning the command below:
     --input-path "./input/1088285600_example/" \
     --description "1088285600_gridding_example" \
     --saved-beam-file-path "./input/1088285600_example/gauss_beam_pointing0_167635008Hz.h5" \
-    --calibrate-checkpoint \
     --recalculate-grid \
     --image-filter 'filter_uv_uniform' \
     --no-mask-mirror-indices \
@@ -861,46 +858,45 @@ We can also plot the variance of the gridded visibilities.
 
 Checkpointing
 -------------
-The checkpointing system in ``pyfhd`` is designed to save the state of the
-pipeline after important, potentially long running steps. The checkpoints are
-stored in the ``checkpoints`` directory and they are saved at the following points:
+``pyfhd`` saves important products as they are made so that later runs can start
+from where earlier runs left off. When you run ``pyfhd`` it figures out what steps
+need to run based on the options selected in the config and the outputs (if any)
+that already exist in the output directory. You can request particular steps to
+be rerun with ``recalculate`` options, which will flow down to later steps
+(i.e. if you request a step to be recalculated, any later steps that depend on
+the outputs of that step will also be recalculated). To recalculate everything
+use the ``recalculate-all`` option. The ``recalculate`` options include:
 
-- ``obs_checkpoint``: ``obs`` dict creation, reading of visibilities and weights,
-  creation of the ``params`` dict.
-- ``beam_checkpoint``: beam setup, creation of the ``antenna`` and ``psf`` dicts.
-- ``calibrate_checkpoint``: End of calibration, creation of the ``cal`` dict
-  which saves the observations, params, calibrated visibilities, model visibilities,
-  and visibility weights.
-- ``gridding_checkpoint``: End of gridding, creation of the ``gridding`` dict
-  which holds the gridded visibilities, associated weights, variances, models, etc.
+- ``recalculate-all``: Recalculate everything.
+- ``recalculate-beam``: Recalculate the beam. Will also require recalcuating
+  calibration model visibilities and gridding (to continuum or uvf cubes).
+- ``recalculate-cal-model-vis``: Recalculate the calibration model visibilities.
+  Will also require recalcuating calibration and gridding.
+- ``recalculate-cal``: Recalculate the calibration. Will also require
+  recalcuating gridding.
+- ``recalculate-grid``: Recalculate the continuum gridding.
+- ``recalculate-healpix``: Recalculate the uvf gridding and conversion to healpix.
 
-In the case that you wish to skip a step in the pipeline, you can use the
-``--calibrate-checkpoint`` or ``--gridding-checkpoint`` boolean options to skip the
-calibration or gridding steps respectively. Set them to True to skip the calculations
-and load the previously calcuated products from the checkpoint file in the
-checkpoint directory.
+There are several options to control which outputs are saved (all are saved by
+default). Setting any of these to False can reduce the amount of space on disk
+taken up by outputs, but they will also have to be recalculated for any subsequent
+re-runs. Some smaller outputs are always saved (e.g. obs, cal and params dicts).
 
-.. attention::
-  The ``--obs-checkpoint`` and ``--calibrate-checkpoint`` will check for each
-  other's existence and if both are used ``--calibrate-checkpoint`` will be
-  prioritised and ``obs-checkpoint`` will be ignored.
+- ``save-beam``: Save the antenna and psf dicts.
+- ``save-skymodel``: Save the skymodel used to form visibilities for calibration
+  and subtraction (if different).
+- ``save-model-uv``: Save the model uv used to form visibilities for calibration
+  and subtraction (if different).
+- ``save-visibilities``: Save the calibrated data visibilities, the model
+  visibilities (if calculated) and the visibility weights.
 
-In the example below, we will run ``pyfhd`` with the ``--calibrate-checkpoint``
-option, which will skip the calibration and visibility step and go straight to
+In the example below, we will run ``pyfhd`` with the ``--recalculate-grid``
+option, which will skip the setup and calibration steps and go straight to
 gridding.
 
 .. code-block:: bash
 
-  pyfhd -c ./input/1088285600_example/1088285600_example.yaml --calibrate-checkpoint 1088285600
-
-Within the logs of the ``pyfhd`` you should see the following message::
-
-.. code-block:: text
-
-  yyyy-mm-dd HH:MM:SS - INFO:
-      Checkpoint Loaded: Calibrated and Flagged visibility parameters, array and weights, the flagged observation metadata dictionary and the calibration dictionary loaded from output/pyfhd_1088285600_example/calibrate_checkpoint.h5
-
-Do note if you wish to use the ``gridding-checkpoint`` then you also need ``calibrate-checkpoint``.
+  pyfhd -c ./input/1088285600_example/1088285600_example.yaml --recalculate-grid 1088285600
 
 
 Other Telescopes
