@@ -295,7 +295,7 @@ def create_params(pyfhd_header: dict, params_data: np.recarray) -> dict:
                     antenna_mod_index /= 2 ** np.floor(np.log(tile_B_test) / np.log(2))
             # antenna numbers start from 1
             params["antenna1"] = np.floor(params["baseline_arr"] / antenna_mod_index)
-            params["antenna2"] = np.fix(params["baseline_arr"] % antenna_mod_index)
+            params["antenna2"] = np.trunc(params["baseline_arr"] % antenna_mod_index)
 
     except KeyError as error:
         logger.error(

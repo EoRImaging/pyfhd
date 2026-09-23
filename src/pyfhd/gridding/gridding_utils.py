@@ -218,10 +218,10 @@ def baseline_grid_locations(
     ycen = np.outer(frequency_array, ky_arr)
 
     # Pixel number offset per baseline for each uv-box subset
-    x_offset = np.fix(
+    x_offset = np.trunc(
         np.floor((xcen - np.floor(xcen)) * psf_resolution) % psf_resolution
     ).astype(np.int64)
-    y_offset = np.fix(
+    y_offset = np.trunc(
         np.floor((ycen - np.floor(ycen)) * psf_resolution) % psf_resolution
     ).astype(np.int64)
 
