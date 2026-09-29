@@ -1,7 +1,6 @@
 # Default Arguments for pyfhd
 # ~ returns None in Python (i.e. NULL)
 input-path: '.'
-recalculate-all: false
 silent: false
 log-file: true
 conserve-memory: true
@@ -15,19 +14,22 @@ min-baseline: 1.
 deproject-w-term: ~
 
 # Checkpointing
-save-checkpoints: true
-obs-checkpoint: true
-beam-checkpoint: true
-calibrate-checkpoint: true
-gridding-checkpoint: true
+recalculate-all: false
+recalculate-beam: false
+recalculate-cal-model-vis: false
+recalculate-cal: false
+recalculate-grid: false
+recalculate-healpix: false
 
 # Instrument
 instrument: 'mwa'
+# antenna size in meters. Defaults sensibly if the instrument is "mwa" or "hera"
+# should be set for other telescopes.
+antenna-size: ~
 override-target-phasera: ~
 override-target-phasedec: ~
 
 # Beam Setup
-recalculate-beam: false
 interpolate-kernel: true
 # options for an FHD saved beam:
 saved-beam-file-path: ~
@@ -52,7 +54,7 @@ beam-clip-floor: true
 
 # Calibration
 calibrate-visibilities: true
-# options for choosing sources to go into model visibiliites:
+# options for choosing sources to go into model visibilities:
 # The calibration catalog file must be readable by pyradiosky's SkyModel object
 calibration-catalog-file-path : '../GLEAM_v2_plus_rlb2019.sav'
 calibration-model-delay-filter: true
@@ -67,12 +69,12 @@ calibration-catalog-spectral-index: ~
 calibration-catalog-preserve-zero-spectral-index: false
 calibration-collapse-extended-sources: false
 calibration-catalog-flatten-spectrum: false
-# Use model-file-path to pass in model visibilities. None of the source selection
-# options above will be used when passing in model visibilities.
-model-file-type: 'sav'  # choices are sav, uvfits and h5 (prefer sav and uvfits)
-# If you set model-file-type to uvfits or HDF5, set import-model-uvfits to the (ideally absolute) path of the fits file
-# If model-file-type is set to sav then it will look for the sav files as said in the function import_vis_model_from_sav
-model-file-path: ~
+# Use cal-model-file-path to pass in model visibilities for calibration. None of
+# the source selection options above will be used when passing in model visibilities.
+cal-model-file-type: 'sav'  # choices are sav, uvfits and h5 (prefer sav and uvfits)
+# If cal-odel-file-type is set to sav then it will look for the sav files as
+# described in the function import_vis_model_from_sav
+cal-model-file-path: ~
 # options for calibration fitting:
 bandpass-calibrate: true
 cal-bp-transfer: ~
@@ -116,7 +118,6 @@ flag-visibilities: false
 transfer-weights: ~
 
 # Gridding
-recalculate-grid: true
 mask-mirror-indices: false
 image-filter: 'filter_uv_uniform'
 grid-spectral: false
@@ -140,12 +141,10 @@ description: ~  # Add a string name here to name your run
 pad-uv-image: 1.
 ring-radius-multi: 10.
 export-images: true
+save-beam: true
+save-skymodel: true
+save-model-uv: true
 save-visibilities: true
-save-weights: true
-save-model: true
-save-obs: true
-save-params: true
-save-cal: true
 save-healpix-fits: true
 snapshot-healpix-export: true
 

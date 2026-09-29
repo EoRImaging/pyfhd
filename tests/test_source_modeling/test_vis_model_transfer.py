@@ -36,7 +36,7 @@ def before_file(tag, run, data_dir, model_dir):
     # valid path. if it does, return it, otherwise remake it.
     if before_file.exists():
         h5_before = load(before_file)
-        if Path(h5_before["pyfhd_config"]["model_file_path"]).exists():
+        if Path(h5_before["pyfhd_config"]["cal_model_file_path"]).exists():
             return before_file
 
     sav_file = before_file.with_suffix(".sav")
@@ -47,8 +47,8 @@ def before_file(tag, run, data_dir, model_dir):
     # For point_zenith let's test the uvfits we have
     h5_save_dict["pyfhd_config"] = {
         "flag_model": False if "skip_model_flagging" in h5_save_dict["extra"] else True,
-        "model_file_type": "uvfits" if tag == "point_zenith" else "sav",
-        "model_file_path": (
+        "cal_model_file_type": "uvfits" if tag == "point_zenith" else "sav",
+        "cal_model_file_path": (
             str(Path(model_dir, f"{tag}.uvfits"))
             if tag == "point_zenith"
             else str(model_dir)
