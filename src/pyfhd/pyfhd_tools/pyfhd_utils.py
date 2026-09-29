@@ -1,9 +1,9 @@
 import logging
 import subprocess  # nosec B404
+import sys
 from copy import deepcopy
 from datetime import timedelta
 from math import factorial, pi
-from sys import exit
 
 import h5py
 import numpy as np
@@ -43,7 +43,7 @@ logger = logging.getLogger(__name__)
 
 @njit
 def get_bins(
-    min: int | float, max: int | float, bin_size: int
+    min_val: int | float, max_val: int | float, bin_size: int
 ) -> NDArray[np.float64 | np.int64]:
     """
     Calculates the bins for the histogram and reverse indices based on a
@@ -54,9 +54,9 @@ def get_bins(
 
     Parameters
     ----------
-    min : int | float
+    min_val : int | float
         The minimum chosen for the histogram
-    max : int | float
+    max_val : int | float
         The maximum chosen for the histogram
     bin_size : int
         The bin size chosen for the histogram. This histogram always uses bins
@@ -75,15 +75,15 @@ def get_bins(
     get_ri: Calculates the reverse indices only
     """
 
-    return np.arange(min, max + bin_size, bin_size)
+    return np.arange(min_val, max_val + bin_size, bin_size)
 
 
 @njit
 def get_hist(
     data: NDArray[np.floating | np.integer | np.complexfloating],
     bins: NDArray[np.float64 | np.int64],
-    min: int | float,
-    max: int | float,
+    min_val: int | float,
+    max_val: int | float,
 ) -> NDArray[np.int64]:
     """
     Calculates the histogram based on the given bins and data, taking into account
@@ -95,9 +95,9 @@ def get_hist(
         A NumPy array that is of one dtype float, int, or complex. Cannot be object
     bins : NDArray[np.float64 | np.int64]
         A NumPy array of bins for the histogram
-    min : int | float
+    min_val : int | float
         The minimum set for the data
-    max : int | float
+    max_val : int | float
         The maximum set for the data
 
     Returns
@@ -129,7 +129,7 @@ def get_hist(
     # Now loop through the data
     for idx in range(data.size):
         # Check if its inside the range we set
-        if data[idx] < min or data[idx] > max:
+        if data[idx] < min_val or data[idx] > max_val:
             continue
         # Calculate the index for indices and histogram
         bin_i = int(n * (data[idx] - bin_min) / bin_divider)
@@ -143,8 +143,8 @@ def get_ri(
     data: NDArray[np.floating | np.integer | np.complexfloating],
     bins: NDArray[np.float64 | np.int64],
     hist: NDArray[np.int64],
-    min: int | float,
-    max: int | float,
+    min_val: int | float,
+    max_val: int | float,
 ) -> NDArray[np.int64]:
     """
     Calculates the reverse indices of a data and histogram.
@@ -196,9 +196,9 @@ def get_ri(
         A NumPy array containing the bins for the histogram
     hist : NDArray[np.int64]
         A NumPy array containing the histogram
-    min : int | float
+    min_val : int | float
         The minimum for the dataset
-    max : int | float
+    max_val : int | float
         The maximum for the dataset
 
     Returns
@@ -225,8 +225,8 @@ def get_ri(
     data_idx = bin_l + 1
     first_v = [bin_l + 1]
     # Add the bins
-    for bin in hist:
-        data_idx += bin
+    for bin_i in hist:
+        data_idx += bin_i
         first_v.append(data_idx)
     # Setup the reverse indices
     ri = np.zeros(bin_l + 1 + data.size, dtype=np.int64)
@@ -245,7 +245,7 @@ def get_ri(
     counter = 0
     for idx in range(data.size):
         # Check if its inside the range we set
-        if data[idx] < min or data[idx] > max:
+        if data[idx] < min_val or data[idx] > max_val:
             counter += 1
             continue
         # Calculate the index for indices and histogram
@@ -261,8 +261,8 @@ def histogram(
     data: NDArray[np.floating | np.integer | np.complexfloating],
     bin_size: int = 1,
     num_bins: int | None = None,
-    min: int | float | None = None,
-    max: int | float | None = None,
+    min_val: int | float | None = None,
+    max_val: int | float | None = None,
 ) -> tuple[NDArray[np.int64], NDArray[np.float64 | np.int64], NDArray[np.int64]]:
     """
     The histogram function combines the use of the get_bins, get_hist and get_ri
@@ -278,9 +278,9 @@ def histogram(
         Sets the bin size for this histogram, by default 1
     num_bins : int | None, optional
         Set the number of bins this does override bin_size completely, by default None
-    min :  int | float | None, optional
+    min_val :  int | float | None, optional
         Set a minimum for the dataset, by default None
-    max :  int | float | None, optional
+    max_val :  int | float | None, optional
         Set a maximum for the dataset, by default None
 
     Returns
@@ -300,34 +300,34 @@ def histogram(
     """
 
     # If the minimum has not been set, set it
-    if min is None:
-        min = np.min(data)
+    if min_val is None:
+        min_val = np.min(data)
     # If the maximum has not been set, set it
     # Check if the max argument was used, set to True, if we set max here by
     # data turn it off.
-    if max is None:
-        max = np.max(data)
+    if max_val is None:
+        max_val = np.max(data)
     # If the number of bins has been set use that
     if num_bins is not None:
-        bin_size = (max - min) / num_bins
+        bin_size = (max_val - min_val) / num_bins
     # Need to add checks if max is below min or max below min
-    if min > max:
-        max = min
-    if max < min:
-        min = max
+    if min_val > max_val:
+        max_val = min_val
+    if max_val < min_val:
+        min_val = max_val
     # IDL uses the bin_size as equal throughout min to max
-    bins = get_bins(min, max, bin_size)
+    bins = get_bins(min_val, max_val, bin_size)
     # However, if we set a max, we must adjust the last bin to max according to
     # IDL specifications
     # And we only do this in the case max was by an argument
-    if (bins[-1] > max) or num_bins is not None:
+    if (bins[-1] > max_val) or num_bins is not None:
         bins = bins[:-1]
     # Flatten the data
     data_flat = data.flatten()
     # Get the histogram
-    hist = get_hist(data_flat, bins, min, max)
+    hist = get_hist(data_flat, bins, min_val, max_val)
     # Get the reverse indices
-    ri = get_ri(data_flat, bins, hist, min, max)
+    ri = get_ri(data_flat, bins, hist, min_val, max_val)
     # Return
     return hist, bins, ri
 
@@ -832,7 +832,7 @@ def array_match(
         min_use = np.min([np.min(array_1), np.min(array_2)])
         max_use = np.max([np.max(array_1), np.max(array_2)])
         # Also compute the histogram for array_2
-        hist2, _, ri2 = histogram(array_2, min=min_use, max=max_use)
+        hist2, _, ri2 = histogram(array_2, min_val=min_use, max_val=max_use)
     else:
         # If the second array wasn't supplied
         min_use = np.min(array_1)
@@ -840,7 +840,7 @@ def array_match(
         # Supply a second hist
         hist2 = np.arange(max_use - min_use + 1)
     # Get the histogram for the first
-    hist1, _, ri1 = histogram(array_1, min=min_use, max=max_use)
+    hist1, _, ri1 = histogram(array_1, min_val=min_use, max_val=max_use)
     # Arrays should be the same size, does addition
     hist_combined = hist1 + hist2
     bins = np.where(hist_combined > 0)
@@ -849,7 +849,7 @@ def array_match(
     hist_v1, bins_v1, _ = histogram(bins + min_use)
     omin = bins_v1[0]
     omax = bins_v1[-1]
-    hist_v2, _, _ = histogram(value_match, min=omin, max=omax)
+    hist_v2, _, _ = histogram(value_match, min_val=omin, max_val=omax)
     vals = np.nonzero(np.bitwise_and(hist_v1, hist_v2))[0] + omin - min_use
     n_match = vals.size
 
@@ -1301,7 +1301,7 @@ def vis_weights_update(
         obs["n_vis"] = 0
         return vis_weights, obs
 
-    bin_n, _, _ = histogram(xmin + ymin * obs["dimension"], min=0)
+    bin_n, _, _ = histogram(xmin + ymin * obs["dimension"], min_val=0)
     obs["n_vis"] = np.sum(bin_n)
 
     obs["n_time_flag"] = np.sum(1 - obs["baseline_info"]["time_use"])
@@ -1542,7 +1542,7 @@ def reshape_and_average_in_time(
     new_shape = (n_freq, n_time, n_baselines)
 
     if vis_weights.shape != new_shape:
-        exit(
+        sys.exit(
             f"Attempting to use weights with shape {vis_weights.shape} in "
             "`reshape_and_average_in_time`, this is not allowed"
         )
@@ -1629,7 +1629,7 @@ def region_grow(
     # Get the histogram of the labels to ascertain the neighbours we will be
     # interested in
     if np.size(roiPixels) > 1:
-        labels, _, _ = histogram(labelArray.flat[roiPixels], min=0)
+        labels, _, _ = histogram(labelArray.flat[roiPixels], min_val=0)
         labels = np.nonzero(labels != 0)[0]
         nLabels = labels.size
     else:
@@ -1646,7 +1646,7 @@ def region_grow(
     if nLabels:
         labels -= 1
     # Get a histogram of all the labels
-    labelHist, _, revInd = histogram(labelArray, min=1)
+    labelHist, _, revInd = histogram(labelArray, min_val=1)
     # Get the number of pixels we will be growing to
     nPixels = np.sum(labelHist[labels]) if nLabels else 0
     # If we have any pixels to grow, then grow
@@ -1710,7 +1710,7 @@ def crosspol_split_real_imaginary(
 
 def spectral_window(
     n_samples: int,
-    type: str = "Blackman-Harris",
+    window_type: str = "Blackman-Harris",
     periodic: bool = False,
     fractional_size: float | None = None,
 ) -> NDArray[np.floating]:
@@ -1725,7 +1725,7 @@ def spectral_window(
     ----------
     n_samples : int
         Length of window function.
-    type : str
+    window_type : str
         Window function type. One of: Hann, Hamming, Blackman, Nutall, Blackman-Nutall,
         Blackman-Harris, Blackman-Harris^2, Kaiser3, Tukey.
     fractional_size : float
@@ -1748,9 +1748,10 @@ def spectral_window(
         "Kaiser3",
         "Tukey",
     ]
-    if type not in type_list:
+    if window_type not in type_list:
         raise ValueError(
-            f"Spectral window type {type} not recognized. Must be one of {type_list}"
+            f"Spectral window type {window_type} not recognized. Must be one of "
+            f"{type_list}"
         )
 
     if n_samples < 2:
@@ -1766,7 +1767,7 @@ def spectral_window(
     cos_term3 = np.cos(6.0 * np.pi * np.arange(n_use) / (n_use - 1))
     # cos_term4 = np.cos(8.0 * np.pi * np.arange(n_use) / (n_use - 1))
 
-    match type:
+    match window_type:
         case "Hann":
             window = 0.5 * (1 - cos_term1)
         case "Hamming":

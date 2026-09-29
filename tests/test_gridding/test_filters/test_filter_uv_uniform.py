@@ -74,9 +74,9 @@ def test_filter_uv_uniform(filter_uni_before: Path, filter_uni_after: Path):
     h5_before = load(filter_uni_before)
     h5_after = load(filter_uni_after)
 
-    image_uv_filtered, filter = filter_uv_uniform(
+    image_uv_filtered, filter_use = filter_uv_uniform(
         h5_before["image_uv"], h5_before["vis_count"], weights=h5_before["weights"]
     )
 
     npt.assert_allclose(image_uv_filtered, h5_after["image_uv"], atol=2e-5)
-    npt.assert_allclose(filter, h5_after["filter"], atol=1e-8)
+    npt.assert_allclose(filter_use, h5_after["filter"], atol=1e-8)

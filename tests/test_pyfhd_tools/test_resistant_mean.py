@@ -105,43 +105,43 @@ def test_points_zenith_offzenith_and_1088716296(before_file, after_file):
 
 @pytest.mark.github_actions
 def test_res_mean_int():
-    input = np.concatenate([np.arange(20), np.array([100, 200, 300, 400])])
-    assert resistant_mean(input, 2) == 9.5
+    input_array = np.concatenate([np.arange(20), np.array([100, 200, 300, 400])])
+    assert resistant_mean(input_array, 2) == 9.5
 
 
 @pytest.mark.github_actions
 def test_res_mean_float():
-    input = np.concatenate(
+    input_array = np.concatenate(
         [np.arange(0, 20, 0.75), np.array([25.0, -10.75, -30.0, 50])]
     )
-    assert resistant_mean(input, 2) == 9.75
+    assert resistant_mean(input_array, 2) == 9.75
 
 
 @pytest.mark.github_actions
 def test_res_mean_complex_int():
-    input = np.linspace(0 + 2j, 20 + 42j, 21)
-    npt.assert_allclose(resistant_mean(input, 2), 7 + 16j)
+    input_array = np.linspace(0 + 2j, 20 + 42j, 21)
+    npt.assert_allclose(resistant_mean(input_array, 2), 7 + 16j)
 
 
 @pytest.mark.github_actions
 def test_res_mean_complex_float():
-    input = np.linspace(0 + 10j, 10 + 30j, 20)
+    input_array = np.linspace(0 + 10j, 10 + 30j, 20)
     npt.assert_allclose(
-        resistant_mean(input, 3), 2.6315789872949775 + 15.263158017938787j
+        resistant_mean(input_array, 3), 2.6315789872949775 + 15.263158017938787j
     )
 
 
 @pytest.mark.github_actions
 def test_res_mean_complex_large_i():
-    input = np.concatenate(
+    input_array = np.concatenate(
         [np.linspace(0, 19 + 19j, 20), np.array([1 + 100j, 3 + 400j, 5 + 500j])]
     )
-    npt.assert_allclose(resistant_mean(input, 3), 9.5 + 9.5j)
+    npt.assert_allclose(resistant_mean(input_array, 3), 9.5 + 9.5j)
 
 
 @pytest.mark.github_actions
 def test_res_mean_random_large():
-    input = np.concatenate(
+    input_array = np.concatenate(
         [np.linspace(0, 10, 100_000), np.arange(-1_000_000, 1_000_000, 1000)]
     )
-    npt.assert_allclose(resistant_mean(input, 4), 4.9998998746918923, atol=1e-4)
+    npt.assert_allclose(resistant_mean(input_array, 4), 4.9998998746918923, atol=1e-4)

@@ -3,6 +3,15 @@
 ## Unreleased
 
 ### Breaking Changes!
+* Updated function parameter names to avoid shadowing python builtins.
+The affected functions and parameters are:
+`beam_setup.beam_utils.beam_image` (`abs`->`use_abs`);
+`calibration.calibration_utils.calculate_adaptive_gain` (`iter`->`iter_i`);
+`gridding.gridding_utils.dirty_image_generate` (`filter`->`filter_array`);
+`pyfhd_tools.pyfhd_utils.get_bins` (`min`->`min_val` and `max`->`max_val`);
+`pyfhd_tools.pyfhd_utils.get_hist` (`min`->`min_val` and `max`->`max_val`);
+`pyfhd_tools.pyfhd_utils.get_ri` (`min`->`min_val` and `max`->`max_val`);
+`pyfhd_tools.pyfhd_utils.histogram` (`min`->`min_val` and `max`->`max_val`);
 * uv plane and image axes have been transposed to put the x axis before the y axis.
 This should be transparent to most users, but could cause inconsistencies with
 partial re-running of pyfhd jobs from before this change.

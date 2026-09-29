@@ -229,8 +229,12 @@ def vis_calibrate_subroutine(
         baseline_weight = np.sum(weight, axis=0)
         freq_use = np.where((freq_weight > 0) & (freq_use_flag > 0))[0]
         baseline_use = np.nonzero(baseline_weight)
-        hist_tile_A, _, riA = histogram(tile_A_i[baseline_use], min=0, max=n_tile - 1)
-        hist_tile_B, _, riB = histogram(tile_B_i[baseline_use], min=0, max=n_tile - 1)
+        hist_tile_A, _, riA = histogram(
+            tile_A_i[baseline_use], min_val=0, max_val=n_tile - 1
+        )
+        hist_tile_B, _, riB = histogram(
+            tile_B_i[baseline_use], min_val=0, max_val=n_tile - 1
+        )
         tile_use = np.where(((hist_tile_A + hist_tile_B) > 0) & (tile_use_flag > 0))[0]
         tile_flag = np.where(((hist_tile_A + hist_tile_B) == 0) & (tile_use_flag == 0))[
             0

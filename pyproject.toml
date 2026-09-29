@@ -92,6 +92,7 @@ select = [
     "W", # pycodestyle warnings
     "F", # Pyflakes
     "B", # flake8-bugbear
+    "A", # flake8-builtins
 ]
 ignore = [
     "B028", # no-explicit-stacklevel for warnings

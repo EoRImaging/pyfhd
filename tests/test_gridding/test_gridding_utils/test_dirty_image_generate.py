@@ -89,7 +89,7 @@ def test_dirty_image_generate(dirty_before: Path, dirty_after: Path):
         not_real=h5_before["not_real"],
         pad_uv_image=h5_before["pad_uv_image"],
         weights=h5_before["weights"],
-        filter=h5_before["filter"],
+        filter_array=h5_before["filter"],
         beam_ptr=h5_before["beam_ptr"],
     )
 

@@ -291,7 +291,9 @@ def visibility_degrid(
                     if n_xyf_bin == 1:
                         ind_remap = np.zeros(vis_n, dtype=int)
                     else:
-                        hist_inds_u, _, ri_xyf = histogram(xyf_ui, bin_size=1, min=0)
+                        hist_inds_u, _, ri_xyf = histogram(
+                            xyf_ui, bin_size=1, min_val=0
+                        )
                         ind_remap = ind_ref[ri_xyf[0 : hist_inds_u.size] - ri_xyf[0]]
                     vis_n = n_xyf_bin
                 else:
