@@ -699,7 +699,7 @@ def recarray_to_dict(data: np.recarray | dict) -> dict:
                             list(data[key].shape) + list(data[key].flat[0].shape)
                         )
             except ValueError:
-                data[key] = list(x for x in data[key])
+                data[key] = list(data[key])
     return data
 
 
