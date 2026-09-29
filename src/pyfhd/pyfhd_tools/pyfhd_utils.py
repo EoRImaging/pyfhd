@@ -660,7 +660,7 @@ def rebin(
         # To ensure that we get the result same as IDL
         # it seems to fix the values after every calculation if integer
         if np.issubdtype(a.dtype, np.integer):
-            rebinned = np.fix(rebinned).astype("int")
+            rebinned = np.trunc(rebinned).astype("int")
         # Now get it for the rows
         rebinned = rebinned.mean(1)
         # If we are expecting 1D array ensure it gets returned as a 1D array
@@ -669,7 +669,7 @@ def rebin(
         # To ensure that we get the result same as IDL
         # it seems to fix the values after every calculation if integer
         if np.issubdtype(a.dtype, np.integer):
-            rebinned = np.fix(rebinned).astype("int")
+            rebinned = np.trunc(rebinned).astype("int")
 
     # Otherwise we are expanding
     else:
