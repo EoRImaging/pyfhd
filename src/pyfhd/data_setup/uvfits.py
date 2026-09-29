@@ -1,15 +1,15 @@
 import logging
 from pathlib import Path
 
+import numpy as np
 from astropy.coordinates import EarthLocation
 from astropy.io import fits
 from astropy.io.fits.fitsrec import FITS_rec
 from astropy.io.fits.header import Header
 from astropy.time import Time
-import numpy as np
 from numpy.typing import NDArray
 
-from pyfhd.io.pyfhd_io import save
+from ..io.pyfhd_io import save
 
 logger = logging.getLogger(__name__)
 

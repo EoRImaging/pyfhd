@@ -5,10 +5,10 @@ import numpy as np
 import numpy.testing as npt
 import pytest
 
-from pyfhd.io.pyfhd_io import convert_sav_to_dict, load, recarray_to_dict, save
-from pyfhd.pyfhd_tools.test_utils import get_savs
 from pyfhd.beam_setup.beam_utils import beam_image
 from pyfhd.data.datasets import fetch_data
+from pyfhd.io.pyfhd_io import convert_sav_to_dict, load, recarray_to_dict, save
+from pyfhd.pyfhd_tools.test_utils import get_savs
 
 
 @pytest.fixture

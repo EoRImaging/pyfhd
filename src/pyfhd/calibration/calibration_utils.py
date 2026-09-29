@@ -1,19 +1,19 @@
-import importlib_resources
 import logging
 from copy import deepcopy
-
-import numpy as np
-from astropy.io import fits
-from astropy.constants import c
-from numpy.typing import NDArray
 from pathlib import Path
+
+import importlib_resources
+import numpy as np
+from astropy.constants import c
+from astropy.io import fits
+from numpy.typing import NDArray
 from scipy.ndimage import uniform_filter
 
 from pyfhd.pyfhd_tools.pyfhd_utils import (
+    histogram,
+    rebin,
     resistant_mean,
     weight_invert,
-    rebin,
-    histogram,
 )
 
 logger = logging.getLogger(__name__)

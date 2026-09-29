@@ -1,14 +1,14 @@
-import numpy as np
 import logging
-from scipy.io import readsav
-from pyfhd.beam_setup.antenna import init_beam
-from pyfhd.beam_setup.beam_utils import beam_power
-from pyfhd.io.pyfhd_io import recarray_to_dict
 from pathlib import Path
-from pyfhd.io.pyfhd_io import save, load
-from h5py import File
 
-from pyfhd.pyfhd_tools.pyfhd_utils import histogram, rebin, weight_invert
+import numpy as np
+from h5py import File
+from scipy.io import readsav
+
+from ..io.pyfhd_io import load, recarray_to_dict, save
+from ..pyfhd_tools.pyfhd_utils import histogram, rebin, weight_invert
+from .antenna import init_beam
+from .beam_utils import beam_power
 
 logger = logging.getLogger(__name__)
 

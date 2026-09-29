@@ -1,8 +1,10 @@
-from pyfhd.io.pyfhd_io import load, save
 from pathlib import Path
+
 import numpy as np
-from h5py import File, Group, Dataset
 import pytest
+from h5py import Dataset, File, Group
+
+from pyfhd.io.pyfhd_io import load, save
 
 
 @pytest.mark.github_actions

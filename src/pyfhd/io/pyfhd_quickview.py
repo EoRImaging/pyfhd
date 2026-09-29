@@ -2,23 +2,23 @@ import logging
 from datetime import datetime
 from pathlib import Path
 
-from astropy.io import fits
 import numpy as np
+from astropy.io import fits
 from numpy.typing import NDArray
 
-from pyfhd.data_setup.obs import update_obs
-from pyfhd.beam_setup.beam_utils import beam_image
-from pyfhd.io.pyfhd_io import save
-from pyfhd.pyfhd_tools.unit_conv import pixel_to_radec
-from pyfhd.pyfhd_tools.pyfhd_utils import (
+from ..beam_setup.beam_utils import beam_image
+from ..data_setup.obs import update_obs
+from ..gridding.gridding_utils import dirty_image_generate
+from ..plotting.fits_image import plot_fits_image
+from ..pyfhd_tools.pyfhd_utils import (
+    crosspol_split_real_imaginary,
     meshgrid,
     rebin,
-    weight_invert,
     region_grow,
-    crosspol_split_real_imaginary,
+    weight_invert,
 )
-from pyfhd.gridding.gridding_utils import dirty_image_generate
-from pyfhd.plotting.fits_image import plot_fits_image
+from ..pyfhd_tools.unit_conv import pixel_to_radec
+from .pyfhd_io import save
 
 logger = logging.getLogger(__name__)
 

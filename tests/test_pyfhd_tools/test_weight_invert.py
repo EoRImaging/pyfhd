@@ -1,5 +1,6 @@
-import pytest
 import numpy as np
+import pytest
+
 from pyfhd.pyfhd_tools.pyfhd_utils import weight_invert
 
 

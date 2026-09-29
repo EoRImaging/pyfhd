@@ -1,15 +1,15 @@
 import logging
 import os
 from pathlib import Path
-
-from astropy.stats import sigma_clipped_stats
-import matplotlib.pyplot as plt
-import matplotlib.colors as colors
-from matplotlib.figure import Figure
-from matplotlib.colors import Colormap
-import numpy as np
-from numpy.typing import NDArray
 from typing import Literal, cast
+
+import matplotlib.colors as colors
+import matplotlib.pyplot as plt
+import numpy as np
+from astropy.stats import sigma_clipped_stats
+from matplotlib.colors import Colormap
+from matplotlib.figure import Figure
+from numpy.typing import NDArray
 
 logger = logging.getLogger(__name__)
 

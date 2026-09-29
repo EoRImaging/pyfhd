@@ -1,22 +1,21 @@
 import copy
 import logging
-from math import pi, log10
 from pathlib import Path
 
 import numpy as np
+from astropy.coordinates import EarthLocation
 from astropy.io import fits
 from astropy.table import Table
 from astropy.time import Time
-from astropy.coordinates import EarthLocation
 from astropy.units import Quantity
 
-from pyfhd.pyfhd_tools.pyfhd_utils import (
-    idl_argunique,
-    histogram,
+from ..pyfhd_tools.pyfhd_utils import (
     angle_difference,
+    histogram,
+    idl_argunique,
     parallactic_angle,
 )
-from pyfhd.pyfhd_tools.unit_conv import altaz_to_radec, radec_to_pixel, radec_to_altaz
+from ..pyfhd_tools.unit_conv import altaz_to_radec, radec_to_altaz, radec_to_pixel
 
 logger = logging.getLogger(__name__)
 
@@ -170,7 +169,7 @@ def create_obs(
 
     # Determine the imaging parameters to use
     if pyfhd_config["FoV"] is not None:
-        obs["kpix"] = (180 / pi) / pyfhd_config["FoV"]
+        obs["kpix"] = (180 / np.pi) / pyfhd_config["FoV"]
     if pyfhd_config["kbinsize"] is None:
         obs["kpix"] = 0.5
     else:
@@ -180,7 +179,7 @@ def create_obs(
     # in x direction (dimension)
     if pyfhd_config["dimension"] is None and pyfhd_config["elements"] is None:
         obs["dimension"] = 2 ** int(
-            (log10((2 * max_baseline) / pyfhd_config["kpix"]) / log10(2))
+            (np.log10((2 * max_baseline) / pyfhd_config["kpix"]) / np.log10(2))
         )
         obs["elements"] = obs["dimension"]
     elif pyfhd_config["dimension"] is not None and pyfhd_config["elements"] is None:
@@ -195,7 +194,7 @@ def create_obs(
     # Ensure both dimension and elements are ints to prevent issues down the pipeline
     obs["dimension"] = int(obs["dimension"])
     obs["elements"] = int(obs["elements"])
-    obs["degpix"] = (180 / pi) / (obs["kpix"] * pyfhd_config["dimension"])
+    obs["degpix"] = (180 / np.pi) / (obs["kpix"] * pyfhd_config["dimension"])
 
     # Set the max and min baseline
     max_baseline_inds = np.where(
@@ -243,7 +242,7 @@ def create_obs(
 
     # Set the last of obs values
     if pyfhd_config["dft_threshold"]:
-        obs["dft_threshold"] = 1 / (2 * pi) ** 2 * obs["dimension"]
+        obs["dft_threshold"] = 1 / (2 * np.pi) ** 2 * obs["dimension"]
     else:
         obs["dft_threshold"] = 0
     obs["degrid_spectral_terms"] = 0

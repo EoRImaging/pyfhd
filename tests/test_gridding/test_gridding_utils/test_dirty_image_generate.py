@@ -1,10 +1,12 @@
-import pytest
 from os import environ as env
 from pathlib import Path
-from pyfhd.gridding.gridding_utils import dirty_image_generate
-from pyfhd.pyfhd_tools.test_utils import get_data_items
+
+import pytest
 from numpy.testing import assert_allclose
-from pyfhd.io.pyfhd_io import save, load
+
+from pyfhd.gridding.gridding_utils import dirty_image_generate
+from pyfhd.io.pyfhd_io import load, save
+from pyfhd.pyfhd_tools.test_utils import get_data_items
 
 
 @pytest.fixture

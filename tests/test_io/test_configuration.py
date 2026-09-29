@@ -1,12 +1,12 @@
-import importlib_resources
 import sys
 import time
 
 import configargparse
+import importlib_resources
 import pytest
 
-from pyfhd.pyfhd_tools.pyfhd_setup import pyfhd_parser, pyfhd_setup
 from pyfhd.pyfhd import setup_directory
+from pyfhd.pyfhd_tools.pyfhd_setup import pyfhd_parser, pyfhd_setup
 
 
 @pytest.mark.github_actions

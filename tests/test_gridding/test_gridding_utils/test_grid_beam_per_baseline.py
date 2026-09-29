@@ -1,11 +1,12 @@
-from pyfhd.io.pyfhd_io import recarray_to_dict
-import pytest
 from os import environ as env
 from pathlib import Path
-from pyfhd.gridding.gridding_utils import grid_beam_per_baseline
-from pyfhd.pyfhd_tools.test_utils import get_data, get_data_items
-from pyfhd.io.pyfhd_io import save, load
+
+import pytest
 from numpy.testing import assert_allclose
+
+from pyfhd.gridding.gridding_utils import grid_beam_per_baseline
+from pyfhd.io.pyfhd_io import load, recarray_to_dict, save
+from pyfhd.pyfhd_tools.test_utils import get_data, get_data_items
 
 
 @pytest.fixture

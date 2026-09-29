@@ -4,8 +4,8 @@ import warnings
 import numpy as np
 from numpy.typing import NDArray
 
-from pyfhd.calibration.calibration_utils import calculate_adaptive_gain
-from pyfhd.pyfhd_tools.pyfhd_utils import weight_invert, histogram, idl_median
+from ..pyfhd_tools.pyfhd_utils import histogram, idl_median, weight_invert
+from .calibration_utils import calculate_adaptive_gain
 
 logger = logging.getLogger(__name__)
 

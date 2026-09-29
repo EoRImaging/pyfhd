@@ -1,8 +1,9 @@
-import numpy as np
-from pyfhd.pyfhd_tools.test_utils import get_data_items
-from pyfhd.pyfhd_tools.pyfhd_utils import array_match
-import pytest
 import importlib_resources
+import numpy as np
+import pytest
+
+from pyfhd.pyfhd_tools.pyfhd_utils import array_match
+from pyfhd.pyfhd_tools.test_utils import get_data_items
 
 
 @pytest.fixture

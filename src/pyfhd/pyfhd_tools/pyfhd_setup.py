@@ -1,16 +1,16 @@
 import argparse
-import importlib_resources
 import logging
 import re
-import sys
 import shutil
+import sys
 import time
-from glob import glob
 from contextlib import contextmanager
+from glob import glob
 from importlib.metadata import version
 from pathlib import Path
 
 import configargparse
+import importlib_resources
 import yaml
 
 logger = logging.getLogger(__name__)

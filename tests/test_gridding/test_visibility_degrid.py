@@ -1,10 +1,10 @@
+import copy
 from os import environ as env
 from pathlib import Path
-import copy
 
-import pytest
 import numpy as np
 import numpy.testing as npt
+import pytest
 
 from pyfhd.data.datasets import fetch_data
 from pyfhd.gridding.visibility_degrid import visibility_degrid
