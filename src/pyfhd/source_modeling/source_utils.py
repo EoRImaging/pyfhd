@@ -211,7 +211,7 @@ def generate_source_cal_skymodel(
     # Add some columns to the object to handle selections on extended sources
     # putting them on the object helps with selects
     skymodel.add_extra_columns(
-        names=["ra_deg_use", "dec_deg_use", "flux_I_use"],
+        names=["ra_deg_use", "dec_deg_use", "flux_unpol_use"],
         values=[skymodel.ra.deg, skymodel.dec.deg, skymodel.stokes[0, 0]],
     )
 
@@ -235,19 +235,19 @@ def generate_source_cal_skymodel(
                 ra_vals[ra_vals > np.pi] -= 360
 
             avg_ra = np.average(
-                ra_vals, weights=skymodel.extra_columns["flux_I_use"][wh_src]
+                ra_vals, weights=skymodel.extra_columns["flux_unpol_use"][wh_src]
             )
             if avg_ra < 0:
                 avg_ra += 360
             skymodel.extra_columns["ra_deg_use"][wh_src] = avg_ra
             avg_dec = np.average(
                 skymodel.extra_columns["dec_deg_use"][wh_src],
-                weights=skymodel.extra_columns["flux_I_use"][wh_src],
+                weights=skymodel.extra_columns["flux_unpol_use"][wh_src],
             )
             skymodel.extra_columns["dec_deg_use"][wh_src] = avg_dec
 
-            total_I_flux = skymodel.extra_columns["flux_I_use"][wh_src].sum()
-            skymodel.extra_columns["flux_I_use"][wh_src] = total_I_flux
+            total_unpol_flux = skymodel.extra_columns["flux_unpol_use"][wh_src].sum()
+            skymodel.extra_columns["flux_unpol_use"][wh_src] = total_unpol_flux
 
     ra0 = obs["obsra"]
     dec0 = obs["obsdec"]
@@ -334,17 +334,19 @@ def generate_source_cal_skymodel(
 
                 avg_x = np.average(
                     skymodel.extra_columns["x_use"][wh_src],
-                    weights=skymodel.extra_columns["flux_I_use"][wh_src],
+                    weights=skymodel.extra_columns["flux_unpol_use"][wh_src],
                 )
                 skymodel.extra_columns["x_use"][wh_src] = avg_x
                 avg_y = np.average(
                     skymodel.extra_columns["y_use"][wh_src],
-                    weights=skymodel.extra_columns["flux_I_use"][wh_src],
+                    weights=skymodel.extra_columns["flux_unpol_use"][wh_src],
                 )
                 skymodel.extra_columns["y_use"][wh_src] = avg_y
 
-                total_I_flux = skymodel.extra_columns["flux_I_use"][wh_src].sum()
-                skymodel.extra_columns["flux_I_use"][wh_src] = total_I_flux
+                total_unpol_flux = skymodel.extra_columns["flux_unpol_use"][
+                    wh_src
+                ].sum()
+                skymodel.extra_columns["flux_unpol_use"][wh_src] = total_unpol_flux
 
             if no_extend:
                 keep_comp = np.full((skymodel.Ncomponents,), True)
@@ -370,19 +372,19 @@ def generate_source_cal_skymodel(
                 skymodel.extended_model_group = None
 
         if flux_threshold is not None:
-            flux_I_use = skymodel.extra_columns["flux_I_use"]
+            flux_unpol_use = skymodel.extra_columns["flux_unpol_use"]
             if flux_threshold < 0:
                 # interpret negative flux thresholds as upper bounds.
                 # Weird, but what FHD does
-                flux_I_use *= -1
+                flux_unpol_use *= -1
 
             src_use = np.nonzero(
                 (skymodel.extra_columns["x_use"] >= fft_alias_range)
                 & (skymodel.extra_columns["x_use"] <= dimension - 1 - fft_alias_range)
                 & (skymodel.extra_columns["y_use"] >= fft_alias_range)
                 & (skymodel.extra_columns["y_use"] <= dimension - 1 - fft_alias_range)
-                & (flux_I_use > flux_threshold)
-                & (skymodel.extra_columns["flux_I_use"] != 0)
+                & (flux_unpol_use > flux_threshold)
+                & (skymodel.extra_columns["flux_unpol_use"] != 0)
             )[0]
 
         else:
@@ -391,7 +393,7 @@ def generate_source_cal_skymodel(
                 & (skymodel.extra_columns["x_use"] <= dimension - 1 - fft_alias_range)
                 & (skymodel.extra_columns["y_use"] >= fft_alias_range)
                 & (skymodel.extra_columns["y_use"] <= dimension - 1 - fft_alias_range)
-                & (skymodel.extra_columns["flux_I_use"] != 0)
+                & (skymodel.extra_columns["flux_unpol_use"] != 0)
             )[0]
         n_src_use = src_use.size
         if n_src_use == 0:
@@ -410,9 +412,9 @@ def generate_source_cal_skymodel(
 
             skymodel.select(component_inds=src_use)
 
-            inds_finite = np.nonzero(np.isfinite(skymodel.extra_columns["flux_I_use"]))[
-                0
-            ]
+            inds_finite = np.nonzero(
+                np.isfinite(skymodel.extra_columns["flux_unpol_use"])
+            )[0]
             n_finite = inds_finite.size
             if n_finite == 0:
                 logger.warning(
@@ -449,13 +451,13 @@ def generate_source_cal_skymodel(
                 )
 
                 influence = (
-                    skymodel.extra_columns["flux_I_use"]
+                    skymodel.extra_columns["flux_unpol_use"]
                     * skymodel.extra_columns["beam_I"]
                 )
 
                 # remove the extra columns just used internally
                 skymodel.remove_extra_columns(
-                    ["ra_deg_use", "dec_deg_use", "x_use", "y_use", "flux_I_use"]
+                    ["ra_deg_use", "dec_deg_use", "x_use", "y_use", "flux_unpol_use"]
                 )
 
                 # sort from max to min apparent flux
@@ -463,10 +465,10 @@ def generate_source_cal_skymodel(
                 skymodel._select_along_param_axis({"Ncomponents": order})
 
     if flatten_spectrum:
-        wh_pos_I_flux = np.nonzero(skymodel.stokes[0, 0] > 0)[0]
+        wh_pos_unpol_flux = np.nonzero(skymodel.stokes[0, 0] > 0)[0]
         alpha_avg = np.average(
-            skymodel.spectral_index[wh_pos_I_flux],
-            weights=skymodel.stokes[0, 0, wh_pos_I_flux],
+            skymodel.spectral_index[wh_pos_unpol_flux],
+            weights=skymodel.stokes[0, 0, wh_pos_unpol_flux],
         )
         obs["alpha_avg"] = alpha_avg
         skymodel.spectral_index -= alpha_avg

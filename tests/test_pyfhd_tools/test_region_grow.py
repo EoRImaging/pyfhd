@@ -93,7 +93,7 @@ def after_file(tag, run, subfunc, data_dir):
 
 
 @pytest.mark.github_actions
-def test_simple_1D_region_grow():
+def test_simple_1d_region_grow():
     # Equivalent to doing region_grow([0,0,0,0,5,10,5,0,0,0,0], [5], threshold=[5,10])
     input_array = np.array([0, 0, 0, 0, 5, 10, 5, 0, 0, 0, 0])
     expected = np.array([4, 5, 6])
@@ -103,7 +103,7 @@ def test_simple_1D_region_grow():
 
 
 @pytest.mark.github_actions
-def test_simple_2D_region_grow():
+def test_simple_2d_region_grow():
     # Equivalent to doing:
     # IDL> test = reform(indgen(100)*1., 10,10)
     # IDL> region_grow(test, indgen(10)+45, threshold=[30,70])
@@ -149,7 +149,7 @@ def test_simple_2D_region_grow():
     npt.assert_array_equal(output, expected)
 
 
-def test_FHD_region_grow(before_file, after_file):
+def test_fhd_region_grow(before_file, after_file):
     if before_file is None or after_file is None:
         pytest.skip(
             "This test has been skipped, likely because we don't have the "
