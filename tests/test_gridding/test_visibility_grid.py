@@ -52,8 +52,9 @@ def before_gridding(data_dir: Path, number: int, request: pytest.FixtureRequest)
 
     if before_gridding.exists():
         h5_before = load(before_gridding, lazy_load=True)
-        after_axes_reorder = (
-            "after_axes_reorder" in h5_before.keys() and h5_before["after_axes_reorder"]
+        after_axes_reorder = bool(
+            "after_axes_reorder" in h5_before.keys()
+            and h5_before["after_axes_reorder"][()]
         )
         h5_before.close()
         if after_axes_reorder:
@@ -172,8 +173,9 @@ def after_gridding(data_dir: Path, number: int, request: pytest.FixtureRequest):
 
     if after_gridding.exists():
         h5_after = load(after_gridding, lazy_load=True)
-        after_axes_reorder = (
-            "after_axes_reorder" in h5_after.keys() and h5_after["after_axes_reorder"]
+        after_axes_reorder = bool(
+            "after_axes_reorder" in h5_after.keys()
+            and h5_after["after_axes_reorder"][()]
         )
         h5_after.close()
         if after_axes_reorder:
@@ -300,8 +302,9 @@ def full_before_gridding(data_dir: Path, full_number: int):
 
     if before_gridding.exists():
         h5_before = load(before_gridding, lazy_load=True)
-        after_axes_reorder = (
-            "after_axes_reorder" in h5_before.keys() and h5_before["after_axes_reorder"]
+        after_axes_reorder = bool(
+            "after_axes_reorder" in h5_before.keys()
+            and h5_before["after_axes_reorder"][()]
         )
         h5_before.close()
         if after_axes_reorder:
@@ -388,8 +391,9 @@ def full_after_gridding(data_dir: Path, full_number: int):
 
     if after_gridding.exists():
         h5_after = load(after_gridding, lazy_load=True)
-        after_axes_reorder = (
-            "after_axes_reorder" in h5_after.keys() and h5_after["after_axes_reorder"]
+        after_axes_reorder = bool(
+            "after_axes_reorder" in h5_after.keys()
+            and h5_after["after_axes_reorder"][()]
         )
         h5_after.close()
         if after_axes_reorder:
@@ -494,8 +498,9 @@ def before_vis_model_freq_gridding(tag, run, data_dir):
     # If the h5 file already exists and has been created, return the path to it
     if before_file.exists() and new_beam_file.exists():
         h5_before = load(before_file, lazy_load=True)
-        after_axes_reorder = (
-            "after_axes_reorder" in h5_before.keys() and h5_before["after_axes_reorder"]
+        after_axes_reorder = bool(
+            "after_axes_reorder" in h5_before.keys()
+            and h5_before["after_axes_reorder"][()]
         )
         h5_before.close()
         if after_axes_reorder:
@@ -622,8 +627,9 @@ def after_vis_model_freq_gridding(tag, run, data_dir):
     # If the h5 file already exists and has been created, return the path to it
     if after_file.exists():
         h5_after = load(after_file, lazy_load=True)
-        after_axes_reorder = (
-            "after_axes_reorder" in h5_after.keys() and h5_after["after_axes_reorder"]
+        after_axes_reorder = bool(
+            "after_axes_reorder" in h5_after.keys()
+            and h5_after["after_axes_reorder"][()]
         )
         h5_after.close()
         if after_axes_reorder:

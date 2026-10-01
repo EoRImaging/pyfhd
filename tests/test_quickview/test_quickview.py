@@ -151,6 +151,10 @@ def test_quickview(before_file, data_dir):
         actual_fits = astropy.io.fits.open(fits)
         actual_header = actual_fits[0].header
         expected_header = expected_fits[0].header
+        # Fix old radec keyword
+        if "RADECSYS" in expected_header:
+            expected_header["RADESYSA"] = expected_header["RADECSYS"]
+            del expected_header["RADECSYS"]
         # Remove keys that are different between the two FITS files
         if expected_header.get("COMMENT") is not None:
             del expected_header["COMMENT"]
@@ -164,14 +168,13 @@ def test_quickview(before_file, data_dir):
             del actual_header["HISTORY"]
         if expected_header.get("HISTORY") is not None:
             del expected_header["HISTORY"]
+
+        # For some files, the expected header is lower precision
+        if expected_header["BITPIX"] == -32:
+            expected_header["BITPIX"] = -64
+
         header_diff = astropy.io.fits.HeaderDiff(
             actual_header, expected_header, atol=2e-4, ignore_comments=["*"]
         )
         print(header_diff.report())
-        # print(actual_header)
-        # print(expected_header)
         assert header_diff.identical
-        # expected_fits_data = expected_fits[0].data
-        # actual_fits_data = actual_fits[0].data
-        # expected_fits_data = np.transpose(expected_fits_data)
-        # npt.assert_allclose(actual_fits_data, expected_fits_data, atol=1e-6)

@@ -25,8 +25,9 @@ def interp_kernel_before(data_dir, number):
 
     if interp_kernel_before.exists():
         h5_before = load(interp_kernel_before, lazy_load=True)
-        after_axes_reorder = (
-            "after_axes_reorder" in h5_before.keys() and h5_before["after_axes_reorder"]
+        after_axes_reorder = bool(
+            "after_axes_reorder" in h5_before.keys()
+            and h5_before["after_axes_reorder"][()]
         )
         h5_before.close()
         if after_axes_reorder:
@@ -56,9 +57,9 @@ def interp_kernel_before(data_dir, number):
 
     h5_save_dict = recarray_to_dict(h5_save_dict)
 
+    h5_save_dict["after_axes_reorder"] = True
     save(interp_kernel_before, h5_save_dict, "before_file")
 
-    h5_save_dict["after_axes_reorder"] = True
     return interp_kernel_before
 
 
