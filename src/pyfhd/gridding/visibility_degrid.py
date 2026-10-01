@@ -93,10 +93,9 @@ def visibility_degrid(
 
     n_spectral = obs["degrid_spectral_terms"]
     interp_flag = pyfhd_config["interpolate_kernel"]
-    if pyfhd_config["conserve_memory"]:
+    if pyfhd_config["conserve_memory"] and pyfhd_config["memory_threshold"] < 1e6:
         # memory threshold is in bytes
-        if pyfhd_config["memory_threshold"] < 1e6:
-            pyfhd_config["memory_threshold"] = 1e8
+        pyfhd_config["memory_threshold"] = 1e8
 
     # If both beam and interp_flag leave a warning, prioritise beam_per_baseline
     if beam_per_baseline and interp_flag:
@@ -180,11 +179,10 @@ def visibility_degrid(
         y = x.copy()
 
     conj_i = np.where(params["vv"] > 0)
-    if conj_i[0].size > 0:
-        if beam_per_baseline:
-            uu[conj_i] = -uu[conj_i]
-            vv[conj_i] = -vv[conj_i]
-            ww[conj_i] = -ww[conj_i]
+    if conj_i[0].size > 0 and beam_per_baseline:
+        uu[conj_i] = -uu[conj_i]
+        vv[conj_i] = -vv[conj_i]
+        ww[conj_i] = -ww[conj_i]
 
     # Create the correct size visibility array
     vis_dimension = n_baselines * n_samples

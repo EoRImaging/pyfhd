@@ -431,7 +431,7 @@ def test_rebin_fl_20_rows(large_data_dir):
     input_array, expected = get_data(large_data_dir, "data_fl.npy", "data_fl_20r.npy")
     threshold = 1e-5
     result = rebin(input_array, (20, 5))
-    assert np.max((result - expected)) < threshold
+    assert np.max(result - expected) < threshold
 
 
 def test_rebin_fl_20_columns(large_data_dir):
@@ -439,7 +439,7 @@ def test_rebin_fl_20_columns(large_data_dir):
     input_array, expected = get_data(large_data_dir, "data_fl.npy", "data_fl_20c.npy")
     threshold = 1e-5
     result = rebin(input_array, (4, 20))
-    assert np.max((result - expected)) < threshold
+    assert np.max(result - expected) < threshold
 
 
 def test_rebin_fl_20_rows_20_columns(large_data_dir):
@@ -449,7 +449,7 @@ def test_rebin_fl_20_rows_20_columns(large_data_dir):
     )
     threshold = 1e-5
     result = rebin(input_array, (20, 20))
-    assert np.max((result - expected)) < threshold
+    assert np.max(result - expected) < threshold
 
 
 def test_rebin_fl_50_columns(large_data_dir):
@@ -457,7 +457,7 @@ def test_rebin_fl_50_columns(large_data_dir):
     input_array, expected = get_data(large_data_dir, "data_fl.npy", "data_fl_50c.npy")
     threshold = 1e-5
     result = rebin(input_array, (4, 50))
-    assert np.max((result - expected)) < threshold
+    assert np.max(result - expected) < threshold
 
 
 def test_rebin_fl_40_rows(large_data_dir):
@@ -465,7 +465,7 @@ def test_rebin_fl_40_rows(large_data_dir):
     input_array, expected = get_data(large_data_dir, "data_fl.npy", "data_fl_40r.npy")
     threshold = 1e-5
     result = rebin(input_array, (40, 5))
-    assert np.max((result - expected)) < threshold
+    assert np.max(result - expected) < threshold
 
 
 def test_rebin_fl_2000(large_data_dir):
@@ -473,7 +473,7 @@ def test_rebin_fl_2000(large_data_dir):
     input_array, expected = get_data(large_data_dir, "data_fl.npy", "data_fl_2000.npy")
     threshold = 1e-5
     result = rebin(input_array, (40, 50))
-    assert np.max((result - expected)) < threshold
+    assert np.max(result - expected) < threshold
 
 
 # SAMPLE Testing

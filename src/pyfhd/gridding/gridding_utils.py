@@ -255,14 +255,13 @@ def baseline_grid_locations(
         ymin[range_test_y_i] = -1
 
     # Flag baselines which fall outside the uv plane
-    if not fill_model_visibilities:
-        if np.size(flag_dist_baseline) > 0:
-            # If baselines fall outside the desired min/max baseline range at all
-            # during the frequency range then set their maximum pixel value to
-            # -1 to exclude them
-            xmin[:, flag_dist_baseline] = -1
-            ymin[:, flag_dist_baseline] = -1
-            del flag_dist_baseline
+    if not fill_model_visibilities and np.size(flag_dist_baseline) > 0:
+        # If baselines fall outside the desired min/max baseline range at all
+        # during the frequency range then set their maximum pixel value to
+        # -1 to exclude them
+        xmin[:, flag_dist_baseline] = -1
+        ymin[:, flag_dist_baseline] = -1
+        del flag_dist_baseline
 
     # Normally we check vis_weight_switch, but its always true here so... do this
     if fill_model_visibilities:
@@ -274,11 +273,10 @@ def baseline_grid_locations(
             xmin[flag_i] = -1
             ymin[flag_i] = -1
 
-    if mask_mirror_indices:
+    if mask_mirror_indices and conj_i.size > 0:
         # Option to exclude v-axis mirrored baselines
-        if conj_i.size > 0:
-            xmin[:, conj_i] = -1
-            ymin[:, conj_i] = -1
+        xmin[:, conj_i] = -1
+        ymin[:, conj_i] = -1
 
     # If xmin or ymin is invalid then adjust the baselines dict as necessary
     if xmin.size == 0 or ymin.size == 0 or np.max([np.max(xmin), np.max(ymin)]) < 0:
@@ -424,49 +422,48 @@ def dirty_image_generate(
 
     # If a filter was supplied as a numpy array (we can adjust this to support
     # different formats)
-    if filter_array is not None:
-        if isinstance(filter_array, np.ndarray):
-            # If the filter is already the right size, use it
-            if np.size(filter_array) == np.size(di_uv_use):
-                di_uv_use *= filter_array
-            # Otherwise use a filter function
-            else:
-                if pyfhd_config["image_filter"] == "filter_uv_uniform":
-                    logger.info("Using filter_uv_uniform for dirty_image_generate")
-                elif pyfhd_config["image_filter"] == "filter_uv_hannning":
-                    logger.warning(
-                        "filter_uv_hanning hasn't been translated yet using "
-                        "filter_uv_uniform for dirty_image_generate instead"
-                    )
-
-                elif pyfhd_config["image_filter"] == "filter_uv_natural":
-                    logger.warning(
-                        "filter_uv_natural hasn't been translated yet using "
-                        "filter_uv_uniform for dirty_image_generate instead"
-                    )
-
-                elif pyfhd_config["image_filter"] == "filter_uv_radial":
-                    logger.warning(
-                        "filter_uv_radial hasn't been translated yet using "
-                        "filter_uv_uniform for dirty_image_generate instead"
-                    )
-
-                elif pyfhd_config["image_filter"] == "filter_uv_tapered_uniform":
-                    logger.warning(
-                        "filter_uv_tapered_uniform hasn't been translated yet "
-                        "using filter_uv_uniform for dirty_image_generate instead"
-                    )
-
-                elif pyfhd_config["image_filter"] == "filter_uv_optimal":
-                    logger.warning(
-                        "filter_uv_optimal hasn't been translated yet using "
-                        "filter_uv_uniform for dirty_image_generate instead"
-                    )
-                # Since we only use filter_uniform at the moment, put the call
-                # to it here.
-                di_uv_use, filter_array = filters.filter_uv_uniform(
-                    di_uv_use, vis_count=uniform_filter_uv, weights=weights
+    if filter_array is not None and isinstance(filter_array, np.ndarray):
+        # If the filter is already the right size, use it
+        if np.size(filter_array) == np.size(di_uv_use):
+            di_uv_use *= filter_array
+        # Otherwise use a filter function
+        else:
+            if pyfhd_config["image_filter"] == "filter_uv_uniform":
+                logger.info("Using filter_uv_uniform for dirty_image_generate")
+            elif pyfhd_config["image_filter"] == "filter_uv_hannning":
+                logger.warning(
+                    "filter_uv_hanning hasn't been translated yet using "
+                    "filter_uv_uniform for dirty_image_generate instead"
                 )
+
+            elif pyfhd_config["image_filter"] == "filter_uv_natural":
+                logger.warning(
+                    "filter_uv_natural hasn't been translated yet using "
+                    "filter_uv_uniform for dirty_image_generate instead"
+                )
+
+            elif pyfhd_config["image_filter"] == "filter_uv_radial":
+                logger.warning(
+                    "filter_uv_radial hasn't been translated yet using "
+                    "filter_uv_uniform for dirty_image_generate instead"
+                )
+
+            elif pyfhd_config["image_filter"] == "filter_uv_tapered_uniform":
+                logger.warning(
+                    "filter_uv_tapered_uniform hasn't been translated yet "
+                    "using filter_uv_uniform for dirty_image_generate instead"
+                )
+
+            elif pyfhd_config["image_filter"] == "filter_uv_optimal":
+                logger.warning(
+                    "filter_uv_optimal hasn't been translated yet using "
+                    "filter_uv_uniform for dirty_image_generate instead"
+                )
+            # Since we only use filter_uniform at the moment, put the call
+            # to it here.
+            di_uv_use, filter_array = filters.filter_uv_uniform(
+                di_uv_use, vis_count=uniform_filter_uv, weights=weights
+            )
 
     # Resize the dirty image by the factor resize
     if resize is not None:
