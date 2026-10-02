@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 def truncate_colormap(cmap, *, minval=0.0, maxval=1.0, nseg=100):
     new_cmap = colors.LinearSegmentedColormap.from_list(
-        "trunc({n},{a:.2f},{b:.2f})".format(n=cmap.name, a=minval, b=maxval),
+        f"trunc({cmap.name},{minval:.2f},{maxval:.2f})",
         cmap(np.linspace(minval, maxval, nseg)),
     )
     return new_cmap

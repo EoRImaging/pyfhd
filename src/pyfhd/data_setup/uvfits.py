@@ -152,7 +152,7 @@ def extract_header(
 
     # Setup params list and names
     param_list = []
-    ptype_list = ["PTYPE{}".format(i) for i in range(1, pyfhd_header["n_params"] + 1)]
+    ptype_list = [f"PTYPE{i}" for i in range(1, pyfhd_header["n_params"] + 1)]
     for ptype in ptype_list:
         param_list.append(params_header[ptype].strip())
     param_names = []
