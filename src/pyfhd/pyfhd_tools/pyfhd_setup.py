@@ -1751,7 +1751,7 @@ def pyfhd_setup(pyfhd_config: dict, run_time: float, output_dir_exists: bool) ->
     pyfhd_config["input_path"] = Path(pyfhd_config["input_path"]).expanduser().resolve()
     if not pyfhd_config["input_path"].exists():
         logger.error(
-            f"{pyfhd_config["input_path"]} doesn't exist, please check your input path"
+            f"{pyfhd_config['input_path']} doesn't exist, please check your input path"
         )
         errors += 1
     obs_uvfits_path = Path(
