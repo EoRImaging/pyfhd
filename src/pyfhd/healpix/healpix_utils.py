@@ -191,7 +191,8 @@ def healpix_cnv_generate(
         xv_hpx, yv_hpx = radec_to_pixel(pix_ra, pix_dec, obs["astr"])
     else:
         cen_coords = ang2vec(obs["obsra"], obs["obsdec"], lonlat=True)
-        hpx_inds = query_disc(nside, cen_coords, hpx_radius)
+        # healpy expects the radius in radians, but hpx_radius is in degrees
+        hpx_inds = query_disc(nside, cen_coords, np.radians(hpx_radius))
         pix_coords = np.vstack(pix2vec(nside, hpx_inds)).T
         pix_ra, pix_dec = vec2ang(pix_coords, lonlat=True)
         xv_hpx, yv_hpx = radec_to_pixel(pix_ra, pix_dec, obs["astr"])
