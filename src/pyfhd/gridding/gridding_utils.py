@@ -715,8 +715,9 @@ def grid_beam_per_baseline(
 
 
 def visibility_count(
+    *,
     obs: dict,
-    psf: dict,
+    psf: dict | h5py.File,
     params: dict,
     vis_weights: NDArray[np.float64],
     fi_use: NDArray[np.integer] | None = None,
@@ -732,6 +733,8 @@ def visibility_count(
     ----------
     obs : dict
         Observation metadata dictionary
+    psf : dict | h5py.File
+        Beam metadata dictionary
     params : dict
         Visibility metadata dictionary
     vis_weights : NDArray[np.float64]

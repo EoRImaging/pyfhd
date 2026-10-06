@@ -39,6 +39,8 @@ the new `analytic-beam-yaml` option to configure them.
 * Added handling for `~` in paths in config yamls.
 
 ### Bug Fixes
+* Fixed a bug in `filter_uv_uniform` that caused errors if the optional vis_count
+parameter was not passed.
 * Fixed a bug in degridding where the interpolate_kernel option was ignored.
 * Fixed indexing bugs in gridding and degridding when baselines are entirely flagged.
 * Fixed a bug in gridding where the wrong frequency index (and possibly sometimes
