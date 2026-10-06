@@ -1,10 +1,12 @@
-from numpy.testing import assert_allclose
 from pathlib import Path
-import pytest
-from pyfhd.gridding.gridding_utils import interpolate_kernel
-from pyfhd.pyfhd_tools.test_utils import get_data_items
-from pyfhd.io.pyfhd_io import save, load, recarray_to_dict
+
 import importlib_resources
+import pytest
+from numpy.testing import assert_allclose
+
+from pyfhd.gridding.gridding_utils import interpolate_kernel
+from pyfhd.io.pyfhd_io import load, recarray_to_dict, save
+from pyfhd.pyfhd_tools.test_utils import get_data_items
 
 
 @pytest.fixture

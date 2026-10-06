@@ -1,18 +1,18 @@
-import importlib_resources
 import logging
 from typing import Literal
 
+import importlib_resources
 import numpy as np
-from astropy.constants import c
-from astropy.coordinates import SkyCoord, EarthLocation
 from astropy import units
+from astropy.constants import c
+from astropy.coordinates import EarthLocation, SkyCoord
 from astropy.time import Time
 from pyuvdata import BeamInterface, UVBeam
 from scipy.interpolate import interp1d
 
-from ..pyfhd_tools.unit_conv import pixel_to_radec, radec_to_altaz
 from ..pyfhd_tools.pyfhd_utils import parallactic_angle
 from ..pyfhd_tools.types import ComplexArray, FloatArray
+from ..pyfhd_tools.unit_conv import pixel_to_radec, radec_to_altaz
 
 
 def _azza_beam_arrays(image_dim, scale, obs, jdate):

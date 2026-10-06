@@ -1,10 +1,12 @@
-import pytest
-import numpy as np
 from os import environ as env
 from pathlib import Path
+
+import importlib_resources
+import numpy as np
+import pytest
+
 from pyfhd.pyfhd_tools.pyfhd_utils import histogram
 from pyfhd.pyfhd_tools.test_utils import get_data, get_data_items
-import importlib_resources
 
 
 @pytest.fixture

@@ -4,13 +4,13 @@ import h5py
 import numpy as np
 from numpy.typing import NDArray
 
-from pyfhd.gridding.gridding_utils import (
-    interpolate_kernel,
+from ..pyfhd_tools.pyfhd_utils import idl_argunique, l_m_n, rebin, weight_invert
+from .gridding_utils import (
     baseline_grid_locations,
-    grid_beam_per_baseline,
     conjugate_mirror,
+    grid_beam_per_baseline,
+    interpolate_kernel,
 )
-from pyfhd.pyfhd_tools.pyfhd_utils import weight_invert, rebin, l_m_n, idl_argunique
 
 logger = logging.getLogger(__name__)
 

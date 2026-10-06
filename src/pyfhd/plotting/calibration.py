@@ -1,8 +1,9 @@
-import numpy as np
+from pathlib import Path
+
+import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
-import matplotlib
-from pathlib import Path
+import numpy as np
 
 matplotlib.use("pdf")
 

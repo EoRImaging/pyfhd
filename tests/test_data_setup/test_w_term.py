@@ -1,8 +1,10 @@
-import pytest
-import numpy as np
-import numpy.testing as npt
 from os import environ as env
 from pathlib import Path
+
+import numpy as np
+import numpy.testing as npt
+import pytest
+
 from pyfhd.io.pyfhd_io import recarray_to_dict
 from pyfhd.pyfhd_tools.pyfhd_utils import simple_deproject_w_term
 from pyfhd.pyfhd_tools.test_utils import get_savs

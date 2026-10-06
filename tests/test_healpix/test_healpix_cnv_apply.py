@@ -1,12 +1,14 @@
 from os import environ as env
 from pathlib import Path
+
+import h5py
+import importlib_resources
 import numpy as np
 import numpy.testing as npt
 import pytest
-import h5py
-from pyfhd.io.pyfhd_io import convert_sav_to_dict, load, recarray_to_dict, save
+
 from pyfhd.healpix.healpix_utils import healpix_cnv_apply
-import importlib_resources
+from pyfhd.io.pyfhd_io import convert_sav_to_dict, load, recarray_to_dict, save
 
 
 @pytest.fixture

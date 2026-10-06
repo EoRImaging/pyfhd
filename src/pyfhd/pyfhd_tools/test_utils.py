@@ -1,12 +1,12 @@
-from pyfhd.io.pyfhd_io import recarray_to_dict
-import numpy as np
-from scipy.io import readsav
 from pathlib import Path
+
+import numpy as np
 import numpy.testing as npt
-from colorama import Fore
-from colorama import Style
-from pyfhd.io.pyfhd_io import save
+from colorama import Fore, Style
 from numpy.typing import NDArray
+from scipy.io import readsav
+
+from ..io.pyfhd_io import recarray_to_dict, save
 
 
 def get_data(data_dir: Path, data_filename: str, *args: list[str]) -> list:

@@ -1,7 +1,8 @@
+import argparse
+from pathlib import Path
+
 import numpy as np
 from scipy.io import readsav
-from pathlib import Path
-import argparse
 
 
 def splitter(sav_file, save_path):

@@ -1,8 +1,9 @@
-import pytest
-import numpy as np
-from pyfhd.pyfhd_tools.test_utils import get_data_items
-from pyfhd.pyfhd_tools.pyfhd_utils import deriv_coefficients
 import importlib_resources
+import numpy as np
+import pytest
+
+from pyfhd.pyfhd_tools.pyfhd_utils import deriv_coefficients
+from pyfhd.pyfhd_tools.test_utils import get_data_items
 
 
 @pytest.fixture
