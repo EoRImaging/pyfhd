@@ -111,10 +111,10 @@ def create_obs(
         baseline_min = np.min(params["baseline_arr"])
         exponent = np.log(np.min(baseline_min)) / np.log(2)
         antenna_mod_index = 2 ** np.floor(exponent)
-        tile_B_test = baseline_min % antenna_mod_index
+        tile_b_test = baseline_min % antenna_mod_index
         # Check if a bad fit and if autocorrelations or the first tile are missing
-        if (tile_B_test > 1) and (baseline_min % 2 == 1):
-            antenna_mod_index /= 2 ** np.floor(np.log(np.min(tile_B_test)) / np.log(2))
+        if (tile_b_test > 1) and (baseline_min % 2 == 1):
+            antenna_mod_index /= 2 ** np.floor(np.log(np.min(tile_b_test)) / np.log(2))
         baseline_info["tile_a"] = np.floor(params["baseline_arr"] / antenna_mod_index)
         baseline_info["tile_b"] = np.fix(params["baseline_arr"] / antenna_mod_index)
         max_tile = max(np.max(baseline_info["tile_a"]), np.max(baseline_info["tile_b"]))
@@ -352,11 +352,11 @@ def read_metafits(
         )
         hdr = None
         # Simulate the flagging of tiles by taking where tiles don't exist
-        tile_A1 = params["antenna1"]
-        tile_B1 = params["antenna2"]
-        hist_A1, _, _ = histogram(tile_A1, min_val=1, max_val=obs["n_tile"])
-        hist_B1, _, _ = histogram(tile_B1, min_val=1, max_val=obs["n_tile"])
-        hist_AB = hist_A1 + hist_B1
+        tile_a1 = params["antenna1"]
+        tile_b1 = params["antenna2"]
+        hist_a1, _, _ = histogram(tile_a1, min_val=1, max_val=obs["n_tile"])
+        hist_b1, _, _ = histogram(tile_b1, min_val=1, max_val=obs["n_tile"])
+        hist_ab = hist_a1 + hist_b1
         meta["tile_names"] = layout["antenna_names"]
         # if pyuvdata is available, get antenna heights using pyuvdata utils
         try:
@@ -375,7 +375,7 @@ def read_metafits(
             meta["tile_height"] = ant_enu[:, 2]
         except ImportError:
             meta["tile_height"] = np.zeros(obs["n_tile"])
-        tile_use = np.where(hist_AB == 0)[0]
+        tile_use = np.where(hist_ab == 0)[0]
         meta["tile_flag"] = np.zeros(obs["n_tile"], dtype=np.int8)
         if tile_use.size > 0:
             meta["tile_flag"][tile_use] = 1

@@ -1110,20 +1110,20 @@ def vis_cal_polyfit(
                 np.maximum(np.zeros_like(cable_reflections[4]), cable_reflections[4]),
                 np.ones_like(cable_reflections[4]),
             )
-            tile_mode_X = cable_reflections[5]
-            tile_amp_X = cable_reflections[6]
-            tile_phase_X = cable_reflections[7]
-            tile_mode_Y = cable_reflections[8]
-            tile_amp_Y = cable_reflections[9]
-            tile_phase_Y = cable_reflections[10]
+            tile_mode_x = cable_reflections[5]
+            tile_amp_x = cable_reflections[6]
+            tile_phase_x = cable_reflections[7]
+            tile_mode_y = cable_reflections[8]
+            tile_amp_y = cable_reflections[9]
+            tile_phase_y = cable_reflections[10]
 
             # Modes in fourier transform units
             mode_i_arr = np.zeros((cal["n_pol"], obs["n_tile"]))
-            mode_i_arr[0, :] = tile_mode_X * tile_ref_flag
-            mode_i_arr[1, :] = tile_mode_Y * tile_ref_flag
+            mode_i_arr[0, :] = tile_mode_x * tile_ref_flag
+            mode_i_arr[1, :] = tile_mode_y * tile_ref_flag
 
-            amp_arr = np.vstack([tile_amp_X, tile_amp_Y])
-            phase_arr = np.vstack[[tile_phase_X, tile_phase_Y]]
+            amp_arr = np.vstack([tile_amp_x, tile_amp_y])
+            phase_arr = np.vstack[[tile_phase_x, tile_phase_y]]
 
         elif pyfhd_config["cal_reflection_mode_theory"]:
             logger.info(

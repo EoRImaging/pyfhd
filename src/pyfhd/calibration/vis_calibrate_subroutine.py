@@ -113,8 +113,8 @@ def vis_calibrate_subroutine(
     # weights WILL be over-written! (Only for NAN gain solutions)
     vis_weight_ptr_use = vis_weight_ptr
     # tile_a & tile_b contribution indexed from 0
-    tile_A_i = obs["baseline_info"]["tile_a"] - 1
-    tile_B_i = obs["baseline_info"]["tile_b"] - 1
+    tile_a_i = obs["baseline_info"]["tile_a"] - 1
+    tile_b_i = obs["baseline_info"]["tile_b"] - 1
     freq_arr = obs["baseline_info"]["freq"]
     n_baselines = obs["n_baselines"]
     if pyfhd_config["cal_phase_fit_iter"]:
@@ -145,8 +145,8 @@ def vis_calibrate_subroutine(
         if time_average:
             # The visibilities have dimension nfreq x (n_baselines x n_time),
             # which can be reformed to nfreq x n_baselines x n_time
-            tile_A_i = tile_A_i[0:n_baselines]
-            tile_B_i = tile_B_i[0:n_baselines]
+            tile_a_i = tile_a_i[0:n_baselines]
+            tile_b_i = tile_b_i[0:n_baselines]
             # So IDL does reforms as REFORM(x, cols, rows, num_of_col_row_arrays)
             # Python is row-major, so we need to flip that shape that is used in REFORM
             # Although, to get the same results in the shape we want we need to do a few
@@ -229,31 +229,31 @@ def vis_calibrate_subroutine(
         baseline_weight = np.sum(weight, axis=0)
         freq_use = np.where((freq_weight > 0) & (freq_use_flag > 0))[0]
         baseline_use = np.nonzero(baseline_weight)
-        hist_tile_A, _, riA = histogram(
-            tile_A_i[baseline_use], min_val=0, max_val=n_tile - 1
+        hist_tile_a, _, ri_a = histogram(
+            tile_a_i[baseline_use], min_val=0, max_val=n_tile - 1
         )
-        hist_tile_B, _, riB = histogram(
-            tile_B_i[baseline_use], min_val=0, max_val=n_tile - 1
+        hist_tile_b, _, ri_b = histogram(
+            tile_b_i[baseline_use], min_val=0, max_val=n_tile - 1
         )
-        tile_use = np.where(((hist_tile_A + hist_tile_B) > 0) & (tile_use_flag > 0))[0]
-        tile_flag = np.where(((hist_tile_A + hist_tile_B) == 0) & (tile_use_flag == 0))[
+        tile_use = np.where(((hist_tile_a + hist_tile_b) > 0) & (tile_use_flag > 0))[0]
+        tile_flag = np.where(((hist_tile_a + hist_tile_b) == 0) & (tile_use_flag == 0))[
             0
         ]
 
         # Should be able to reduce precision if memory is a concern
-        tile_A_i_use = np.zeros(np.size(baseline_use), dtype=np.int64)
-        tile_B_i_use = np.zeros(np.size(baseline_use), dtype=np.int64)
+        tile_a_i_use = np.zeros(np.size(baseline_use), dtype=np.int64)
+        tile_b_i_use = np.zeros(np.size(baseline_use), dtype=np.int64)
         for tile_i in range(np.size(tile_use)):
-            if hist_tile_A[tile_use[tile_i]] > 0:
+            if hist_tile_a[tile_use[tile_i]] > 0:
                 # Calculate tile contributions for each non-flagged baseline
-                tile_A_i_use[riA[riA[tile_use[tile_i]] : riA[tile_use[tile_i] + 1]]] = (
-                    tile_i
-                )
-            if hist_tile_B[tile_use[tile_i]] > 0:
+                tile_a_i_use[
+                    ri_a[ri_a[tile_use[tile_i]] : ri_a[tile_use[tile_i] + 1]]
+                ] = tile_i
+            if hist_tile_b[tile_use[tile_i]] > 0:
                 # Calculate tile contributions for each non-flagged baseline
-                tile_B_i_use[riB[riB[tile_use[tile_i]] : riB[tile_use[tile_i] + 1]]] = (
-                    tile_i
-                )
+                tile_b_i_use[
+                    ri_b[ri_b[tile_use[tile_i]] : ri_b[tile_use[tile_i] + 1]]
+                ] = tile_i
 
         ref_tile_use = np.where(reference_tile == tile_use)
         if ref_tile_use[0].size == 0:
@@ -291,26 +291,26 @@ def vis_calibrate_subroutine(
             vis_data2 = vis_data2[b_i_use]
             vis_model2 = vis_model2[b_i_use]
 
-            A_ind = np.hstack([tile_A_i_use, tile_B_i_use])
-            A_ind = A_ind[b_i_use]
-            B_ind = np.hstack([tile_B_i_use, tile_A_i_use])
-            B_ind = B_ind[b_i_use]
+            a_ind = np.hstack([tile_a_i_use, tile_b_i_use])
+            a_ind = a_ind[b_i_use]
+            b_ind = np.hstack([tile_b_i_use, tile_a_i_use])
+            b_ind = b_ind[b_i_use]
 
-            A_ind_arr = []
+            a_ind_arr = []
             n_arr = np.zeros(tile_use.size)
             for tile_i in range(tile_use.size):
-                inds = np.where(A_ind == tile_i)[0]
+                inds = np.where(a_ind == tile_i)[0]
                 if inds.size > 1:
-                    A_ind_arr.append(np.reshape(inds, (inds.size, 1)))
+                    a_ind_arr.append(np.reshape(inds, (inds.size, 1)))
                 else:
-                    A_ind_arr.append(-1)
+                    a_ind_arr.append(-1)
                 # NEED SOMETHING MORE IN CASE INDIVIDUAL TILES ARE FLAGGED FOR
                 # ONLY A FEW FREQUENCIES!!
                 n_arr[tile_i] = inds.size
             # I suspect a list of lists maybe faster than the object array,
             # check during optimization
             # Although I doubt it will make a huge difference.
-            A_ind_arr = np.array(A_ind_arr, dtype=object)
+            a_ind_arr = np.array(a_ind_arr, dtype=object)
             # For tiles which don't satisfy the minimum number of solutions,
             # pre-emptively set them to 0 in order to prevent certain failure in
             # meeting strict convergence threshold
@@ -326,11 +326,11 @@ def vis_calibrate_subroutine(
                 divergence_flag = 0
                 vis_use = vis_data2
 
-                vis_model_matrix = vis_model2 * np.conj(gain_curr[B_ind])
+                vis_model_matrix = vis_model2 * np.conj(gain_curr[b_ind])
                 for tile_i in range(tile_use.size):
                     if n_arr[tile_i] >= min_cal_solutions:
                         if calibration_weights:
-                            xmat = vis_model_matrix[(A_ind_arr[tile_i]).astype(int)]
+                            xmat = vis_model_matrix[(a_ind_arr[tile_i]).astype(int)]
                             # For some reason IDL multiplcation just allows two
                             # arrays of very dissimilar sizes to be multiplied
                             # by just ignoring everything after the index of the
@@ -343,15 +343,15 @@ def vis_calibrate_subroutine(
                                 / np.dot(xmat, xmat_dag)
                                 * np.dot(
                                     np.transpose(
-                                        vis_use[(A_ind_arr[tile_i]).astype(int)]
+                                        vis_use[(a_ind_arr[tile_i]).astype(int)]
                                     ),
                                     xmat_dag,
                                 )
                             )[0]
                         else:
                             gain_new[tile_i] = np.linalg.lstsq(
-                                vis_model_matrix[(A_ind_arr[tile_i]).astype(int)],
-                                vis_use[(A_ind_arr[tile_i]).astype(int)],
+                                vis_model_matrix[(a_ind_arr[tile_i]).astype(int)],
+                                vis_use[(a_ind_arr[tile_i]).astype(int)],
                                 rcond=None,
                             )[0][0][0]
 
@@ -469,7 +469,7 @@ def vis_calibrate_subroutine(
                     f"pol_i: {pol_i} and freq_i: {fi}. Convergence was: "
                     f"{conv_test[fii, i - 1]} and the threshold was: {conv_thresh}"
                 )
-            del A_ind_arr
+            del a_ind_arr
             logger.info(
                 f"Convergence was reached for polarization: {obs['pol_names'][pol_i]} "
                 f"({pol_i}) and frequency: {fi}, with a convergence of: "

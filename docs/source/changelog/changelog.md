@@ -3,6 +3,9 @@
 ## Unreleased
 
 ### Breaking Changes!
+* Updated function parameter names to conform to pep8 guidelines.
+The affected function and parameter is:
+`pyfhd_tools.pyfhd_utils.region_grow` (`roiPixels`->`roi_pixels`);
 * Updated function parameter names to avoid shadowing python builtins.
 The affected functions and parameters are:
 `beam_setup.beam_utils.beam_image` (`abs`->`use_abs`);
