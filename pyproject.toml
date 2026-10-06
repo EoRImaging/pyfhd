@@ -91,6 +91,7 @@ select = [
     "E", # pycodestyle
     "W", # pycodestyle warnings
     "F", # Pyflakes
+    "UP", # pyupgrade
     "B", # flake8-bugbear
     "A", # flake8-builtins
     "C4", # flake8-comprehensions

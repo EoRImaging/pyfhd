@@ -181,19 +181,14 @@ def try_assert_all_close(
     """
     try:
         npt.assert_allclose(actual, target, atol=tolerance)
-        print(
-            Fore.GREEN
-            + Style.BRIGHT
-            + "Test Passed for {}".format(name)
-            + Style.RESET_ALL
-        )
+        print(Fore.GREEN + Style.BRIGHT + f"Test Passed for {name}" + Style.RESET_ALL)
     except AssertionError as error:
         print(
             Fore.RED
             + Style.BRIGHT
-            + "Test Failed for {}:".format(name)
+            + f"Test Failed for {name}:"
             + Style.RESET_ALL
-            + "{}".format(error)
+            + f"{error}"
             + Style.RESET_ALL
         )
 
