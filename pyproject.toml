@@ -93,6 +93,7 @@ select = [
     "F", # Pyflakes
     "B", # flake8-bugbear
     "A", # flake8-builtins
+    "C4", # flake8-comprehensions
 ]
 ignore = [
     "B028", # no-explicit-stacklevel for warnings
