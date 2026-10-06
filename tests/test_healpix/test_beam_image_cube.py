@@ -88,8 +88,10 @@ def test_beam_image_cube(before_file, after_file, beam_dir):
 
     h5_before["obs"]["dimension"] = int(h5_before["obs"]["dimension"])
     h5_before["obs"]["elements"] = int(h5_before["obs"]["elements"])
+    h5_before["obs"]["obsx"] = int(h5_before["obs"]["obsx"])
+    h5_before["obs"]["obsy"] = int(h5_before["obs"]["obsy"])
 
-    beam_arr, beam_mask = beam_image_cube(
+    beam_arr, _ = beam_image_cube(
         h5_before["obs"],
         psf,
         n_freq_bin=h5_before["n_freq_bin"],

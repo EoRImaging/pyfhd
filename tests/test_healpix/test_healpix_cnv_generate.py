@@ -150,11 +150,24 @@ def test_healpix_cnv_generate(before_file, after_file, request):
     assert hpx_cnv["nside"] == expected_hpx_cnv["nside"]
     # The indices come from a file, they should be the same
     npt.assert_array_equal(hpx_cnv["inds"], expected_hpx_cnv["inds"])
-    # Hopefully once we fix the world_to_pixel issue, the following will pass
-    npt.assert_array_equal(hpx_cnv["i_use"], expected_hpx_cnv["i_use"])
+
+    # Need to handle the different indexing in IDL and python
+    # First unravel with Fortran order, then reravel with C order then sort
+    exp_xinds, exp_yinds = np.unravel_index(
+        expected_hpx_cnv["i_use"],
+        shape=(h5_before["obs"]["dimension"], h5_before["obs"]["elements"]),
+        order="F",
+    )
+    raveled_inds = np.ravel_multi_index(
+        (exp_xinds, exp_yinds),
+        dims=(h5_before["obs"]["dimension"], h5_before["obs"]["elements"]),
+    )
+    order = np.argsort(raveled_inds)
+
+    npt.assert_array_equal(hpx_cnv["i_use"], raveled_inds[order])
     npt.assert_array_equal(
-        np.hstack(hpx_cnv["ija"]), np.hstack(expected_hpx_cnv["ija"])
+        np.hstack(hpx_cnv["ija"]), np.hstack(expected_hpx_cnv["ija"][order])
     )
     npt.assert_allclose(
-        np.hstack(hpx_cnv["sa"]), np.hstack(expected_hpx_cnv["sa"]), atol=2e-5
+        np.hstack(hpx_cnv["sa"]), np.hstack(expected_hpx_cnv["sa"][order]), atol=2e-5
     )

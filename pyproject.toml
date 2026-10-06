@@ -29,10 +29,10 @@ classifiers = [
 ]
 dependencies = [
     "astropy>=6.1.7",
+    "astropy_healpix>=1.0.2",
     "colorama>=0.4.6",
     "configargparse>=1.7",
     "h5py>=3.13.0",
-    "healpy>=1.18.1",
     "importlib-resources>=6.5.2",
     "matplotlib>=3.10.3",
     "numba>=0.61.2",

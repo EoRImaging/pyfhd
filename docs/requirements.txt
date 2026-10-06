@@ -8,7 +8,7 @@ colorama
 ConfigArgParse
 myst-parser
 h5py
-healpy
+astropy_healpix
 importlib_resources
 matplotlib
 sphinx_reports

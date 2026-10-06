@@ -3,8 +3,11 @@
 astropy==7.1.0
     # via
     #   pyfhd (pyproject.toml)
-    #   healpy
+    #   astropy-healpix
+    #   pyradiosky
     #   pyuvdata
+astropy-healpix==2.0.1
+    # via pyfhd (pyproject.toml)
 astropy-iers-data==0.2025.6.9.14.9.37
     # via astropy
 colorama==0.4.6
@@ -22,18 +25,17 @@ fonttools==4.58.2
 h5py==3.14.0
     # via
     #   pyfhd (pyproject.toml)
+    #   pyradiosky
     #   pyuvdata
-healpy==1.18.1
-    # via pyfhd (pyproject.toml)
 importlib-resources==6.5.2
     # via pyfhd (pyproject.toml)
 kiwisolver==1.4.8
     # via matplotlib
-llvmlite==0.44.0
+llvmlite==0.50.0
     # via numba
 matplotlib==3.10.3
     # via pyfhd (pyproject.toml)
-numba==0.61.2
+numba==0.68.0
     # via
     #   pyfhd (pyproject.toml)
     #   pyuvdata
@@ -41,12 +43,13 @@ numpy==2.2.6
     # via
     #   pyfhd (pyproject.toml)
     #   astropy
+    #   astropy-healpix
     #   contourpy
     #   h5py
-    #   healpy
     #   matplotlib
     #   numba
     #   pyerfa
+    #   pyradiosky
     #   pyuvdata
     #   scipy
 packaging==25.0
@@ -62,10 +65,14 @@ pyerfa==2.0.1.5
     #   pyuvdata
 pyparsing==3.2.3
     # via matplotlib
+pyradiosky==1.1.2
+    # via pyfhd (pyproject.toml)
 python-dateutil==2.9.0.post0
     # via matplotlib
-pyuvdata==3.2.2
-    # via pyfhd (pyproject.toml)
+pyuvdata==3.2.8
+    # via
+    #   pyfhd (pyproject.toml)
+    #   pyradiosky
 pyyaml==6.0.2
     # via
     #   astropy
@@ -73,10 +80,16 @@ pyyaml==6.0.2
 scipy==1.15.3
     # via
     #   pyfhd (pyproject.toml)
+    #   pyradiosky
     #   pyuvdata
 setuptools==80.9.0
-    # via setuptools-scm
+    # via
+    #   pyradiosky
+    #   setuptools-scm
 setuptools-scm==8.3.1
-    # via pyuvdata
+    # via
+    #   pyfhd (pyproject.toml)
+    #   pyradiosky
+    #   pyuvdata
 six==1.17.0
     # via python-dateutil

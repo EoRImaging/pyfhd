@@ -5,10 +5,10 @@ from pathlib import Path
 
 import h5py
 import numpy as np
+from astropy import units
 from astropy.coordinates import EarthLocation
+from astropy_healpix import HEALPix
 from numpy.typing import NDArray
-from healpy import query_disc
-from healpy.pixelfunc import ang2vec, pix2vec, vec2ang
 
 from pyfhd.beam_setup.beam_utils import beam_image
 from pyfhd.gridding.visibility_grid import visibility_grid
@@ -184,17 +184,19 @@ def healpix_cnv_generate(
     # If you wish to implement the keyword divide_pixel_area implement it here and
     # add it as an option inside pyfhd_config
 
+    hp = HEALPix(nside=nside, order="ring")
     if hpx_inds is not None:
-        pix_coords = np.vstack(pix2vec(nside, hpx_inds)).T
-        pix_ra, pix_dec = vec2ang(pix_coords, lonlat=True)
+        pix_ra, pix_dec = hp.healpix_to_lonlat(hpx_inds)
         # This assume the refraction fix on FHD has been implemented
-        xv_hpx, yv_hpx = radec_to_pixel(pix_ra, pix_dec, obs["astr"])
+        xv_hpx, yv_hpx = radec_to_pixel(pix_ra.deg, pix_dec.deg, obs["astr"])
     else:
-        cen_coords = ang2vec(obs["obsra"], obs["obsdec"], lonlat=True)
-        hpx_inds = query_disc(nside, cen_coords, hpx_radius)
-        pix_coords = np.vstack(pix2vec(nside, hpx_inds)).T
-        pix_ra, pix_dec = vec2ang(pix_coords, lonlat=True)
-        xv_hpx, yv_hpx = radec_to_pixel(pix_ra, pix_dec, obs["astr"])
+        hpx_inds = hp.cone_search_lonlat(
+            obs["obsra"] * units.deg,
+            obs["obsdec"] * units.deg,
+            radius=hpx_radius * units.deg,
+        )
+        pix_ra, pix_dec = hp.healpix_to_lonlat(hpx_inds)
+        xv_hpx, yv_hpx = radec_to_pixel(pix_ra.deg, pix_dec.deg, obs["astr"])
         # slightly more restrictive boundary here
         # ('LT' and 'GT' instead of 'LE' and 'GE')
         pix_i_use = np.where(
@@ -230,8 +232,8 @@ def healpix_cnv_generate(
         lon=obs["lon"], lat=obs["lat"], height=obs["alt"]
     )
     alt, _ = radec_to_altaz(
-        ra=pix_ra,
-        dec=pix_dec,
+        ra=pix_ra.deg,
+        dec=pix_dec.deg,
         lat=telescope_location.lat.value,
         lon=telescope_location.lon.value,
         height=telescope_location.height.value,
@@ -244,30 +246,40 @@ def healpix_cnv_generate(
         xv_hpx = xv_hpx[h_use]
         yv_hpx = yv_hpx[h_use]
         hpx_inds = hpx_inds[h_use]
+
+    # set up floor and ceil arrays giving the neighboring pixel inds in the
+    # original image in each direction for hpx pixels
+    xv_hpx_floor = np.floor(xv_hpx).astype(int)
+    xv_hpx_ceil = np.ceil(xv_hpx).astype(int)
+    yv_hpx_floor = np.floor(yv_hpx).astype(int)
+    yv_hpx_ceil = np.ceil(yv_hpx).astype(int)
+
     # The differences in precision through the use of vec2ang, radec_to_pixel
     # are exposed directly causing differences in the results. We can probably
     # assume these numbers are the results. We can probably assume these numbers
     # are "better" compared to IDL
-    x_frac = 1 - (xv_hpx - np.floor(xv_hpx))
-    y_frac = 1 - (yv_hpx - np.floor(yv_hpx))
+    x_frac = 1 - (xv_hpx - xv_hpx_floor)
+    y_frac = 1 - (yv_hpx - yv_hpx_floor)
 
-    v_floor = np.floor(xv_hpx) + obs["dimension"] * np.floor(yv_hpx)
-    v_ceil = np.ceil(xv_hpx) + obs["dimension"] * np.ceil(yv_hpx)
-    # Differences in precision occur here compared to IDL, unsolvable ones as
-    # we're using built in HEALPIX and astropy functions to get these arrays.
-    # We can probably assume these numbers are "better" compared to IDL, as a
-    # result the v_floor and v_ceil arrays are one off compared to IDL, making
-    # min_bin off by one
-    min_bin = max(np.nanmin(v_floor), 0)
-    max_bin = min(np.nanmax(v_ceil), obs["dimension"] * obs["elements"] - 1)
-    h00, _, ri00 = histogram(v_floor, min=min_bin, max=max_bin)
-    h01, _, ri01 = histogram(
-        np.floor(xv_hpx) + obs["dimension"] * np.ceil(yv_hpx), min=min_bin, max=max_bin
+    xlow_ylow_inds = np.ravel_multi_index(
+        (xv_hpx_floor, yv_hpx_floor), dims=(obs["dimension"], obs["elements"])
     )
-    h10, _, ri10 = histogram(
-        np.ceil(xv_hpx) + obs["dimension"] * np.floor(yv_hpx), min=min_bin, max=max_bin
+    xlow_yhigh_inds = np.ravel_multi_index(
+        (xv_hpx_floor, yv_hpx_ceil), dims=(obs["dimension"], obs["elements"])
     )
-    h11, _, ri11 = histogram(v_ceil, min=min_bin, max=max_bin)
+    xhigh_ylow_inds = np.ravel_multi_index(
+        (xv_hpx_ceil, yv_hpx_floor), dims=(obs["dimension"], obs["elements"])
+    )
+    xhigh_yhigh_inds = np.ravel_multi_index(
+        (xv_hpx_ceil, yv_hpx_ceil), dims=(obs["dimension"], obs["elements"])
+    )
+
+    min_bin = max(np.nanmin(xlow_ylow_inds), 0)
+    max_bin = min(np.nanmax(xhigh_yhigh_inds), obs["dimension"] * obs["elements"] - 1)
+    h00, _, ri00 = histogram(xlow_ylow_inds, min=min_bin, max=max_bin)
+    h01, _, ri01 = histogram(xlow_yhigh_inds, min=min_bin, max=max_bin)
+    h10, _, ri10 = histogram(xhigh_ylow_inds, min=min_bin, max=max_bin)
+    h11, _, ri11 = histogram(xhigh_yhigh_inds, min=min_bin, max=max_bin)
     htot = h00 + h01 + h10 + h11
     inds = np.nonzero(htot)[0]
 
@@ -406,7 +418,9 @@ def beam_image_cube(
             f_i = freq_i_use[f_i_i[0]]
             beam_single = beam_image(psf, obs, pol_i, freq_i=f_i, square=square)
             beam_arr[pol_i, f_i_i[0] : f_i_i[bin_n[fb_i] - 1] + 1] = beam_single
-            b_i = int(obs["obsx"] + obs["obsy"] * obs["dimension"])
+            b_i = np.ravel_multi_index(
+                ([obs["obsx"]], [obs["obsy"]]), (obs["dimension"], obs["elements"])
+            )
             beam_i = region_grow(
                 beam_single,
                 b_i,
