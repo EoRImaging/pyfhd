@@ -25,6 +25,7 @@ def vis_source_model(
     skymodel: SkyModel,
     vis_weights: FloatArray | None,
     uv_mask: BoolArray | None = None,
+    model_uv_savefile: Path | None = None,
     model_delay_filter: bool = True,
     fill_model_visibilities: bool = False,
     vis_model: BoolArray | None = None,
@@ -135,17 +136,11 @@ def vis_source_model(
     dft_end = time.time()
     _print_time_diff(dft_start, dft_end, "source DFT")
 
-    # Option to save model uv plane as part of a calibration-only loop.
+    # save model uv plane
     # put this here rather than in calibrate because the model_uv plane is not
     # used in calibrate.
-    if pyfhd_config["cal_stop"]:
-        model_uv_path = Path(
-            pyfhd_config["output_dir"],
-            "calibration",
-            f"{pyfhd_config['obs_id']}_model_uv_arr.h5",
-        )
-        logger.info(f"Saving the models uv plane to {model_uv_path}")
-        save(model_uv_path, model_uv_arr, "model_uv")
+    if model_uv_savefile is not None:
+        save(model_uv_savefile, model_uv_arr, "model_uv")
 
     vis_arr = np.zeros((n_pol, n_freq, vis_dimension), dtype=np.cdouble)
 

@@ -1200,7 +1200,7 @@ def run_command(cmd: str, dry_run=False):
 
 
 def vis_weights_update(
-    vis_weights: NDArray[np.float64], obs: dict, psf: dict | h5py.File, params: dict
+    vis_weights: NDArray[np.float64], *, obs: dict, psf_dim: int, params: dict
 ) -> tuple[NDArray[np.float64], dict]:
     """
     Update the visibility weights array to match any updates to the observation
@@ -1213,8 +1213,8 @@ def vis_weights_update(
         Visibility weights array.
     obs : dict
         Observation metadata dictionary
-    psf: dict | h5py.File
-        Beam dictionary
+    psf_dim: int
+        Size of the gridding kernel on one size.
     params : dict
         Visibility metadata dictionary
 
@@ -1237,9 +1237,6 @@ def vis_weights_update(
     if conj_i[0].size > 0:
         kx_arr[conj_i] = -kx_arr[conj_i]
         ky_arr[conj_i] = -ky_arr[conj_i]
-    psf_dim = psf["dim"]
-    if isinstance(psf, h5py.File):
-        psf_dim = psf_dim[0]
     xcen = np.outer(obs["baseline_info"]["freq"], kx_arr)
     xmin = np.floor(xcen) + obs["dimension"] / 2 - (psf_dim / 2 - 1)
     ycen = np.outer(obs["baseline_info"]["freq"], ky_arr)

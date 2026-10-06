@@ -1,7 +1,7 @@
 import logging
 import os
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import h5py
 import numpy as np
@@ -10,6 +10,154 @@ from numpy.typing import NDArray, DTypeLike
 from scipy.io import readsav
 
 logger = logging.getLogger(__name__)
+
+
+SAVEFILES = {
+    "obs": {"folder": "metadata", "tag": "obs"},
+    "params": {"folder": "metadata", "tag": "params"},
+    "layout": {"folder": "metadata", "tag": "layout"},
+    "antenna": {"folder": "beams", "tag": "antenna"},
+    "psf": {"folder": "beams", "tag": "beam"},
+    "cal_model_uv": {"folder": "model", "tag": "cal_model_uv"},
+    "cal_skymodel": {"folder": "model", "tag": "cal_skymodel", "exten": "skyh5"},
+    "cal_model_vis_arr": {"folder": "model", "tag": "cal_model_vis_arr"},
+    "cal": {"folder": "calibration", "tag": "cal"},
+    "cal_vis_arr": {"folder": "visibilities", "tag": "calibrated_vis_arr"},
+    "cal_vis_weights": {"folder": "visibilities", "tag": "calibrated_vis_weights"},
+    "grid_data_uv": {"folder": "grid_data", "tag": "uv_data"},
+    "grid_weights_uv": {"folder": "grid_data", "tag": "uv_weights"},
+    "grid_variance_uv": {"folder": "grid_data", "tag": "uv_variance"},
+    "uniform_filter_uv": {"folder": "grid_data", "tag": "vis_count"},
+    "grid_model_uv": {"folder": "grid_data", "tag": "uv_model"},
+    "healpix_cube": {"folder": "healpix", "tag": "h*.h5"},
+    "config": {"folder": "config", "tag": "pyfhd_config"},
+}
+
+
+CHECKPOINTS = {
+    "setup": ["obs", "params"],
+    "beam": ["psf", "antenna"],
+    "cal_model_vis": ["cal_model_vis_arr"],
+    "cal": ["cal", "cal_vis_arr", "cal_vis_weights"],
+    "gridding": [
+        "grid_data_uv",
+        "grid_weights_uv",
+        "grid_variance_uv",
+        "uniform_filter_uv",
+    ],
+    "healpix": ["healpix_cube"],
+}
+
+checkpoint_literal = Literal["setup", "beam", "cal", "gridding", "healpix"]
+
+
+def product_file(
+    product: str, pyfhd_config: dict, mkdir: bool = False
+) -> Path | list[Path]:
+    """
+    Construct file names for each product.
+
+    Parameters
+    ----------
+    product : str
+        The product type. Must be a key in SAVEFILES.
+    pyfhd_config : dict
+        The pyfhd config dictionary. Must contain "output_dir" and "obs_id" keys.
+    mkdir : bool
+        Option to make the parent folder if it doesn't exist.
+
+    Returns
+    -------
+    filename : Path or list of Paths
+        Usually returns a file Path object. If the tag field in the associated
+        value in the SAVEFILES contains asterisks, returns a list of files
+        that match the pattern (via glob). The list can be empty if no files
+        match the pattern
+
+    """
+    file_info = SAVEFILES[product]
+
+    if "*" in file_info["tag"]:
+        root_dir = Path(pyfhd_config["output_dir"], file_info["folder"])
+        return list(root_dir.glob(file_info["tag"]))
+    else:
+        if "exten" in file_info:
+            exten = file_info["exten"]
+        else:
+            exten = "h5"
+        filename = Path(
+            pyfhd_config["output_dir"],
+            file_info["folder"],
+            f"{pyfhd_config['obs_id']}_{file_info['tag']}.{exten}",
+        )
+        if mkdir:
+            filename.parent.mkdir(exist_ok=True)
+        return filename
+
+
+def checkpoint_filenames(
+    checkpoint: checkpoint_literal, pyfhd_config: dict, mkdir: bool = False
+) -> dict:
+    """
+    Get all the files for a checkpoint.
+
+    Can include optional files if `optional` is set to True.
+
+    Parameters
+    ----------
+    checkpoint : str
+        The checkpoint type. Must be a key in CHECKPOINTS.
+    pyfhd_config : dict
+        The pyfhd config dictionary. Must contain "output_dir" and "obs_id" keys.
+    mkdir : bool
+        Option to make the parent folder for each file if it doesn't exist.
+
+    Returns
+    -------
+    dict
+        Dictionary giving filenames for each required product.
+
+    """
+    required_products = CHECKPOINTS[checkpoint]
+
+    file_dict = {}
+    for var in required_products:
+        filename = product_file(var, pyfhd_config=pyfhd_config, mkdir=mkdir)
+        file_dict[var] = filename
+
+    return file_dict
+
+
+def checkpoint_complete(checkpoint: checkpoint_literal, pyfhd_config: dict) -> bool:
+    """
+    Check to see if all the required files are present for a checkpoint.
+
+    Parameters
+    ----------
+    checkpoint : str
+        The checkpoint type. Must be a key in CHECKPOINTS.
+    pyfhd_config : dict
+        The pyfhd config dictionary. Must contain "output_dir" and "obs_id" keys.
+
+    Returns
+    -------
+    bool
+        Boolean indicator of whether all files exist for all required products.
+
+    """
+    file_dict = checkpoint_filenames(checkpoint, pyfhd_config)
+
+    files_exist = []
+    for filename in file_dict.values():
+        if isinstance(filename, list):
+            files_exist.append(len(filename) > 0)
+        else:
+            files_exist.append(filename.exists())
+
+    if np.all(files_exist):
+        return True
+    else:
+        return False
 
 
 def dtype_picker(dtype: DTypeLike) -> type:

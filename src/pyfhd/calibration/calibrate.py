@@ -1,5 +1,4 @@
 from copy import deepcopy
-from pathlib import Path
 import logging
 import time
 
@@ -27,7 +26,7 @@ from ..pyfhd_tools.pyfhd_utils import (
 from ..plotting.calibration import plot_cals
 from ..source_modeling.source_utils import generate_source_cal_skymodel
 from ..source_modeling.vis_source_model import vis_source_model
-from ..io.pyfhd_io import save
+from ..io.pyfhd_io import product_file, save
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +63,7 @@ def calibrate(
     vis_weights : NDArray[np.float64]
         Weights (flags) of the visibilities
     vis_model_arr : NDArray[np.complex128], optional
-        Simulated model visibilites.
+        Simulated model visibilities.
     pyfhd_config : dict
         pyfhd's configuration dictionary containing all the options set for a pyfhd run
 
@@ -115,13 +114,16 @@ def calibrate(
         catalog_end = time.time()
         _print_time_diff(catalog_start, catalog_end, "Catalog setup")
 
-        cal_folder = Path(pyfhd_config["output_dir"], "calibration")
-        cal_skymodel_path = Path(
-            cal_folder, f"{pyfhd_config['obs_id']}_cal_skymodel.skyh5"
-        )
-        logger.info(f"Saving the calibration skymodel to {cal_skymodel_path}")
-        cal_folder.mkdir(exist_ok=True)
-        sky.write_skyh5(filename=cal_skymodel_path, clobber=True)
+        if pyfhd_config["save_skymodel"]:
+            cal_skymodel_path = product_file("cal_skymodel", pyfhd_config)
+            cal_skymodel_path.parent.mkdir(exist_ok=True)
+            sky.write_skyh5(filename=cal_skymodel_path, clobber=True)
+
+        if pyfhd_config["save_model_uv"]:
+            cal_model_uv_path = product_file("cal_model_uv", pyfhd_config)
+            cal_model_uv_path.parent.mkdir(exist_ok=True)
+        else:
+            cal_model_uv_path = None
 
         logger.info("Creating calibration model visibilities")
         degrid_start = time.time()
@@ -135,19 +137,15 @@ def calibrate(
             vis_weights=None,
             fill_model_visibilities=True,
             model_delay_filter=pyfhd_config["calibration_model_delay_filter"],
+            model_uv_savefile=cal_model_uv_path,
         )
         degrid_end = time.time()
         _print_time_diff(degrid_start, degrid_end, "Model visibility creation")
 
-        # Option to save unflagged model visibilities as part of a
-        # calibration-only loop.
-        if pyfhd_config["cal_stop"]:
-            model_vis_arr_path = Path(
-                pyfhd_config["output_dir"],
-                "visibilities",
-                f"{pyfhd_config['obs_id']}_model_vis_arr.h5",
-            )
-            logger.info(f"Saving the models visibilities to {model_vis_arr_path}")
+        # save unflagged model visibilities
+        if pyfhd_config["save_visibilities"]:
+            model_vis_arr_path = product_file("cal_model_vis_arr", pyfhd_config)
+            model_vis_arr_path.parent.mkdir(exist_ok=True)
             save(model_vis_arr_path, vis_model_arr, "visibilities")
     # Calculate auto-correlation visibilities, optionally use them for initial
     # calibration estimates
@@ -295,7 +293,7 @@ def calibrate_qu_mixing(
     vis_arr : np.ndarray
         Uncalibrated data visiblities
     vis_model_arr : np.ndarray
-        Simulated model visibilites
+        Simulated model visibilities
     vis_weights : np.ndarray
         Weights (flags) of the visibilities
     obs : dict
