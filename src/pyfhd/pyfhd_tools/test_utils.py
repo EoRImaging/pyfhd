@@ -39,11 +39,11 @@ def get_data(data_dir: Path, data_filename: str, *args: list[str]) -> list:
     # Put as Paths and read the files
     input_path = Path(data_dir, data_filename)
     if input_path.suffix == ".sav":
-        input = readsav(input_path, python_dict=True)
+        input_array = readsav(input_path, python_dict=True)
     else:
-        input = np.load(input_path, allow_pickle=True)
+        input_array = np.load(input_path, allow_pickle=True)
     if len(args) > 0:
-        return_list = [input]
+        return_list = [input_array]
         for file in args:
             path = Path(data_dir, file)
             if path.suffix == ".sav":
@@ -53,7 +53,7 @@ def get_data(data_dir: Path, data_filename: str, *args: list[str]) -> list:
             return_list.append(output)
         return return_list
     # Return the input and expected
-    return input
+    return input_array
 
 
 def get_data_items(data_dir: Path, data_with_item_path: Path, *args: list[str]) -> list:

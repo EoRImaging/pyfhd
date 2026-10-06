@@ -120,7 +120,7 @@ def beam_image(
     *,
     freq_i: int | None = None,
     dimension: int | None = None,
-    abs=False,
+    use_abs: bool = False,
     square=False,
 ) -> np.ndarray:
     """
@@ -145,7 +145,7 @@ def beam_image(
     dimension : int
         Size of the image returned (image will be dimension x dimension). Defaults
         to using the dimension of the obs structure.
-    abs : bool, optional
+    use_abs : bool, optional
         Return the absolute value of the beam image, by default False
     square : bool, optional
         Return the square of the beam image, by default False
@@ -192,7 +192,7 @@ def beam_image(
     yl = int(elements / 2 - psf_dim / 2 + 1)
     yh = int(elements / 2 - psf_dim / 2 + psf_dim)
 
-    group_n, _, ri_id = histogram(group_id, min=0)
+    group_n, _, _ = histogram(group_id, min_val=0)
     gi_use = np.nonzero(group_n)
     # Most likely going to be 1 as pyfhd does only one beam mostly
     n_groups = np.count_nonzero(group_n)
@@ -257,7 +257,7 @@ def beam_image(
                         psf["beam_ptr"][pol_i, fbin, rbin, rbin] * group_n[gi_use[gi]]
                     ).reshape([psf_dim, psf_dim])
                 beam_single /= np.sum(group_n[gi_use])
-                if abs:
+                if use_abs:
                     beam_single = np.abs(beam_single)
                 beam_base_uv1 = np.zeros([dimension, elements], np.complex128)
                 beam_base_uv1[xl : xh + 1, yl : yh + 1] = beam_single

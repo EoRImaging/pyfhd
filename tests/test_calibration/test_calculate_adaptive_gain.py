@@ -77,7 +77,7 @@ def calc_test_before(data_dir, calc_test):
     if before_file.exists():
         return before_file
 
-    gain_list, convergence_list, iter, base_gain, final_con_est = get_data_items(
+    gain_list, convergence_list, iteration, base_gain, final_con_est = get_data_items(
         data_dir,
         f"input_gain_list_{calc_test}.npy",
         f"input_convergence_list_{calc_test}.npy",
@@ -89,7 +89,7 @@ def calc_test_before(data_dir, calc_test):
     h5_save_dict = {}
     h5_save_dict["gain_list"] = gain_list
     h5_save_dict["convergence_list"] = convergence_list
-    h5_save_dict["iter"] = iter
+    h5_save_dict["iter"] = iteration
     h5_save_dict["base_gain"] = base_gain
     h5_save_dict["final_convergence_estimate"] = final_con_est
 

@@ -62,7 +62,7 @@ def get_image_renormalization(
             pyfhd_config,
             weights=weights[pol_i],
             pad_uv_image=pyfhd_config["pad_uv_image"],
-            filter=filter_arr[pol_i],
+            filter_array=filter_arr[pol_i],
             beam_ptr=beam_base[pol_i],
             degpix=obs["degpix"],
         )
@@ -251,29 +251,29 @@ def quickview(
     filter_arr = np.zeros([obs["n_pol"], obs["dimension"], obs["elements"]])
     for pol_i in range(obs["n_pol"]):
         complex_flag = pol_i > 1
-        filter = np.empty(0)
+        filter_use = np.empty(0)
         # Get the dirty image of the uv plane and the filter from filter_uv_uniform
-        instr_dirty_arr[pol_i], filter, _ = dirty_image_generate(
+        instr_dirty_arr[pol_i], filter_use, _ = dirty_image_generate(
             image_uv[pol_i],
             pyfhd_config,
             uniform_filter_uv=uniform_filter_uv,
             degpix=obs_out["degpix"],
             weights=weights_uv[pol_i],
             pad_uv_image=pyfhd_config["pad_uv_image"],
-            filter=filter,
+            filter_array=filter_use,
             not_real=complex_flag,
             beam_ptr=beam_base_out[pol_i],
         )
-        filter_arr[pol_i] = filter
+        filter_arr[pol_i] = filter_use
         if model_uv is not None:
-            instr_model_arr[pol_i], filter, _ = dirty_image_generate(
+            instr_model_arr[pol_i], filter_use, _ = dirty_image_generate(
                 model_uv[pol_i],
                 pyfhd_config,
                 uniform_filter_uv=uniform_filter_uv,
                 degpix=obs_out["degpix"],
                 weights=weights_uv[pol_i],
                 pad_uv_image=pyfhd_config["pad_uv_image"],
-                filter=filter,
+                filter_array=filter_use,
                 not_real=complex_flag,
                 beam_ptr=beam_base_out[pol_i],
             )

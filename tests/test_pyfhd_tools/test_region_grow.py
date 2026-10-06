@@ -93,9 +93,9 @@ def after_file(tag, run, subfunc, data_dir):
 @pytest.mark.github_actions
 def test_simple_1D_region_grow():
     # Equivalent to doing region_grow([0,0,0,0,5,10,5,0,0,0,0], [5], threshold=[5,10])
-    input = np.array([0, 0, 0, 0, 5, 10, 5, 0, 0, 0, 0])
+    input_array = np.array([0, 0, 0, 0, 5, 10, 5, 0, 0, 0, 0])
     expected = np.array([4, 5, 6])
-    output = region_grow(input, [5], low=5, high=10)
+    output = region_grow(input_array, [5], low=5, high=10)
 
     npt.assert_array_equal(output, expected)
 
@@ -105,7 +105,7 @@ def test_simple_2D_region_grow():
     # Equivalent to doing:
     # IDL> test = reform(indgen(100)*1., 10,10)
     # IDL> region_grow(test, indgen(10)+45, threshold=[30,70])
-    input = np.arange(100).reshape([10, 10])
+    input_array = np.arange(100).reshape([10, 10])
     expected = np.array(
         [
             31,
@@ -142,7 +142,7 @@ def test_simple_2D_region_grow():
             68,
         ]
     )
-    output = region_grow(input, np.arange(45, 55), low=30, high=70)
+    output = region_grow(input_array, np.arange(45, 55), low=30, high=70)
 
     npt.assert_array_equal(output, expected)
 
