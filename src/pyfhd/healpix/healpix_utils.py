@@ -210,12 +210,15 @@ def healpix_cnv_generate(
         pix_ra = pix_ra[pix_i_use]
         pix_dec = pix_dec[pix_i_use]
         if mask is not None:
-            hpx_mask00 = mask[
-                np.floor(xv_hpx).astype(int), np.floor(yv_hpx).astype(int)
-            ]
-            hpx_mask01 = mask[np.floor(xv_hpx).astype(int), np.ceil(yv_hpx).astype(int)]
-            hpx_mask10 = mask[np.ceil(xv_hpx).astype(int), np.floor(yv_hpx).astype(int)]
-            hpx_mask11 = mask[np.ceil(xv_hpx).astype(int), np.ceil(yv_hpx).astype(int)]
+            # Images are indexed [y, x], the transpose of IDL's [x, y]
+            x_lo = np.floor(xv_hpx).astype(int)
+            x_hi = np.ceil(xv_hpx).astype(int)
+            y_lo = np.floor(yv_hpx).astype(int)
+            y_hi = np.ceil(yv_hpx).astype(int)
+            hpx_mask00 = mask[y_lo, x_lo]
+            hpx_mask01 = mask[y_hi, x_lo]
+            hpx_mask10 = mask[y_lo, x_hi]
+            hpx_mask11 = mask[y_hi, x_hi]
             hpx_mask = hpx_mask00 * hpx_mask01 * hpx_mask10 * hpx_mask11
             pix_i_use2 = np.nonzero(hpx_mask)
             xv_hpx = xv_hpx[pix_i_use2]
