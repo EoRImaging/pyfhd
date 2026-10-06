@@ -77,6 +77,8 @@ def test_phase_shift_uv_image(before_file, after_file):
 
     obs = load(before_file)
     expected_rephase = load(after_file)
+    # IDL products read into python need to be transposed
+    expected_rephase = expected_rephase.T
 
     obs["dimension"] = int(obs["dimension"])
     obs["elements"] = int(obs["elements"])

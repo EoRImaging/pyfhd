@@ -81,8 +81,9 @@ def vis_count_after(data_dir, number):
 
     if vis_count_after.exists():
         h5_after = load(vis_count_after, lazy_load=True)
-        after_axes_reorder = (
-            "after_axes_reorder" in h5_after.keys() and h5_after["after_axes_reorder"]
+        after_axes_reorder = bool(
+            "after_axes_reorder" in h5_after.keys()
+            and h5_after["after_axes_reorder"][()]
         )
         h5_after.close()
         if after_axes_reorder:
@@ -94,15 +95,16 @@ def vis_count_after(data_dir, number):
     # match IDL FHD
     h5_save_dict = {"uniform_filter": uniform_filter.T}
 
+    h5_save_dict["after_axes_reorder"] = True
     save(vis_count_after, h5_save_dict, "after_file")
 
-    h5_save_dict["after_axes_reorder"] = True
     return vis_count_after
 
 
 def test_vis_count(vis_count_before: Path, vis_count_after: Path):
     h5_before = load(vis_count_before)
-    expected_uniform_filter = load(vis_count_after)
+    h5_after = load(vis_count_after)
+    expected_uniform_filter = h5_after["uniform_filter"]
 
     uniform_filter = visibility_count(
         h5_before["obs"],
