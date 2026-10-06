@@ -537,7 +537,7 @@ def run_pyfhd(pyfhd_config: dict, pyfhd_start: float):
                     no_conjugate=no_conjugate,
                     model=vis_model_arr_use,
                 )
-                if len(gridding_dict.keys()) != 0:
+                if len(gridding_dict) != 0:
                     image_uv[pol_i] = gridding_dict["image_uv"]
                     weights_uv[pol_i] = gridding_dict["weights"]
                     variance_uv[pol_i] = gridding_dict["variance"]

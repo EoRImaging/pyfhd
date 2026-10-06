@@ -60,14 +60,14 @@ def vis_count_before(data_dir, number):
     h5_save_dict["vis_weights"] = vis_weights.transpose()
     h5_save_dict["fi_use"] = get_file(data_dir, f"input_fi_use_{number}.npy")
     h5_save_dict["bi_use"] = get_file(data_dir, f"input_bi_use_arr_{number}.npy")
-    h5_save_dict["mask_mirror_indices"] = (
-        True if get_file(data_dir, f"input_mask_mirror_indices_{number}.npy") else False
+    h5_save_dict["mask_mirror_indices"] = bool(
+        get_file(data_dir, f"input_mask_mirror_indices_{number}.npy")
     )
-    h5_save_dict["no_conjugate"] = (
-        True if get_file(data_dir, f"input_no_conjugate_{number}.npy") else False
+    h5_save_dict["no_conjugate"] = bool(
+        get_file(data_dir, f"input_no_conjugate_{number}.npy")
     )
-    h5_save_dict["fill_model_visibilities"] = (
-        True if get_file(data_dir, f"input_fill_model_vis_{number}.npy") else False
+    h5_save_dict["fill_model_visibilities"] = bool(
+        get_file(data_dir, f"input_fill_model_vis_{number}.npy")
     )
 
     # Save it
@@ -83,7 +83,7 @@ def vis_count_after(data_dir, number):
     if vis_count_after.exists():
         h5_after = load(vis_count_after, lazy_load=True)
         after_axes_reorder = (
-            "after_axes_reorder" in h5_after.keys() and h5_after["after_axes_reorder"]
+            "after_axes_reorder" in h5_after and h5_after["after_axes_reorder"]
         )
         h5_after.close()
         if after_axes_reorder:

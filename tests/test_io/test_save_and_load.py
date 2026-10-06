@@ -29,11 +29,11 @@ def test_save_and_load():
     loaded_data = load("test_data.h5")
 
     # Check if the loaded data matches the original sample data
-    for key in sample_data.keys():
+    for key in sample_data:
         assert key in loaded_data, f"Key {key} not found in loaded data"
         if isinstance(sample_data[key], dict):
             # For dictionaries, check if all keys match
-            for subkey in sample_data[key].keys():
+            for subkey in sample_data[key]:
                 assert subkey in loaded_data[key], (
                     f"Subkey {subkey} not found in loaded data[{key}]"
                 )

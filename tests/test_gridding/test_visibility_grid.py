@@ -54,7 +54,7 @@ def before_gridding(data_dir: Path, number: int, request: pytest.FixtureRequest)
     if before_gridding.exists():
         h5_before = load(before_gridding, lazy_load=True)
         after_axes_reorder = (
-            "after_axes_reorder" in h5_before.keys() and h5_before["after_axes_reorder"]
+            "after_axes_reorder" in h5_before and h5_before["after_axes_reorder"]
         )
         h5_before.close()
         if after_axes_reorder:
@@ -90,16 +90,11 @@ def before_gridding(data_dir: Path, number: int, request: pytest.FixtureRequest)
     h5_save_dict["psf"] = sav_file_rearrange_psf(h5_save_dict["psf"])
 
     h5_save_dict = recarray_to_dict(h5_save_dict)
-
-    h5_save_dict["calculate_uniform_filter"] = (
-        True
-        if ("uniform_filter" in h5_save_dict and h5_save_dict["uniform_filter"])
-        else False
+    h5_save_dict["calculate_uniform_filter"] = bool(
+        "uniform_filter" in h5_save_dict and h5_save_dict["uniform_filter"]
     )
-    h5_save_dict["no_conjugate"] = (
-        True
-        if ("no_conjugate" in h5_save_dict and h5_save_dict["no_conjugate"])
-        else False
+    h5_save_dict["no_conjugate"] = bool(
+        "no_conjugate" in h5_save_dict and h5_save_dict["no_conjugate"]
     )
     h5_save_dict["obs"]["n_baselines"] = h5_save_dict["obs"]["nbaselines"]
     # Transpose the model if it exists
@@ -114,26 +109,20 @@ def before_gridding(data_dir: Path, number: int, request: pytest.FixtureRequest)
         "image_filter": h5_save_dict["extra"]["image_filter_fn"],
         "mask_mirror_indices": False,
         "beam_per_baseline": (
-            True
-            if (
+            bool(
                 "beam_per_baseline" in h5_save_dict
                 and h5_save_dict["beam_per_baseline"]
             )
-            else False
         ),
         "grid_spectral": (
-            True
-            if ("grid_spectral" in h5_save_dict and h5_save_dict["grid_spectral"])
-            else False
+            bool("grid_spectral" in h5_save_dict and h5_save_dict["grid_spectral"])
         ),
-        "grid_weights": True if h5_save_dict["weights"] else False,
+        "grid_weights": bool(h5_save_dict["weights"]),
         "grid_variance": (
-            True if ("variance" in h5_save_dict and h5_save_dict["variance"]) else False
+            bool("variance" in h5_save_dict and h5_save_dict["variance"])
         ),
         "grid_uniform": (
-            True
-            if ("grid_uniform" in h5_save_dict and h5_save_dict["grid_uniform"])
-            else False
+            bool("grid_uniform" in h5_save_dict and h5_save_dict["grid_uniform"])
         ),
     }
     h5_save_dict["visibility_ptr"] = h5_save_dict["visibility_ptr"].T
@@ -174,7 +163,7 @@ def after_gridding(data_dir: Path, number: int, request: pytest.FixtureRequest):
     if after_gridding.exists():
         h5_after = load(after_gridding, lazy_load=True)
         after_axes_reorder = (
-            "after_axes_reorder" in h5_after.keys() and h5_after["after_axes_reorder"]
+            "after_axes_reorder" in h5_after and h5_after["after_axes_reorder"]
         )
         h5_after.close()
         if after_axes_reorder:
@@ -188,7 +177,7 @@ def after_gridding(data_dir: Path, number: int, request: pytest.FixtureRequest):
                 h5_after["weights"] = h5_after["weights"].T
                 h5_after["variance"] = h5_after["variance"].T
                 h5_after["uniform_filter"] = h5_after["uniform_filter"].T
-                if "model_return" in h5_after.keys():
+                if "model_return" in h5_after:
                     h5_after["model_return"] = h5_after["model_return"].T
 
                 h5_after["after_axes_reorder"] = True
@@ -302,7 +291,7 @@ def full_before_gridding(data_dir: Path, full_number: int):
     if before_gridding.exists():
         h5_before = load(before_gridding, lazy_load=True)
         after_axes_reorder = (
-            "after_axes_reorder" in h5_before.keys() and h5_before["after_axes_reorder"]
+            "after_axes_reorder" in h5_before and h5_before["after_axes_reorder"]
         )
         h5_before.close()
         if after_axes_reorder:
@@ -314,15 +303,11 @@ def full_before_gridding(data_dir: Path, full_number: int):
     h5_save_dict["psf"] = sav_file_rearrange_psf(h5_save_dict["psf"])
 
     h5_save_dict = recarray_to_dict(h5_save_dict)
-    h5_save_dict["calculate_uniform_filter"] = (
-        True
-        if ("uniform_filter" in h5_save_dict and h5_save_dict["uniform_filter"])
-        else False
+    h5_save_dict["calculate_uniform_filter"] = bool(
+        "uniform_filter" in h5_save_dict and h5_save_dict["uniform_filter"]
     )
-    h5_save_dict["no_conjugate"] = (
-        True
-        if ("no_conjugate" in h5_save_dict and h5_save_dict["no_conjugate"])
-        else False
+    h5_save_dict["no_conjugate"] = bool(
+        "no_conjugate" in h5_save_dict and h5_save_dict["no_conjugate"]
     )
     h5_save_dict["obs"]["n_baselines"] = h5_save_dict["obs"]["nbaselines"]
     # Transpose the model if it exists
@@ -339,26 +324,20 @@ def full_before_gridding(data_dir: Path, full_number: int):
         "image_filter": h5_save_dict["extra"]["image_filter_fn"],
         "mask_mirror_indices": False,
         "beam_per_baseline": (
-            True
-            if (
+            bool(
                 "beam_per_baseline" in h5_save_dict
                 and h5_save_dict["beam_per_baseline"]
             )
-            else False
         ),
         "grid_spectral": (
-            True
-            if ("grid_spectral" in h5_save_dict and h5_save_dict["grid_spectral"])
-            else False
+            bool("grid_spectral" in h5_save_dict and h5_save_dict["grid_spectral"])
         ),
-        "grid_weights": True if h5_save_dict["weights"] else False,
+        "grid_weights": bool(h5_save_dict["weights"]),
         "grid_variance": (
-            True if ("variance" in h5_save_dict and h5_save_dict["variance"]) else False
+            bool("variance" in h5_save_dict and h5_save_dict["variance"])
         ),
         "grid_uniform": (
-            True
-            if ("grid_uniform" in h5_save_dict and h5_save_dict["grid_uniform"])
-            else False
+            bool("grid_uniform" in h5_save_dict and h5_save_dict["grid_uniform"])
         ),
     }
     h5_save_dict["visibility_ptr"] = h5_save_dict["visibility_ptr"].T
@@ -390,7 +369,7 @@ def full_after_gridding(data_dir: Path, full_number: int):
     if after_gridding.exists():
         h5_after = load(after_gridding, lazy_load=True)
         after_axes_reorder = (
-            "after_axes_reorder" in h5_after.keys() and h5_after["after_axes_reorder"]
+            "after_axes_reorder" in h5_after and h5_after["after_axes_reorder"]
         )
         h5_after.close()
         if after_axes_reorder:
@@ -496,7 +475,7 @@ def before_vis_model_freq_gridding(tag, run, data_dir):
     if before_file.exists() and new_beam_file.exists():
         h5_before = load(before_file, lazy_load=True)
         after_axes_reorder = (
-            "after_axes_reorder" in h5_before.keys() and h5_before["after_axes_reorder"]
+            "after_axes_reorder" in h5_before and h5_before["after_axes_reorder"]
         )
         h5_before.close()
         if after_axes_reorder:
@@ -537,15 +516,11 @@ def before_vis_model_freq_gridding(tag, run, data_dir):
     h5_save_dict = readsav(sav_file, python_dict=True)
     h5_save_dict = recarray_to_dict(h5_save_dict)
 
-    h5_save_dict["calculate_uniform_filter"] = (
-        True
-        if ("uniform_filter" in h5_save_dict and h5_save_dict["uniform_filter"])
-        else False
+    h5_save_dict["calculate_uniform_filter"] = bool(
+        "uniform_filter" in h5_save_dict and h5_save_dict["uniform_filter"]
     )
-    h5_save_dict["no_conjugate"] = (
-        True
-        if ("no_conjugate" in h5_save_dict and h5_save_dict["no_conjugate"])
-        else False
+    h5_save_dict["no_conjugate"] = bool(
+        "no_conjugate" in h5_save_dict and h5_save_dict["no_conjugate"]
     )
     h5_save_dict["obs_out"]["n_baselines"] = h5_save_dict["obs_out"]["nbaselines"]
     h5_save_dict["obs"] = h5_save_dict["obs_out"]
@@ -565,28 +540,20 @@ def before_vis_model_freq_gridding(tag, run, data_dir):
         "image_filter": h5_save_dict["extra"]["image_filter_fn"],
         "mask_mirror_indices": False,
         "beam_per_baseline": (
-            True
-            if (
+            bool(
                 "beam_per_baseline" in h5_save_dict
                 and h5_save_dict["beam_per_baseline"]
             )
-            else False
         ),
         "grid_spectral": (
-            True
-            if ("grid_spectral" in h5_save_dict and h5_save_dict["grid_spectral"])
-            else False
+            bool("grid_spectral" in h5_save_dict and h5_save_dict["grid_spectral"])
         ),
-        "grid_weights": True if h5_save_dict["weights_holo"] else False,
+        "grid_weights": bool(h5_save_dict["weights_holo"]),
         "grid_variance": (
-            True
-            if ("variance_holo" in h5_save_dict and h5_save_dict["variance_holo"])
-            else False
+            bool("variance_holo" in h5_save_dict and h5_save_dict["variance_holo"])
         ),
         "grid_uniform": (
-            True
-            if ("grid_uniform" in h5_save_dict and h5_save_dict["grid_uniform"])
-            else False
+            bool("grid_uniform" in h5_save_dict and h5_save_dict["grid_uniform"])
         ),
     }
     h5_save_dict["visibility_ptr"] = h5_save_dict["vis_ptr"].T
@@ -624,7 +591,7 @@ def after_vis_model_freq_gridding(tag, run, data_dir):
     if after_file.exists():
         h5_after = load(after_file, lazy_load=True)
         after_axes_reorder = (
-            "after_axes_reorder" in h5_after.keys() and h5_after["after_axes_reorder"]
+            "after_axes_reorder" in h5_after and h5_after["after_axes_reorder"]
         )
         h5_after.close()
         if after_axes_reorder:

@@ -65,8 +65,8 @@ def plot_cals(obs: dict, cal: dict, pyfhd_config: dict):
     cal_res_phase = np.unwrap(cal_raw_phase, axis=1) - np.unwrap(cal_sol_phase, axis=1)
 
     # Find the min/max amplitude and phase for plotting, only using unflagged tiles
-    amp_minmax = np.zeros((6))
-    phase_minmax = np.zeros((6))
+    amp_minmax = np.zeros(6)
+    phase_minmax = np.zeros(6)
     amp_minmax[0:2] = [np.nanmin(cal_sol_amp), np.nanmax(cal_sol_amp)]
     amp_minmax[2:4] = [np.nanmin(cal_res_amp), np.nanmax(cal_res_amp)]
     amp_minmax[4:6] = [np.nanmin(cal_raw_amp), np.nanmax(cal_raw_amp)]

@@ -131,9 +131,7 @@ def test_obs_creation(obs_id):
     )
     npt.assert_array_equal(
         obs["baseline_info"]["tile_names"],
-        np.char.strip((obs_fhd["baseline_info"]["tile_names"].astype("str"))).astype(
-            int
-        ),
+        np.char.strip(obs_fhd["baseline_info"]["tile_names"].astype("str")).astype(int),
     )
 
     # Check healpix

@@ -315,7 +315,7 @@ def print_types(dictionary: dict, dict_name: str, indent_level: int = 1) -> None
     indent_level : int
         Sets the indent levels for printing as it's a recursive function, by default 1
     """
-    for key in dictionary.keys():
+    for key in dictionary:
         # Print this if it's a NumPy array
         if isinstance(dictionary[key], np.ndarray):
             print(

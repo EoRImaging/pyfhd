@@ -179,7 +179,7 @@ def create_obs(
     # in x direction (dimension)
     if pyfhd_config["dimension"] is None and pyfhd_config["elements"] is None:
         obs["dimension"] = 2 ** int(
-            (np.log10((2 * max_baseline) / pyfhd_config["kpix"]) / np.log10(2))
+            np.log10((2 * max_baseline) / pyfhd_config["kpix"]) / np.log10(2)
         )
         obs["elements"] = obs["dimension"]
     elif pyfhd_config["dimension"] is not None and pyfhd_config["elements"] is None:
@@ -268,8 +268,8 @@ def create_obs(
     obs["baseline_info"] = baseline_info
 
     # Save the last of the metadata into obs
-    for key in meta.keys():
-        if key not in baseline_info.keys():
+    for key in meta:
+        if key not in baseline_info:
             obs[key] = meta[key]
 
     return obs
@@ -432,7 +432,7 @@ def read_metafits(
         # Save the raw header and data into the meta dictionary
         # Save the header as a Python dictionary
         meta["meta_hdr"] = {}
-        for key in hdr.keys():
+        for key in hdr:
             # Check if there are HISTORY or COMMENT fields which will be combined
             # in a list for ease of use with hdf5 files
             if key in ["HISTORY", "COMMENT"]:

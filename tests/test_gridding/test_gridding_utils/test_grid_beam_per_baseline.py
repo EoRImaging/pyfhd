@@ -40,7 +40,7 @@ def before_grid_per_baseline(data_dir, number):
         "psf_dim": psf["dim"],
         "psf_resolution": psf["resolution"],
         "beam_mask_threshold": psf["beam_mask_threshold"],
-        "beam_clip_floor": True if extra["beam_clip_floor"] else False,
+        "beam_clip_floor": bool(extra["beam_clip_floor"]),
         "image_filter": "filter_uv_uniform",
     }
     (
