@@ -437,11 +437,10 @@ def visibility_grid(
                     # hyperresolved kernel
                     box_matrix[ii, :] = box_mat[x_off[ii], y_off[ii]]
 
-        #  Calculate the conjugate transpose (dagger) of the uv-pixels that the
-        # current beam kernel contributes to
-        box_matrix_dag = np.conj(box_matrix)
-
         if pyfhd_config["grid_spectral"]:
+            #  Calculate the conjugate transpose (dagger) of the uv-pixels that
+            # the current beam kernel contributes to
+            box_matrix_dag = np.conj(box_matrix)
             term_A_box = np.dot(
                 np.transpose(box_matrix_dag), np.transpose((freq_i * vis_box) / n_vis)
             )
@@ -470,57 +469,41 @@ def visibility_grid(
                     xmin_use : xmin_use + psf_dim, ymin_use : ymin_use + psf_dim
                 ] += term_Am_box
 
+        # Calculate the products of the beam kernel's conjugate transpose with
+        # the data vis, the model vis (if gridded) and the weights (1 per vis)
+        # for all vis which contribute to the same static uv-pixels, as one
+        # matrix product: B^H V = conj(B^T conj(V)). This avoids a conjugated
+        # copy of the kernel matrix and a separate product for each plane.
+        # Ensure the boxes are flat, sometimes odd shapes can come in from
+        # metadata
+        box_vals = np.empty(
+            (vis_n, 1 + (model is not None) + pyfhd_config["grid_weights"]),
+            dtype=np.complex128,
+        )
+        box_vals[:, 0] = vis_box.ravel()
         if model is not None:
-            # If model visibilities are being gridded, calculate the product of
-            # the model vis and the beam kernel
-            # for all vis which contribute to the same static uv-pixels, and add
-            # to the static uv-plane
-
-            # Ensure model_box is flat, sometimes odd shapes can come in from
-            # metadata
-            model_box = model_box.flatten()
-            box_arr = np.dot(
-                np.transpose(box_matrix_dag), np.transpose(model_box / n_vis)
-            )
-            model_return[
-                xmin_use : xmin_use + psf_dim, ymin_use : ymin_use + psf_dim
-            ].flat += box_arr
-
-        # Calculate the product of the data vis and the beam kernel
-        # for all vis which contribute to the same static uv-pixels, and add to
-        # the static uv-plane
-
-        # Ensure vis_box is flat, sometimes odd shapes can come in from metadata
-        vis_box = vis_box.flatten()
-        box_arr = np.dot(np.transpose(box_matrix_dag), vis_box / n_vis)
-        image_uv[
-            xmin_use : xmin_use + psf_dim, ymin_use : ymin_use + psf_dim
-        ].flat += box_arr
-        del box_arr
-
+            box_vals[:, 1] = model_box.ravel()
         if pyfhd_config["grid_weights"]:
-            # If weight visibilities are being gridded, calculate the product
-            # the weight (1 per vis) and the beam kernel for all vis which
-            # contribute to the same static uv-pixels, and add to the static uv-plane
-            wts_box = np.dot(
-                np.transpose(box_matrix_dag), np.transpose(psf_weight / n_vis)
-            )
-            weights[
-                xmin_use : xmin_use + psf_dim, ymin_use : ymin_use + psf_dim
-            ].flat += wts_box
+            box_vals[:, -1] = psf_weight
+        box_vals /= n_vis
+        box_arr = np.conj(box_matrix.T @ np.conj(box_vals))
+        uv_box = np.s_[xmin_use : xmin_use + psf_dim, ymin_use : ymin_use + psf_dim]
+
+        # Add the products to the static uv-planes
+        image_uv[uv_box].flat += box_arr[:, 0]
+        if model is not None:
+            model_return[uv_box].flat += box_arr[:, 1]
+        if pyfhd_config["grid_weights"]:
+            weights[uv_box].flat += box_arr[:, -1]
+        del box_arr
 
         if pyfhd_config["grid_variance"]:
             # If variance visibilities are being gridded, calculate the product
             # the weight (1 per vis) and the square of the beam kernel for all
             # vis which contribute to the same static uv-pixels, and add to the
             # static uv-plane
-            var_box = np.dot(
-                np.transpose(np.abs(box_matrix_dag) ** 2),
-                np.transpose(psf_weight / n_vis),
-            )
-            variance[
-                xmin_use : xmin_use + psf_dim, ymin_use : ymin_use + psf_dim
-            ].flat += var_box
+            var_box = (box_matrix.real**2 + box_matrix.imag**2).T @ (psf_weight / n_vis)
+            variance[uv_box].flat += var_box
 
         if calculate_uniform_filter:
             uniform_filter[
