@@ -1153,6 +1153,10 @@ def resistant_mean(
     # I could have used scipy's median_abs_deviation to get this, but by doing
     # this manually I can guarantee the same behaviour as IDL
     mad = np.median(abs_dev) / mad_scale
+    # As in IDLAstro, fall back to the mean absolute deviation when more than
+    # half of the values equal the median
+    if mad < 1.0e-24:
+        mad = np.mean(abs_dev) / 0.8
     #  Use MAD and the number of deviations
     mad_threshold = deviations * mad
     # Subset the array by the deviations and residuals
