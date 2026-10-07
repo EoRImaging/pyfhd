@@ -21,7 +21,7 @@ def zenith_obs_2013_main():
     obs_sav_dict = recarray_to_dict(obs_sav_dict)
     obs = obs_sav_dict["obs"]
     obs["n_baselines"] = obs["nbaselines"]
-    obs["delays"] = obs["delays"].astype("int").repeat(2).reshape((2, 16))
+    obs["delays"] = np.tile(obs["delays"].astype("int"), (2, 1))
     obs["dimension"] = int(obs["dimension"])
     obs["elements"] = int(obs["elements"])
 

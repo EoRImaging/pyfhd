@@ -341,11 +341,9 @@ def read_metafits(
         meta["phasedec"] = hdr["DECPHASE"]
         meta["time_res"] = hdr["INTTIME"]
         delays = hdr["DELAYS"].split(",")
-        meta["delays"] = (
-            np.asarray(delays, np.int64)
-            .repeat(obs["n_pol"])
-            .reshape((obs["n_pol"], len(delays)))
-        )
+        # The same beamformer delays apply to both feed polarizations. Copy the
+        # row rather than repeating each element, which would interleave them.
+        meta["delays"] = np.tile(np.asarray(delays, np.int64), (2, 1))
     else:
         logger.warning(
             "METAFITS file has not been found, Calculating obs meta settings "
