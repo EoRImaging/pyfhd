@@ -151,9 +151,14 @@ def calibrate(
             save(model_vis_arr_path, vis_model_arr, "visibilities")
     # Calculate auto-correlation visibilities, optionally use them for initial
     # calibration estimates
-    vis_auto, auto_tile_i = vis_extract_autocorr(obs, vis_arr, pyfhd_config)
+    # FHD always time-averages the auto-correlations used in calibration
+    vis_auto, auto_tile_i = vis_extract_autocorr(
+        obs, vis_arr, pyfhd_config, time_average=True
+    )
     # Calculate auto-correlation visibilities
-    vis_auto_model, auto_tile_i = vis_extract_autocorr(obs, vis_model_arr, pyfhd_config)
+    vis_auto_model, auto_tile_i = vis_extract_autocorr(
+        obs, vis_model_arr, pyfhd_config, time_average=True
+    )
     # Initalize the gain
     if pyfhd_config["calibration_auto_initialize"]:
         cal["gain"] = vis_cal_auto_init(

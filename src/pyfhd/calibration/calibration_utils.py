@@ -24,6 +24,7 @@ def vis_extract_autocorr(
     vis_arr: NDArray[np.complex128],
     pyfhd_config: dict,
     auto_tile_i: NDArray[np.integer] | None = None,
+    time_average: bool | None = None,
 ) -> tuple[NDArray[np.float64], NDArray[np.integer]]:
     """
     Extract the auto-correlations if they exist from the full visibility array.
@@ -38,6 +39,9 @@ def vis_extract_autocorr(
         pyfhd's configuration dictionary containing all the options set for a pyfhd run
     auto_tile_i : NDArray[np.integer] | None, optional
         Index array for auto-correlation visibilities, by default None
+    time_average : bool | None, optional
+        Average the auto-correlations over the used time steps. If None, use
+        pyfhd_config["cal_time_average"], by default None
 
     Returns
     -------
@@ -50,13 +54,15 @@ def vis_extract_autocorr(
     autocorr_i = np.where(
         obs["baseline_info"]["tile_a"] == obs["baseline_info"]["tile_b"]
     )[0]
+    if time_average is None:
+        time_average = pyfhd_config["cal_time_average"]
     if autocorr_i.size > 0:
         auto_tile_i = obs["baseline_info"]["tile_a"][autocorr_i] - 1
         # As auto_tile_i is used for indexing we need to make it an integer array
         auto_tile_i = auto_tile_i.astype(int)
         auto_tile_i_single = np.unique(auto_tile_i)
         # expect it as a list of 2D arrays, so there might be trouble
-        if not pyfhd_config["cal_time_average"]:
+        if not time_average:
             freq_tile_shape = np.real(vis_arr[0][:, autocorr_i]).shape
             auto_corr = np.zeros([obs["n_pol"]] + list(freq_tile_shape))
         else:
@@ -68,7 +74,7 @@ def vis_extract_autocorr(
             # array, containing two further 2D arrays, rather than a proper 3D
             # array. Turns out this indexing is consistent across both cases
             auto_vals = np.real(vis_arr[pol_i][:, autocorr_i])
-            if pyfhd_config["cal_time_average"]:
+            if time_average:
                 auto_single = np.zeros((obs["n_freq"], auto_tile_i_single.size))
                 time_inds = np.where(obs["baseline_info"]["time_use"])[0]
                 for tile_i in range(auto_tile_i_single.size):
@@ -92,7 +98,7 @@ def vis_extract_autocorr(
                         ]
                 auto_vals = auto_single
             auto_corr[pol_i, :, :] = auto_vals
-        if pyfhd_config["cal_time_average"]:
+        if time_average:
             auto_tile_i = auto_tile_i_single
         return auto_corr, auto_tile_i
     else:
