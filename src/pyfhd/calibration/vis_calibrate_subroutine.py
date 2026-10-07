@@ -296,21 +296,39 @@ def vis_calibrate_subroutine(
             B_ind = np.hstack([tile_B_i_use, tile_A_i_use])
             B_ind = B_ind[b_i_use]
 
-            A_ind_arr = []
-            n_arr = np.zeros(tile_use.size)
-            for tile_i in range(tile_use.size):
-                inds = np.where(A_ind == tile_i)[0]
-                if inds.size > 1:
-                    A_ind_arr.append(np.reshape(inds, (inds.size, 1)))
-                else:
-                    A_ind_arr.append(-1)
-                # NEED SOMETHING MORE IN CASE INDIVIDUAL TILES ARE FLAGGED FOR
-                # ONLY A FEW FREQUENCIES!!
-                n_arr[tile_i] = inds.size
-            # I suspect a list of lists maybe faster than the object array,
-            # check during optimization
-            # Although I doubt it will make a huge difference.
-            A_ind_arr = np.array(A_ind_arr, dtype=object)
+            # NEED SOMETHING MORE IN CASE INDIVIDUAL TILES ARE FLAGGED FOR
+            # ONLY A FEW FREQUENCIES!!
+            n_tile_use = tile_use.size
+            n_arr = np.bincount(A_ind, minlength=n_tile_use)
+            if calibration_weights:
+                A_ind_arr = []
+                for tile_i in range(n_tile_use):
+                    inds = np.where(A_ind == tile_i)[0]
+                    if inds.size > 1:
+                        A_ind_arr.append(np.reshape(inds, (inds.size, 1)))
+                    else:
+                        A_ind_arr.append(-1)
+                A_ind_arr = np.array(A_ind_arr, dtype=object)
+            else:
+                # Each tile's least-squares problem has a single complex unknown,
+                # so its solution is
+                #   g_a = sum_b C_ab g_b / sum_b P_ab |g_b|^2
+                # with C_ab = sum conj(model) * data and P_ab = sum |model|^2
+                # over the equations of tile a paired with tile b. Accumulate C
+                # and P once per frequency; each iteration is then a pair of
+                # matrix-vector products.
+                pair_ind = A_ind * n_tile_use + B_ind
+                cross_vals = np.conj(vis_model2) * vis_data2
+                cross = np.bincount(
+                    pair_ind, weights=cross_vals.real, minlength=n_tile_use**2
+                ) + 1j * np.bincount(
+                    pair_ind, weights=cross_vals.imag, minlength=n_tile_use**2
+                )
+                cross = cross.reshape(n_tile_use, n_tile_use)
+                power = np.bincount(
+                    pair_ind, weights=np.abs(vis_model2) ** 2, minlength=n_tile_use**2
+                ).reshape(n_tile_use, n_tile_use)
+                solve_tile = n_arr >= min_cal_solutions
             # For tiles which don't satisfy the minimum number of solutions,
             # pre-emptively set them to 0 in order to prevent certain failure in
             # meeting strict convergence threshold
@@ -326,10 +344,10 @@ def vis_calibrate_subroutine(
                 divergence_flag = 0
                 vis_use = vis_data2
 
-                vis_model_matrix = vis_model2 * np.conj(gain_curr[B_ind])
-                for tile_i in range(tile_use.size):
-                    if n_arr[tile_i] >= min_cal_solutions:
-                        if calibration_weights:
+                if calibration_weights:
+                    vis_model_matrix = vis_model2 * np.conj(gain_curr[B_ind])
+                    for tile_i in range(n_tile_use):
+                        if n_arr[tile_i] >= min_cal_solutions:
                             xmat = vis_model_matrix[(A_ind_arr[tile_i]).astype(int)]
                             # For some reason IDL multiplcation just allows two
                             # arrays of very dissimilar sizes to be multiplied
@@ -348,12 +366,13 @@ def vis_calibrate_subroutine(
                                     xmat_dag,
                                 )
                             )[0]
-                        else:
-                            gain_new[tile_i] = np.linalg.lstsq(
-                                vis_model_matrix[(A_ind_arr[tile_i]).astype(int)],
-                                vis_use[(A_ind_arr[tile_i]).astype(int)],
-                                rcond=None,
-                            )[0][0][0]
+                else:
+                    numerator = cross @ gain_curr
+                    denominator = power @ (np.abs(gain_curr) ** 2)
+                    # Like lstsq, give 0 when every model value is 0
+                    solved = solve_tile & (denominator > 0)
+                    gain_new[:] = 0
+                    gain_new[solved] = numerator[solved] / denominator[solved]
 
                 gain_old = gain_curr.copy()
                 if np.sum(np.abs(gain_new)) == 0:
@@ -469,7 +488,8 @@ def vis_calibrate_subroutine(
                     f"pol_i: {pol_i} and freq_i: {fi}. Convergence was: "
                     f"{conv_test[fii, i - 1]} and the threshold was: {conv_thresh}"
                 )
-            del A_ind_arr
+            if calibration_weights:
+                del A_ind_arr
             logger.info(
                 f"Convergence was reached for polarization: {obs['pol_names'][pol_i]} "
                 f"({pol_i}) and frequency: {fi}, with a convergence of: "
