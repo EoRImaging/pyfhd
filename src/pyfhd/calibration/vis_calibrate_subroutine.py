@@ -261,7 +261,11 @@ def vis_calibrate_subroutine(
         else:
             # Extract out value to avoid any weird stuff happening
             ref_tile_use = ref_tile_use[0][0]
-        # Replace all NaNs with 0's
+        # Set NaN data to 0 in both the data and the model, and remove NaNs
+        # from the model
+        nan_data = np.isnan(vis_avg)
+        vis_avg[nan_data] = 0
+        vis_model[nan_data] = 0
         vis_model[np.isnan(vis_model)] = 0
 
         conv_test = np.zeros((freq_use.size, max_cal_iter))
@@ -472,14 +476,13 @@ def vis_calibrate_subroutine(
                 f"{conv_test[fii, i]} and the threshold was: {conv_thresh}"
             )
             gain_arr[fi, tile_use] = gain_curr
-        nan_i = np.where(np.isnan(gain_curr))[0]
-        if nan_i.size > 0:
+        nan_gain = np.isnan(gain_arr)
+        if np.any(nan_gain):
             # any gains with NANs -> all tiles for that freq will have NANs
-            freq_nan_i = nan_i % n_freq
-            freq_nan_i = freq_nan_i[np.unique(freq_nan_i)]
-            vis_weight_ptr_use[pol_i][:, freq_nan_i] = 0
-            weight[:, freq_nan_i] = 0
-            gain_arr[nan_i] = 0
+            freq_nan_i = np.unique(np.nonzero(nan_gain)[0])
+            vis_weight_ptr_use[pol_i][freq_nan_i, :] = 0
+            weight[freq_nan_i, :] = 0
+            gain_arr[nan_gain] = 0
         if tile_flag.size > 0:
             # set flagged tiles to NAN to remove from calculations
             gain_arr[:, tile_flag] = np.nan
