@@ -242,11 +242,11 @@ def vis_calibration_flag(obs: dict, cal: dict, pyfhd_config: dict) -> dict:
         freq_cut_i = np.where(gain_freq_fom == 0)[0]
         freq_uncut_i = np.nonzero(gain_freq_fom)[0]
         if freq_cut_i.size > 0:
-            freq_use[freq_use_i][freq_cut_i] = 0
+            freq_use[freq_use_i[freq_cut_i]] = 0
         tile_cut_i = np.where(gain_tile_fom == 0)[0]
         tile_uncut_i = np.nonzero(gain_tile_fom)[0]
         if tile_cut_i.size > 0:
-            obs["baseline_info"]["tile_use"][tile_use_i][tile_cut_i] = 0
+            obs["baseline_info"]["tile_use"][tile_use_i[tile_cut_i]] = 0
         if freq_uncut_i.size == 0 or tile_uncut_i.size == 0:
             logger.error(
                 "The frequency and tile flagging inside calibration found some "
