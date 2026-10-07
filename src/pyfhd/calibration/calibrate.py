@@ -216,7 +216,7 @@ def calibrate(
         if pyfhd_config["auto_ratio_calibration"]:
             cal = cal_auto_ratio_remultiply(cal, auto_ratio, auto_tile_i)
     elif pyfhd_config["calibration_polyfit"]:
-        cal, pyfhd_config = vis_cal_polyfit(cal, obs, None, pyfhd_config)
+        cal, pyfhd_config = vis_cal_polyfit(obs, cal, None, pyfhd_config)
 
     # Get the gain residuals
     if pyfhd_config["calibration_auto_fit"]:
