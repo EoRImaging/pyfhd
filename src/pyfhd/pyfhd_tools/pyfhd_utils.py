@@ -1349,7 +1349,8 @@ def split_vis_weights(
     )
     bin_end[-1] = int(nb - 1)
     bin_i = np.full(nb, -1, dtype=np.int64)
-    for t_i in range(obs["n_time"] // 2):
+    # Label every time step that belongs to an even/odd pair
+    for t_i in range(2 * (obs["n_time"] // 2)):
         bin_i[obs["baseline_info"]["bin_offset"][t_i] : bin_end[t_i] + 1] = t_i
 
     time_start_i = int(np.min(np.nonzero(obs["baseline_info"]["time_use"])[0]))
@@ -1369,7 +1370,12 @@ def split_vis_weights(
             if bin_i_cut.size > 0:
                 bin_i[bin_i_cut] = -1
 
-    bi_use = [np.where(bin_i % 2 == 0)[0], np.where(bin_i % 2 == 1)[0]]
+    # Unused and cut time steps are labelled -1. In Python -1 % 2 is 1, not -1
+    # as in IDL, so exclude them explicitly.
+    bi_use = [
+        np.where((bin_i >= 0) & (bin_i % 2 == 0))[0],
+        np.where((bin_i >= 0) & (bin_i % 2 == 1))[0],
+    ]
 
     # Here we ensure that both even and odd samples are the same size by
     # ensuring both arrays match the smallest size
@@ -1430,7 +1436,9 @@ def vis_noise_calc(
         return noise_arr
 
     if bi_use is None:
-        vis_weights_use, bi_use = split_vis_weights(obs, vis_weights)
+        # split_vis_weights modifies its input, so work on a copy to preserve
+        # the caller's weights (IDL's /preserve_weights)
+        vis_weights_use, bi_use = split_vis_weights(obs, vis_weights.copy())
     else:
         vis_weights_use = vis_weights
 
