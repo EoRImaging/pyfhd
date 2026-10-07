@@ -669,11 +669,13 @@ def stokes_cnv(
             sy = sy.round().astype(int)
 
             # set background to -1 to catch out of range pixels
-            ind_arr = np.zeros((obs["dimension"], obs["elements"]), dtype=int) - 1
+            ind_arr = np.zeros((obs["elements"], obs["dimension"]), dtype=int) - 1
+            # image_pix_use indexes the antenna image grid, which is [y, x]
+            # (built with an "xy" meshgrid), unlike the [x, y] beam images
             ind_arr.flat[antenna["image_pix_use"]] = np.arange(n_pix)
             # NB: FHD just uses sx, sy as indices, which means they are truncated
             # to ints. We will use round
-            p_ind = ind_arr[sx, sy]
+            p_ind = ind_arr[sy, sx]
             s_use = np.nonzero(p_ind > 0)[0]
             if s_use.size == 0:
                 raise ValueError("Error: probably no sources above the horizon")
