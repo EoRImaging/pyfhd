@@ -215,15 +215,17 @@ def create_psf(obs: dict, pyfhd_config: dict) -> dict | File:
                         psf_single[
                             psf["resolution"] - i - 1, psf["resolution"] - j - 1
                         ] = psf_base_superres[xvals_i + i, yvals_i + j]
-                # TODO: check the rolling (shifting) and potential reshaping done
-                # here (should already be in)
+                # The extra offset entries hold the kernel shifted by one pixel
+                # along the axis whose offset wrapped around. The flattened
+                # kernel varies fastest along the second (yvals_i) index, so
+                # that index is axis 1 after the reshape.
                 for i in range(psf["resolution"]):
                     psf_single[psf["resolution"] - i - 1, psf["resolution"]] = np.roll(
                         psf_base_superres[
                             xvals_i + i, yvals_i + psf["resolution"] - 1
                         ].reshape(psf["dim"], psf["dim"]),
                         1,
-                        0,
+                        1,
                     ).flatten()
                 for j in range(psf["resolution"]):
                     psf_single[psf["resolution"], psf["resolution"] - j - 1] = np.roll(
@@ -231,7 +233,7 @@ def create_psf(obs: dict, pyfhd_config: dict) -> dict | File:
                             xvals_i + psf["resolution"] - 1, yvals_i + j
                         ].reshape(psf["dim"], psf["dim"]),
                         1,
-                        1,
+                        0,
                     ).flatten()
                 psf_single[psf["resolution"], psf["resolution"]] = np.roll(
                     np.roll(
