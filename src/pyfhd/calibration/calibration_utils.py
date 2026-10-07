@@ -1072,7 +1072,7 @@ def vis_cal_polyfit(
                     .coef
                 )
                 cal["amp_params"][pol_i, tile_i, :] = fit_params
-                for di in range(pyfhd_config["cal_amp_degree_fit"]):
+                for di in range(fit_params.size):
                     gain_fit += fit_params[di] * np.arange(obs["n_freq"]) ** di
 
             gain_residual[pol_i, :, tile_i] = gain_amp[:, tile_i] - gain_fit
