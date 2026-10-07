@@ -1511,9 +1511,10 @@ def idl_median(
         if even:
             return np.median(x)
         else:
-            med_index = int(np.ceil(len(x) / 2))
-
-            return np.sort(x)[med_index]
+            # IDL returns element n // 2 of the sorted (flattened) array: the
+            # middle element when n is odd, the upper middle one when n is even
+            x = np.asarray(x)
+            return np.sort(x, axis=None)[x.size // 2]
 
 
 def reshape_and_average_in_time(
