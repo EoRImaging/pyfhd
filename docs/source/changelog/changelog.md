@@ -60,6 +60,13 @@ the new `analytic-beam-yaml` option to configure them.
 * Added handling for `~` in paths in config yamls.
 
 ### Bug Fixes
+* Fixed a bug in split_vis_weights where only the first half of the time steps
+were included in the even or the odd set.
+* Fixed a bug in split_vis_weights where unused and cut time steps added to the
+odd set rather than being excluded.
+* Fixed a bug in vis_noise_calc where the weights were passed directly (rather
+than as a copy) to split_vis_weights, which edited them in place, so the main
+pipeline's weights were zeroed before gridding for every time step outside a pair.
 * Fixed a bug where the uv weights FITS files had all the polarizations saved
 in all the files rather than just the named polarization in each file.
 * Fixed a bug in `filter_uv_uniform` that caused errors if the optional vis_count
