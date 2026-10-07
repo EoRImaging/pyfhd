@@ -291,12 +291,13 @@ def vis_flag(
     freq_dev = np.std(freq_fom[freq_nonzero] - freq_mean[freq_nonzero])
 
     # We actually want the complements of the where from IDL translation,
-    # adjusted conditions accordingly
+    # adjusted conditions accordingly: the complement of (A > t) OR (fom == 0)
+    # is (A <= t) AND (fom != 0)
     tile_cut0 = np.where(
-        (np.abs(tile_mean - tile_fom) <= 2 * flag_nsigma * tile_dev) | (tile_fom != 0)
+        (np.abs(tile_mean - tile_fom) <= 2 * flag_nsigma * tile_dev) & (tile_fom != 0)
     )[0]
     freq_cut0 = np.where(
-        (np.abs(freq_mean - freq_fom) <= 2 * flag_nsigma * freq_dev) | (freq_fom != 0)
+        (np.abs(freq_mean - freq_fom) <= 2 * flag_nsigma * freq_dev) & (freq_fom != 0)
     )[0]
     tile_mean2 = idl_median(tile_fom[tile_cut0])
     tile_dev2 = np.std(tile_fom[tile_cut0])
@@ -343,15 +344,15 @@ def vis_flag(
     time_mean = idl_median(time_fom[time_nonzero])
     time_dev = np.std(time_fom[time_nonzero])
     time_cut0 = np.where(
-        (np.abs(time_mean - time_fom) <= 2 * flag_nsigma * time_dev) | (time_fom != 0)
-    )
+        (np.abs(time_mean - time_fom) <= 2 * flag_nsigma * time_dev) & (time_fom != 0)
+    )[0]
     time_mean2 = idl_median(time_fom[time_cut0])
     time_dev2 = np.std(time_fom[time_cut0])
     time_cut = np.where(
-        (np.abs(time_mean2 - time_fom) > 2 * flag_nsigma * time_dev2) | (time_fom == 0)
+        (np.abs(time_mean2 - time_fom) > flag_nsigma * time_dev2) | (time_fom == 0)
     )[0]
     for ti in range(time_cut.size):
-        ti_cut = np.where(time_bin == time_cut[ti])
+        ti_cut = np.where(time_bin == time_cut[ti])[0]
         if ti_cut.size > 0:
             vis_weights[: obs["n_pol"], :, ti_cut] = 0
 
