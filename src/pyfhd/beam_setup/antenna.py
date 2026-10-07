@@ -473,7 +473,9 @@ def init_beam(obs: dict, pyfhd_config: dict) -> dict:
         ave_k_beam = k_obj.copy()
         ave_k_beam.select(freq_chans=[0])
         ave_k_beam.freq_array = np.atleast_1d(np.mean(k_obj.freq_array))
-        ave_k_beam.data_array[:, :, 0] = np.mean(ave_k_beam.data_array, axis=2)
+        # Average over the frequency axis of the full K beam, not the single
+        # channel kept by the select above
+        ave_k_beam.data_array[:, :, 0] = np.mean(k_obj.data_array, axis=2)
         k_freq_array = ave_k_beam.freq_array
         k_beam = BeamInterface(ave_k_beam)
 
