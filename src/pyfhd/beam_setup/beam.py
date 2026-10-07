@@ -132,8 +132,10 @@ def create_psf(obs: dict, pyfhd_config: dict) -> dict | File:
         bi_max = np.max(bi_list)
         pol_arr = np.array([[0, 0], [1, 1], [0, 1], [1, 0]], dtype=np.int8)
         for pol_i in range(obs["n_pol"]):
-            ant_pol_1 = pol_arr[0, pol_i]
-            ant_pol_2 = pol_arr[1, pol_i]
+            # pol_arr is the transpose of IDL's [2, 4] array, so index the pair
+            # first and the antenna polarization second
+            ant_pol_1 = pol_arr[pol_i, 0]
+            ant_pol_2 = pol_arr[pol_i, 1]
 
             # Group IDs label unique beams across the array (should be all 0s as
             # theres only one group)
