@@ -569,7 +569,10 @@ def init_beam(obs: dict, pyfhd_config: dict) -> dict:
     par_rot_matrix[0, 1] = -np.cos(np.deg2rad(par_ang))
     par_rot_matrix[1, 1] = -np.sin(np.deg2rad(par_ang))
 
-    k_vals_image_radec = np.matmul(par_rot_matrix.T, k_vals_image.T).T
+    # Rotate the sky vector components (axis 0) of K for each pixel, as in
+    # FHD's rotate_jones_matrix (Jr = R J). Axis 1 is the feed and must not be
+    # mixed.
+    k_vals_image_radec = np.einsum("ijp,jkp->ikp", par_rot_matrix, k_vals_image)
 
     # Convert to L (the Kronecker product of K with it's conjugate).
     # Same math as Jones to Mueller.
