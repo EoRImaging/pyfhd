@@ -382,7 +382,9 @@ def dirty_image_generate(
 
     # dimension is columns, elements is rows
     elements, dimension = dirty_image_uv.shape
-    di_uv_use = dirty_image_uv
+    # Work on a copy: the masks, filter and normalization below are applied in
+    # place and must not change the caller's array
+    di_uv_use = dirty_image_uv.copy()
     # If the baseline threshold has been set
     if baseline_threshold is not None:
         if width_smooth is None:
