@@ -122,11 +122,14 @@ def vis_flag_basic(
         vis_weight_arr = vis_flag_tiles(obs, vis_weight_arr, pyfhd_config["flag_tiles"])
     # Here I'm going to assume the mwa data you're using is more than 32 tiles
     # If you wish to implement flagging for mwa when it had 32 tiles, do that here
-    # Flagging based on channel width
-    if pyfhd_config["flag_frequencies"]:
-        freq_avg = 768 // obs["n_freq"]
-        channel_edge_flag_width = np.ceil(2 / freq_avg)
-        coarse_channel_width = 32 // freq_avg
+    # Flag the edges of the MWA coarse channels (other instruments have no such
+    # channelization). Coarse channels are 1.28 MHz wide and FHD flags 80 kHz
+    # (two of the original 40 kHz fine channels) at each edge. Assumes the
+    # first channel is at the start of a coarse channel.
+    if pyfhd_config["flag_frequencies"] and pyfhd_config["instrument"] == "mwa":
+        channel_width = np.abs(obs["freq_res"])
+        coarse_channel_width = int(np.round(1.28e6 / channel_width))
+        channel_edge_flag_width = np.ceil(80e3 / channel_width)
         fine_channel_i = np.arange(obs["n_freq"]) % coarse_channel_width
         channel_edge_flag = np.where(
             np.minimum(fine_channel_i, (coarse_channel_width - 1) - fine_channel_i)

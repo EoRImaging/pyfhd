@@ -90,6 +90,7 @@ def test_many_points(before_file, after_file):
         "flag_freq_end": None,
         "flag_tiles": [],
         "flag_frequencies": True,
+        "instrument": "mwa",
     }
 
     # Ran out of time to implement the flag_frequencies being false test case
