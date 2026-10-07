@@ -563,8 +563,9 @@ def update_obs(
     Returns
     -------
     obs: dict
-        The new updated obs dictionary
+        The new updated obs dictionary. The input dictionary is not modified.
     """
+    obs = copy.deepcopy(obs)
     if beam_nfreq_avg is None:
         beam_nfreq_avg = np.round(
             obs["n_freq"] / (np.max(obs["baseline_info"]["fbin_i"]) + 1)
@@ -572,7 +573,7 @@ def update_obs(
     freq_bin = beam_nfreq_avg * obs["freq_res"]
     freq_hist, _, freq_ri = histogram(obs["baseline_info"]["freq"], bin_size=freq_bin)
     freq_bin_i = np.zeros(obs["n_freq"], dtype=np.int64)
-    for bin in range(freq_hist.size - 1):
+    for bin in range(freq_hist.size):
         if freq_ri[bin] < freq_ri[bin + 1]:
             freq_bin_i[freq_ri[freq_ri[bin] : freq_ri[bin + 1]]] = bin
     # Adjust the obs dictionary based on the new dimension and kbinsize

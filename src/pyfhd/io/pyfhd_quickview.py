@@ -246,9 +246,10 @@ def quickview(
     beam_i = np.nonzero(beam_mask)
 
     # Generate our dirty images of the uv planes
-    instr_dirty_arr = np.empty([obs["n_pol"], obs["dimension"], obs["elements"]])
-    instr_model_arr = np.empty([obs["n_pol"], obs["dimension"], obs["elements"]])
-    filter_arr = np.zeros([obs["n_pol"], obs["dimension"], obs["elements"]])
+    image_shape = [obs_out["n_pol"], obs_out["dimension"], obs_out["elements"]]
+    instr_dirty_arr = np.empty(image_shape)
+    instr_model_arr = np.empty(image_shape)
+    filter_arr = np.zeros(image_shape)
     for pol_i in range(obs["n_pol"]):
         complex_flag = pol_i > 1
         filter = np.empty(0)
