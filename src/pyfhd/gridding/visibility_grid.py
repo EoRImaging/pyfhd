@@ -142,15 +142,17 @@ def visibility_grid(
 
     # Instead of checking the visibilitity pointer we just take the vis_inds_use
     # from visibility
-    rows, cols = np.meshgrid(fi_use, bi_use, indexing="ij")
-    vis_arr_use = visibility[rows, cols]
+    # np.ix_ selects the (frequency, baseline) block without building full-size
+    # index arrays
+    vis_inds_use = np.ix_(fi_use, bi_use)
+    vis_arr_use = visibility[vis_inds_use]
     # Model_flag has been removed in favor of just the model taking advantage
     # that the model default is None. If it has been specified at all with
     # anything other than None or False, then it should be a numpy array.
     # If it isn't, exit.
     if model is not None:
         if isinstance(model, np.ndarray):
-            model_use = model[rows, cols]
+            model_use = model[vis_inds_use]
             model_return = np.zeros((dimension, elements), dtype=np.complex128)
         else:
             raise ValueError(

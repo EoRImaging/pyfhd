@@ -1492,24 +1492,17 @@ def vis_calibration_apply(
     gain_pol_arr1 = [0, 1, 0, 1]
     gain_pol_arr2 = [0, 1, 1, 0]
 
-    # OK, it really makes sense to use native python functionality here
-    # We're just trying to match up the frequency-dependent gains to the
-    # correct baselines, and apply them. Can use `meshgrid` here instead of
-    # `rebin`, which will make 2D indexing arrays, so we can directly leave
-    # the gain arrays in the correct shape and index the directly. Using `rebin`
-    # means we have to flatten them
-    inds_a_baseline, inds_a_freqs = np.meshgrid(tile_a_i, np.arange(obs["n_freq"]))
-    inds_b_baseline, inds_b_freqs = np.meshgrid(tile_b_i, np.arange(obs["n_freq"]))
-
     for pol_i in range(n_pol_vis):
-        gain_arr1 = cal["gain"][gain_pol_arr1[pol_i], :, :]
-        gain_arr2 = cal["gain"][gain_pol_arr2[pol_i], :, :]
-
-        vis_gain = gain_arr1[inds_a_freqs, inds_a_baseline] * np.conjugate(
-            gain_arr2[inds_b_freqs, inds_b_baseline]
-        )
-
-        vis_arr[pol_i, :, :] *= weight_invert(vis_gain, use_abs=False)
+        # Invert the small [n_freq, n_tile] gain arrays first:
+        # 1 / (g_a conj(g_b)) = (1 / g_a) conj(1 / g_b), and weight_invert gives
+        # 0 where either gain is 0 or not finite, as it does for the product.
+        # Indexing the tile axis matches the gains to the baselines without
+        # full-size index arrays, and multiplying in place needs only one
+        # full-size temporary.
+        gain_inv1 = weight_invert(cal["gain"][gain_pol_arr1[pol_i]], use_abs=False)
+        gain_inv2 = weight_invert(cal["gain"][gain_pol_arr2[pol_i]], use_abs=False)
+        vis_arr[pol_i] *= gain_inv1[:, tile_a_i]
+        vis_arr[pol_i] *= np.conjugate(gain_inv2)[:, tile_b_i]
 
     # We haven't run FHD in a way that uses 4 pols yet so this is all
     # untested
