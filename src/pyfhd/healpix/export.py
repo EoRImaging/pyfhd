@@ -180,28 +180,20 @@ def healpix_snapshot_cube_generate(
                     ]
                 )
 
-            beam_squared_cube = np.zeros([n_freq_use, hpx_inds.size])
-            weights_cube = np.zeros([n_freq_use, hpx_inds.size])
-            variance_cube = np.zeros([n_freq_use, hpx_inds.size])
-            model_cube = np.zeros([n_freq_use, hpx_inds.size])
-            dirty_or_res_cube = np.zeros([n_freq_use, hpx_inds.size])
-
-            for freq_i in range(n_freq_use):
-                beam_squared_cube[freq_i, :] = healpix_cnv_apply(
-                    beam_arr[pol_i, freq_i] * nf_vis_use[freq_i], hpx_cnv
-                )
-                weights_cube[freq_i, :] = healpix_cnv_apply(
-                    split["weights_arr"][freq_i, :, :], hpx_cnv
-                )
-                variance_cube[freq_i, :] = healpix_cnv_apply(
-                    split["variance_arr"][freq_i, :, :], hpx_cnv
-                )
-                model_cube[freq_i, :] = healpix_cnv_apply(
-                    split["model_arr"][freq_i, :, :], hpx_cnv
-                )
-                dirty_or_res_cube[freq_i, :] = healpix_cnv_apply(
-                    split["residual_arr"][freq_i, :, :], hpx_cnv
-                )
+            # Each call converts all frequencies at once, giving
+            # [n_freq_use, n_hpx] cubes
+            beam_squared_cube = healpix_cnv_apply(
+                beam_arr[pol_i, :n_freq_use] * nf_vis_use[:, np.newaxis, np.newaxis],
+                hpx_cnv,
+            )
+            weights_cube = healpix_cnv_apply(split["weights_arr"][:n_freq_use], hpx_cnv)
+            variance_cube = healpix_cnv_apply(
+                split["variance_arr"][:n_freq_use], hpx_cnv
+            )
+            model_cube = healpix_cnv_apply(split["model_arr"][:n_freq_use], hpx_cnv)
+            dirty_or_res_cube = healpix_cnv_apply(
+                split["residual_arr"][:n_freq_use], hpx_cnv
+            )
             healpix_pol_dict = {
                 "obs": split["obs"],
                 "hpx_inds": hpx_inds,

@@ -16,6 +16,7 @@ from pyfhd.gridding.gridding_utils import dirty_image_generate
 from pyfhd.io.pyfhd_io import load, save
 from pyfhd.pyfhd_tools.pyfhd_utils import angle_difference, histogram, region_grow
 from pyfhd.pyfhd_tools.unit_conv import radec_to_altaz, radec_to_pixel
+from scipy.sparse import csr_matrix
 
 logger = logging.getLogger(__name__)
 
@@ -26,10 +27,10 @@ def healpix_cnv_apply(
     """
     healpix_cnv_apply creates a map based off the array/image and healpix
     convention dictionary given.
-    In FHD the healpix_cnv_apply was mainly used as a wrapper for sprsax2, as
-    such I will put the code for sprsax2 in here as pyfhd will only use sprsax2
-    here as we don't have the holographic mapping
-    function at this time.
+    In FHD the healpix_cnv_apply was mainly used as a wrapper for sprsax2, which
+    multiplies the image by the sparse interpolation matrix described by
+    hpx_cnv. Here that matrix is built with scipy.sparse and applied to all
+    images at once.
 
     Vectors 'sa' (interpolation) and 'ija' (index) follow the row-index sparse
     storage mode as described
@@ -38,25 +39,34 @@ def healpix_cnv_apply(
     Parameters
     ----------
     image : NDArray[np.integer | np.floating | np.complexfloating]
-        An orthoslant image array that is to be converted to a HEALPix map.
+        An orthoslant image array that is to be converted to a HEALPix map, or
+        a stack of them with the images on the last two axes.
     hpx_cnv : dict
         The HEALPix index/interpolation dictionary
 
     Returns
     -------
     hpx_map: NDArray[np.float64]
-        A flattened 1D HEALPix array with the interpolated values from the image.
+        The HEALPix map with the interpolated values from the image, with one
+        HEALPix axis replacing the two image axes.
     """
-    # Is B in sprsax2
-    hpx_map = np.zeros(np.size(hpx_cnv["inds"]))
-    # Is X in sprsax2 or X_use
-    image_vector = image.flatten()
-    for i in range(0, np.size(hpx_cnv["i_use"])):
-        i_use = hpx_cnv["i_use"][i]
-        # Transpose is always True when used inside healpix_cnv_apply when using
-        # sprsax2, so we can ignore the transpose keyword
-        hpx_map[hpx_cnv["ija"][i]] += hpx_cnv["sa"][i] * image_vector[i_use]
-    return hpx_map
+    n_image_pix = image.shape[-2] * image.shape[-1]
+    # Entry i of i_use is an image pixel, and ija[i] and sa[i] list the
+    # HEALPix pixels it contributes to and the interpolation weights.
+    ija = [np.atleast_1d(inds) for inds in hpx_cnv["ija"]]
+    sa = [np.atleast_1d(weights) for weights in hpx_cnv["sa"]]
+    n_per_pix = np.array([inds.size for inds in ija])
+    # Duplicate (HEALPix pixel, image pixel) entries are summed
+    cnv_matrix = csr_matrix(
+        (
+            np.concatenate(sa),
+            (np.concatenate(ija), np.repeat(hpx_cnv["i_use"], n_per_pix)),
+        ),
+        shape=(np.size(hpx_cnv["inds"]), n_image_pix),
+    )
+    image_vectors = image.reshape(-1, n_image_pix)
+    hpx_map = (cnv_matrix @ image_vectors.T).T
+    return hpx_map.reshape(image.shape[:-2] + (np.size(hpx_cnv["inds"]),))
 
 
 def healpix_cnv_generate(
