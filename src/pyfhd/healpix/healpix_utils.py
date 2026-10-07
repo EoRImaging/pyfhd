@@ -563,14 +563,15 @@ def vis_model_freq_split(
     # No x_range and y_range is used in pyfhd, if you wish to do that add that here
 
     if bi_use is None:
+        # Use every visibility with positive weight at any frequency: the
+        # weights are [n_freq, n_vis], so sum over the frequency axis
         if obs["n_pol"] > 1:
             flag_test = np.maximum(np.maximum(vis_weights[0], vis_weights[1]), 0)
-            # Double check the axis used
-            flag_test = np.sum(flag_test, axis=1)
+            flag_test = np.sum(flag_test, axis=0)
             bi_use = np.where(flag_test > 0)[0]
         else:
             flag_test = np.maximum(vis_weights[0], 0)
-            flag_test = np.sum(flag_test, axis=1)
+            flag_test = np.sum(flag_test, axis=0)
             bi_use = np.where(flag_test > 0)[0]
 
     n_vis_use = 0
