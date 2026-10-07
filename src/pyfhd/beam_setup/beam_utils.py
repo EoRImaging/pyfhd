@@ -391,8 +391,10 @@ def beam_image_hyperresolved(
     # mode='nearest' handles out-of-bounds by using nearest edge values
     # Interpolate the abs to get the abs power at zenith, which I think is what
     # we want here.
+    # The image is indexed [y, x] (the antenna grids are built with an "xy"
+    # meshgrid), so the y coordinate comes first.
     power_zenith = map_coordinates(
-        np.abs(image_power_beam), [[zen_int_x], [zen_int_y]], order=1, mode="nearest"
+        np.abs(image_power_beam), [[zen_int_y], [zen_int_x]], order=1, mode="nearest"
     )[0]
 
     # Normalize the image power beam to the zenith
