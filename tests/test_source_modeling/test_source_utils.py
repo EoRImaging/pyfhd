@@ -571,10 +571,13 @@ def test_source_dft_model(model_uv_zenith_2013):
     xrange = fhd_model_uv_sav_dict["xrange"]
     yrange = fhd_model_uv_sav_dict["yrange"]
 
+    # source_dft evaluates the phases in a different order from FHD, which
+    # changes the rounding of phases of up to hundreds of radians at the 1e-12
+    # level (values here are up to ~20)
     np.testing.assert_allclose(
         model_uv_full[xrange[0] : xrange[1] + 1, yrange[0] : yrange[1] + 1],
         fhd_model_uv_cut,
-        atol=1e-12,
+        atol=1e-11,
         rtol=0,
     )
 

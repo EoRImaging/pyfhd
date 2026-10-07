@@ -896,7 +896,19 @@ def source_dft(
     if n_src == 1:
         conserve_memory = False
 
-    n_calc = xvals.size * n_src
+    # Map the uv points onto the grid of their distinct u and v values. When
+    # the points fill much of that grid (the whole plane or a uv mask), the DFT
+    # separates: exp(i (x u + y v)) = exp(i x u) exp(i y v), so the sum over
+    # sources becomes one matrix product per polarization on the grid instead
+    # of a sine and cosine for every source and point.
+    u_grid, u_inv = np.unique(xvals, return_inverse=True)
+    v_grid, v_inv = np.unique(yvals, return_inverse=True)
+    separable = u_grid.size * v_grid.size <= 4 * xvals.size
+
+    if separable:
+        n_calc = (u_grid.size + v_grid.size) * n_src
+    else:
+        n_calc = xvals.size * n_src
     mem_factor = 32.0  # from rough empirical estimations
     if conserve_memory and (n_calc * mem_factor > memory_threshold):
         # DFT with memory management
@@ -920,7 +932,12 @@ def source_dft(
         binsize = [n_src]
         bin_start = [0]
 
-    source_uv_vals = np.zeros((n_pol, xvals.size), dtype=np.complex128)
+    if separable:
+        source_uv_grid = np.zeros(
+            (n_pol, u_grid.size, v_grid.size), dtype=np.complex128
+        )
+    else:
+        source_uv_vals = np.zeros((n_pol, xvals.size), dtype=np.complex128)
     t0 = time.time()
     reporting_frac = 0.2
     logger.info(
@@ -929,14 +946,25 @@ def source_dft(
     )
     for bin_i in range(memory_bins):
         inds = np.arange(binsize[bin_i]) + bin_start[bin_i]
-        # Calculate sin and cosine of exponential in DFT (faster than a direct exp)
-        phase = np.outer(x_use[inds], xvals) + np.outer(y_use[inds], yvals)
-        cos_term = np.cos(phase)
-        sin_term = np.sin(phase)
-        del phase
-        source_uv_vals += np.matmul(flux_use[:, inds], cos_term) + 1j * np.matmul(
-            flux_use[:, inds], sin_term
-        )
+        if separable:
+            u_phase = np.exp(1j * np.outer(x_use[inds], u_grid))
+            v_phase = np.exp(1j * np.outer(y_use[inds], v_grid))
+            for pol_i in range(n_pol):
+                source_uv_grid[pol_i] += (
+                    flux_use[pol_i, inds, np.newaxis] * u_phase
+                ).T @ v_phase
+            del u_phase, v_phase
+        else:
+            # Calculate sin and cosine of exponential in DFT (faster than a
+            # direct exp)
+            phase = np.outer(x_use[inds], xvals) + np.outer(y_use[inds], yvals)
+            cos_term = np.cos(phase)
+            sin_term = np.sin(phase)
+            del phase
+            source_uv_vals += np.matmul(flux_use[:, inds], cos_term) + 1j * np.matmul(
+                flux_use[:, inds], sin_term
+            )
+            del cos_term, sin_term
         loop_time = time.time()
         if (
             memory_bins > int(1.0 / reporting_frac)
@@ -953,7 +981,8 @@ def source_dft(
                 f"remaining: {est_time_left}"
             )
 
-    del cos_term, sin_term
+    if separable:
+        source_uv_vals = source_uv_grid[:, u_inv, v_inv]
 
     return source_uv_vals
 
