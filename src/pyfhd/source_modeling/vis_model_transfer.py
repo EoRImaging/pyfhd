@@ -401,6 +401,15 @@ def flag_model_visibilities(
     else:
         model_times_to_use = matched_times_beg
 
+    # Every data time step needs a model time step. An unmatched time (-1)
+    # would otherwise index the model's last time step.
+    n_unmatched = np.count_nonzero(model_times_to_use == -1)
+    if n_unmatched > 0:
+        raise ValueError(
+            f"{n_unmatched} of the {flaginfo_data.num_times} time steps in the "
+            "data have no matching time step in the transferred model."
+        )
+
     # Now to flag the model - some models have no flagged tiles (antennas),
     # whereas the data might have flagged tiles (and so missing baselines).
     # This means we need to flag the missing tiles out of the data and
@@ -437,7 +446,10 @@ def flag_model_visibilities(
 
     # we should have a pyuvdata input in this case as a tile name is greater
     # than the number of tiles
-    if np.max(flaginfo_data.ant_names) > len(obs_data["baseline_info"]["tile_names"]):
+    data_uses_tile_names = np.max(flaginfo_data.ant_names) > len(
+        obs_data["baseline_info"]["tile_names"]
+    )
+    if data_uses_tile_names:
         # Loop over all possible antenna (tile) names, and if they're not in the
         # list of antennas in this data set, append to flag_indexes
         for ant_ind, ant_name in enumerate(obs_data["baseline_info"]["tile_names"]):
@@ -485,6 +497,31 @@ def flag_model_visibilities(
                 "The data has auto-correlations, but the model does not. "
                 "Setting the auto correlations locations to zero in the model."
             )
+
+    # The copy below pairs the data and model baselines by position, so check
+    # that they name the same antenna pairs in the same order. Express the
+    # data antennas as tile indexes (one-indexed), as used by the model.
+    data_ant1 = flaginfo_data.ant1_single_time[data_include_per_time]
+    data_ant2 = flaginfo_data.ant2_single_time[data_include_per_time]
+    if data_uses_tile_names:
+        name_to_index = {
+            name: ind + 1
+            for ind, name in enumerate(obs_data["baseline_info"]["tile_names"])
+        }
+        data_ant1 = np.array([name_to_index.get(name, -1) for name in data_ant1])
+        data_ant2 = np.array([name_to_index.get(name, -1) for name in data_ant2])
+    model_ant1 = flaginfo_model.ant1_single_time[model_include_per_time]
+    model_ant2 = flaginfo_model.ant2_single_time[model_include_per_time]
+    if (
+        data_ant1.size != model_ant1.size
+        or np.any(data_ant1 != model_ant1)
+        or np.any(data_ant2 != model_ant2)
+    ):
+        raise ValueError(
+            "The baselines of the transferred model do not line up with the "
+            "baselines of the data (different antenna pairs or baseline order), "
+            "so the model cannot be transferred."
+        )
 
     # empty holder for the flagged model - this should be the same shape
     vis_model_arr_flagged = np.zeros(
