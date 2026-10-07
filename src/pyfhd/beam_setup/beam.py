@@ -196,11 +196,13 @@ def create_psf(obs: dict, pyfhd_config: dict) -> dict | File:
                 # a different resolution and requires a different normalization
                 beam_int += (
                     baseline_group_n
-                    + np.sum(psf_base_superres) / psf["resolution"] ** 2
+                    * np.sum(psf_base_superres)
+                    / psf["resolution"] ** 2
                 )
                 beam2_int += (
                     baseline_group_n
-                    + np.sum(np.abs(psf_base_superres) ** 2) / psf["resolution"] ** 2
+                    * np.sum(np.abs(psf_base_superres) ** 2)
+                    / psf["resolution"] ** 2
                 )
                 n_grp_use += baseline_group_n
                 psf_single = np.zeros(
