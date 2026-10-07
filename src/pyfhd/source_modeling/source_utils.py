@@ -373,8 +373,9 @@ def generate_source_cal_skymodel(
             flux_I_use = skymodel.extra_columns["flux_I_use"]
             if flux_threshold < 0:
                 # interpret negative flux thresholds as upper bounds.
-                # Weird, but what FHD does
-                flux_I_use *= -1
+                # Weird, but what FHD does. Negate a copy: the column is used
+                # below to rank the sources by apparent flux.
+                flux_I_use = -flux_I_use
 
             src_use = np.nonzero(
                 (skymodel.extra_columns["x_use"] >= fft_alias_range)
