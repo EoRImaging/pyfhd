@@ -1318,7 +1318,7 @@ def vis_cal_polyfit(
                             np.exp(1j * 2 * np.pi / obs["n_freq"] * mode_i * freq_use)
                             * gain_arr[freq_use, tile_i]
                         )
-                        amp_use = np.abs(mode_fit) / freq_use[0].size
+                        amp_use = np.abs(mode_fit) / freq_use.size
                         phase_use = np.arctan2(mode_fit.imag, mode_fit.real)
 
                     gain_mode_fit = amp_use * np.exp(
