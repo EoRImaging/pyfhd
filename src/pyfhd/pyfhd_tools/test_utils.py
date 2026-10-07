@@ -1,3 +1,4 @@
+from pyfhd.beam_setup.beam import rearrange_sav_psf
 from pyfhd.io.pyfhd_io import recarray_to_dict
 import numpy as np
 from scipy.io import readsav
@@ -280,22 +281,7 @@ def sav_file_rearrange_psf(sav_psf):
     dict
         Returns a psf dict with properly arranged arrays.
     """
-    # do this first to drop beam_ptr size (for only 1 antenna type)
-    sav_psf["beam_ptr"][0] = sav_psf["beam_ptr"][0].T[:, :, 0]
-    sav_psf = recarray_to_dict(sav_psf)
-
-    # need to transpose the offset axes
-    sav_psf["beam_ptr"] = sav_psf["beam_ptr"].transpose([0, 1, 3, 2, 4])
-    # # finally need to reorder the last (flat) from f order to c order
-    inp_shape = sav_psf["beam_ptr"].shape
-    new_shape = tuple(list(inp_shape[:-1]) + [int(sav_psf["dim"]), int(sav_psf["dim"])])
-    sav_psf["beam_ptr"] = (
-        sav_psf["beam_ptr"].reshape(new_shape, order="F").reshape(inp_shape)
-    )
-
-    sav_psf["id"] = sav_psf["id"].astype(int).T
-
-    return sav_psf
+    return rearrange_sav_psf(sav_psf)
 
 
 def print_types(dictionary: dict, dict_name: str, indent_level: int = 1) -> None:

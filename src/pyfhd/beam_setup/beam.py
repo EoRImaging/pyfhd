@@ -13,6 +13,44 @@ from pyfhd.pyfhd_tools.pyfhd_utils import histogram, rebin, weight_invert
 logger = logging.getLogger(__name__)
 
 
+def rearrange_sav_psf(sav_psf: np.recarray) -> dict:
+    """
+    Reading in IDL psf structures via scipy.io.readsav results in rearranged
+    axes and badly sorted flattened arrays. Rearrange them into the layout
+    pyfhd's gridding expects.
+
+    Parameters
+    ----------
+    sav_psf : np.recarray
+        The psf structure as read in by scipy.io.readsav
+
+    Returns
+    -------
+    dict
+        The psf dictionary with properly arranged arrays.
+    """
+    # Take only the first baseline (assumes all baselines have the same beam).
+    # Do this first to drop the beam_ptr size.
+    sav_psf["beam_ptr"][0] = sav_psf["beam_ptr"][0].T[:, :, 0]
+    # Recarray to dict completely unpacks object arrays into the dict
+    sav_psf = recarray_to_dict(sav_psf)
+
+    # Transpose the hyperresolution offset axes
+    sav_psf["beam_ptr"] = sav_psf["beam_ptr"].transpose([0, 1, 3, 2, 4])
+    # Reorder the flattened kernels from IDL (column-major) to numpy
+    # (row-major) order
+    inp_shape = sav_psf["beam_ptr"].shape
+    new_shape = tuple(list(inp_shape[:-1]) + [int(sav_psf["dim"]), int(sav_psf["dim"])])
+    sav_psf["beam_ptr"] = (
+        sav_psf["beam_ptr"].reshape(new_shape, order="F").reshape(inp_shape)
+    )
+
+    # Transpose the group array
+    sav_psf["id"] = sav_psf["id"].astype(int).T
+
+    return sav_psf
+
+
 def create_psf(obs: dict, pyfhd_config: dict) -> dict | File:
     """
     Creates the psf dictionary, which includes the hyperresolved uv-kernel used for
@@ -301,14 +339,9 @@ def create_psf(obs: dict, pyfhd_config: dict) -> dict | File:
         # Delete the read in sav file, now that we got the psf, at this point we
         # will have the psf size twice!
         del beam
-        psf["beam_ptr"][0] = psf["beam_ptr"][0].T
-        # Take only the first baseline (assumes all baselines have the same beam)
-        psf["beam_ptr"][0] = psf["beam_ptr"][0][:, :, 0]
-        # Transpose the group array
-        psf["id"][0] = psf["id"][0].T
-        # Recarray to dict completely unpack object arrays into the dict,
-        # although will require the beam_ptr in memory twice potentially temporarily
-        psf = recarray_to_dict(psf)
+        # Reorder the IDL arrays into pyfhd's layout. This will require the
+        # beam_ptr in memory twice potentially temporarily
+        psf = rearrange_sav_psf(psf)
         # The to_chunk is a dictionary of dictionaries which contain the information
         # necessary to chunk the beam_ptr
         to_chunk = {
