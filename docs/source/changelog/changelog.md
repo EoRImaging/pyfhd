@@ -39,6 +39,8 @@ the new `analytic-beam-yaml` option to configure them.
 * Added handling for `~` in paths in config yamls.
 
 ### Bug Fixes
+* Fixed a bug in healpix_cnv_apply that caused the Healpix images to be rotated
+by 90 degrees.
 * Fixed a bug in split_vis_weights where only the first half of the time steps
 were included in the even or the odd set.
 * Fixed a bug in split_vis_weights where unused and cut time steps added to the
@@ -107,6 +109,7 @@ use a context manager for the logger in the main function.
 computer-specific paths in test data.
 
 ### Dependency Changes
+* Changed to require `astropy_healpix>1.1.1` rather than `healpy`.
 * Updated dependency minimum versions to: pyuvdata>=3.2.7, pyradiosky>=1.1.2
 * Added pyradiosky>=1.1.1 as a dependency for managing source catalogs.
 

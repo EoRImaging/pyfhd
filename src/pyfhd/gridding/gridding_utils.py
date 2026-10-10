@@ -387,10 +387,13 @@ def dirty_image_generate(
     if baseline_threshold is not None:
         if width_smooth is None:
             width_smooth = np.floor(np.sqrt(dimension * elements) / 100)
-        rarray = np.sqrt(
-            (meshgrid(dimension, 1) - dimension / 2) ** 2
-            + (meshgrid(elements, 2) - elements / 2) ** 2
+
+        pix_x_arr, pix_y_arr = np.meshgrid(
+            np.arange(dimension) - dimension / 2,
+            np.arange(elements) - elements / 2,
+            indexing="ij",
         )
+        rarray = np.sqrt(pix_x_arr**2 + pix_y_arr**2)
         # Get all the values that meet the threshold
         if baseline_threshold >= 0:
             cut_i = np.where(rarray.flatten() < baseline_threshold)
