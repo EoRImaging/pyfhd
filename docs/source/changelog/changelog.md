@@ -109,7 +109,7 @@ use a context manager for the logger in the main function.
 computer-specific paths in test data.
 
 ### Dependency Changes
-* Changed to require `astropy_healpix>1.0.2` rather than `healpy`.
+* Changed to require `astropy_healpix>1.1.1` rather than `healpy`.
 * Updated dependency minimum versions to: pyuvdata>=3.2.7, pyradiosky>=1.1.2
 * Added pyradiosky>=1.1.1 as a dependency for managing source catalogs.
 
