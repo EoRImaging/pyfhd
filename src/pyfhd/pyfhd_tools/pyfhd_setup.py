@@ -1100,12 +1100,6 @@ def pyfhd_parser():
         action=OrderedBooleanOptionalAction,
         help="Grid the variance for the uv plane",
     )
-    gridding.add_argument(
-        "--grid-uniform",
-        default=False,
-        action=OrderedBooleanOptionalAction,
-        help="Grid uniformally by applying a uniform weighted filter to all uv-planes",
-    )
 
     # Deconvolution Group
     # deconv.add_argument(
@@ -2202,15 +2196,6 @@ def pyfhd_setup(pyfhd_config: dict, run_time: float, output_dir_exists: bool) ->
             ]
         else:
             pyfhd_config["antenna_size"] = 10
-
-    # Turn off calculating the mapping function if grid_uniform is on (warning)
-    # TODO: add deconvolution here too later
-    if pyfhd_config["grid_uniform"] and pyfhd_config["recalculate_mapfn"]:
-        pyfhd_config["recalculate_mapfn"] = False
-        warnings.warn(
-            "The grid_uniform and recalculate_mapfn options are incompatible. "
-            "Setting recalculate_mapfn to False."
-        )
 
     # require psf_dim to be a multiple of 2
     if pyfhd_config["psf_dim"] is not None and pyfhd_config["psf_dim"] % 2 != 0:

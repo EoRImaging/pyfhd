@@ -30,7 +30,7 @@ def data_dir():
         pytest.param(2, marks=pytest.mark.github_actions),
         pytest.param(3, marks=pytest.mark.github_actions),
         pytest.param(4, marks=pytest.mark.github_actions),
-        pytest.param(5, marks=pytest.mark.github_actions),
+        # number 5 uses grid_uniform, which we've dropped support for
         pytest.param(6, marks=pytest.mark.github_actions),
         pytest.param(7, marks=pytest.mark.github_actions),
     ],
@@ -123,9 +123,6 @@ def before_gridding(data_dir: Path, number: int, request: pytest.FixtureRequest)
         "grid_weights": bool(h5_save_dict["weights"]),
         "grid_variance": (
             bool("variance" in h5_save_dict and h5_save_dict["variance"])
-        ),
-        "grid_uniform": (
-            bool("grid_uniform" in h5_save_dict and h5_save_dict["grid_uniform"])
         ),
         "conserve_memory": False,
         "recalculate_mapfn": False,
@@ -340,9 +337,6 @@ def full_before_gridding(data_dir: Path, full_number: int):
         "grid_weights": bool(h5_save_dict["weights"]),
         "grid_variance": (
             bool("variance" in h5_save_dict and h5_save_dict["variance"])
-        ),
-        "grid_uniform": (
-            bool("grid_uniform" in h5_save_dict and h5_save_dict["grid_uniform"])
         ),
         "conserve_memory": False,
         "recalculate_mapfn": False,
@@ -559,9 +553,6 @@ def before_vis_model_freq_gridding(tag, run, data_dir):
         "grid_variance": (
             bool("variance_holo" in h5_save_dict and h5_save_dict["variance_holo"])
         ),
-        "grid_uniform": (
-            bool("grid_uniform" in h5_save_dict and h5_save_dict["grid_uniform"])
-        ),
     }
     h5_save_dict["visibility_ptr"] = h5_save_dict["vis_ptr"].T
     h5_save_dict["vis_weight_ptr"] = np.swapaxes(
@@ -723,7 +714,6 @@ def test_mapfn_zenith_2013(
     pyfhd_config_use["memory_threshold"] = 1e10
     pyfhd_config_use["mask_mirror_indices"] = False
     pyfhd_config_use["beam_per_baseline"] = False
-    pyfhd_config_use["grid_uniform"] = False
     pyfhd_config_use["grid_spectral"] = False
     pyfhd_config_use["grid_weights"] = True
     pyfhd_config_use["grid_variance"] = False

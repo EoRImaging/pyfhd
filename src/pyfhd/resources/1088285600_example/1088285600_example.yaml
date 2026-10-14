@@ -90,7 +90,6 @@ image-filter : 'filter_uv_uniform'
 grid-spectral: false
 grid-weights: true
 grid-variance: true
-grid-uniform: false
 
 # Deconvolution
 # deconvolve : false

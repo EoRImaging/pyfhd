@@ -101,13 +101,6 @@ def test_git_info(git_string, output_dict):
             "If we're exporting healpix we should also save the visibilities "
             "that created them. Setting save_visibilities to True",
         ),
-        (
-            ["--grid-uniform", "--recalculate-mapfn"],
-            {"grid_uniform": True, "recalculate_mapfn": False},
-            True,
-            "The grid_uniform and recalculate_mapfn options are incompatible. "
-            "Setting recalculate_mapfn to False.",
-        ),
     ],
 )
 def test_configuration(tmp_path, options, config, warn_msg, deprecated):

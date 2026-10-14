@@ -227,13 +227,8 @@ def visibility_grid(
     weights = np.zeros((dimension, elements), dtype=np.complex128)
     variance = np.zeros((dimension, elements))
     uniform_filter = np.zeros((dimension, elements))
-
-    # If the uniform gridding has been activated we need to activate the uniform
-    # filter and switch off calculating the HMF (this should already be done in
-    # setup, but there's no harm to making sure).
-    if pyfhd_config["grid_uniform"]:
-        calculate_uniform_filter = True
-        calculate_mapfn = False
+    # Note: we do not support the "grid_uniform" option in FHD -- it was an old
+    # research idea and is not used.
 
     if calculate_mapfn:
         # setup for the mapping function creation. We're going to create it as
@@ -692,22 +687,6 @@ def visibility_grid(
                 spectral_model_uv = (
                     spectral_model_uv + conjugate_mirror(spectral_model_uv)
                 ) / 2
-
-    # Option to apply a uniform weighted filter to all uv-planes
-    if pyfhd_config["grid_uniform"]:
-        filter_use = weight_invert(uniform_filter, threshold=1)
-        wts_i = np.nonzero(filter_use)
-        if wts_i[0].size > 0:
-            filter_use /= np.mean(filter_use[wts_i])
-        else:
-            filter_use /= np.mean(filter_use)
-        image_uv *= weight_invert(filter_use)
-        if pyfhd_config["grid_weights"]:
-            weights *= weight_invert(filter_use)
-        if pyfhd_config["grid_variance"]:
-            variance *= weight_invert(filter_use)
-        if model is not None:
-            model_return *= weight_invert(filter_use)
 
     if not no_conjugate:
         # The uv-plane is its own conjugate mirror about the x-axis, so fill in

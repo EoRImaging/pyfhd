@@ -403,7 +403,6 @@ This would be the same as runnning the command below:
     --no-grid-spectral \
     --grid-weights \
     --grid-variance \
-    --no-grid-uniform \
     --gridding-plots \
     --no-snapshot-healpix-export \
     1088285600
