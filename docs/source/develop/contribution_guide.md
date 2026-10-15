@@ -1061,15 +1061,6 @@ below, this is based on running the sample data as per the tutorial:
             "python": "/path/to/python/env/python"
             // Set to false if you need to debug interactions with pyfhd and it's dependencies
             "justMyCode": true,
-            // If you're inside a docker or singularity container, you likely need to also set the
-            // path mappings (this tells debugpy where to map your files on your machine to inside
-            // the container)
-            // "pathMappings": [
-            //     {
-            //         "localRoot": "${workspaceFolder}",
-            //         "remoteRoot": "/pyfhd"
-            //     }
-            // ]
         }
     ]
 }
