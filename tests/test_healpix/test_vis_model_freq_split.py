@@ -57,7 +57,6 @@ def before_file(tag, run, data_dir):
         "interpolate_kernel": sav_dict["extra"]["interpolate_kernel"],
         "mask_mirror_indices": False,
         "beam_per_baseline": False,
-        "grid_uniform": False,
         "grid_spectral": False,
         "grid_weights": True,
         "grid_variance": True,

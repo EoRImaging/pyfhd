@@ -111,17 +111,35 @@ class OrderedBooleanOptionalAction(argparse.BooleanOptionalAction):
         self.option_strings = longs + shorts
 
 
-def git_info():
-    version_str = version("pyfhd")
-    parts = version_str.split(".")
+def git_info(version_str: str | None = None):
+    """
+    Parse the version info.
 
-    if ".dev" not in version_str:
-        tag = version_str
-        return tag, None, None, False
+    Parameters
+    ----------
+    version_str : str, optional
+        Version string to parse. If None, get the pyfhd version. Should only be
+        set to a string for testing purposes.
+
+    """
+    if version_str is None:
+        version_str = version("pyfhd")
+    parts = version_str.split(".")
 
     dirty_flag = False
     commit = None
     branch = None
+
+    if ".dev" not in version_str:
+        tag = version_str
+        return {
+            "version": version_str,
+            "tag": tag,
+            "commit": commit,
+            "commit_str": tag,
+            "branch": branch,
+            "dirty_flag": dirty_flag,
+        }
 
     dev_loc = version_str.find(".dev")
     tag = version_str[:dev_loc]
@@ -147,9 +165,8 @@ def git_info():
     else:
         branch = None
 
-    commit_str = ""
     if commit is not None:
-        commit_str += f" {commit}"
+        commit_str = f"{commit}"
         if branch is not None:
             commit_str += f" (branch: {branch})"
         if dirty_flag:
@@ -157,7 +174,7 @@ def git_info():
     else:
         commit_str = tag
 
-    version_info = {
+    return {
         "version": version_str,
         "tag": tag,
         "commit": commit,
@@ -165,7 +182,6 @@ def git_info():
         "branch": branch,
         "dirty_flag": dirty_flag,
     }
-    return version_info
 
 
 def pyfhd_parser():
@@ -384,6 +400,14 @@ def pyfhd_parser():
         help="Forces pyfhd to recalculate the gridding function. Replaces "
         "grid_recalculate from FHD",
     )
+    checkpoints.add_argument(
+        "--recalculate-mapfn",
+        default=False,
+        action=OrderedBooleanOptionalAction,
+        help="Forces pyfhd to recalculate the holographic mapping function. "
+        "Replaces mapfn_recalculate from FHD",
+    )
+
     checkpoints.add_argument(
         "--recalculate-healpix",
         default=False,
@@ -1075,12 +1099,6 @@ def pyfhd_parser():
         default=False,
         action=OrderedBooleanOptionalAction,
         help="Grid the variance for the uv plane",
-    )
-    gridding.add_argument(
-        "--grid-uniform",
-        default=False,
-        action=OrderedBooleanOptionalAction,
-        help="Grid uniformally by applying a uniform weighted filter to all uv-planes",
     )
 
     # Deconvolution Group
@@ -1814,6 +1832,7 @@ def recalculate_flow(pyfhd_config: dict) -> dict:
             pyfhd_config["recalculate_grid"] = True
             if pyfhd_config["snapshot_healpix_export"]:
                 pyfhd_config["recalculate_healpix"] = True
+        # add recalculate_mapfn logic & need_mapfn when deconvolution exists
 
     if (
         pyfhd_config["recalculate_beam"]
@@ -2157,6 +2176,7 @@ def pyfhd_setup(pyfhd_config: dict, run_time: float, output_dir_exists: bool) ->
             )
 
     # If both mapping function and healpix export are on save the visibilities (Warning)
+    # TODO: figure out if this should change now that we can build the mapping function
     if (
         pyfhd_config["snapshot_healpix_export"]
         and not pyfhd_config["save_visibilities"]
