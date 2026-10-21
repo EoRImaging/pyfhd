@@ -146,7 +146,7 @@ def git_info(version_str: str | None = None):
     if parts[-1] == "dirty":
         dirty_flag = True
 
-    # get commit
+    # get commit, guaranteed to be present if ".dev" is present
     for part_num, part in enumerate(parts):
         if "+g" in part:
             commit_part = part_num
@@ -165,14 +165,11 @@ def git_info(version_str: str | None = None):
     else:
         branch = None
 
-    if commit is not None:
-        commit_str = f"{commit}"
-        if branch is not None:
-            commit_str += f" (branch: {branch})"
-        if dirty_flag:
-            commit_str += " DIRTY (uncommitted changes)"
-    else:
-        commit_str = tag
+    commit_str = f"{commit}"
+    if branch is not None:
+        commit_str += f" (branch: {branch})"
+    if dirty_flag:
+        commit_str += " DIRTY (uncommitted changes)"
 
     return {
         "version": version_str,
