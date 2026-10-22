@@ -21,12 +21,11 @@ from pyfhd.source_modeling.vis_source_model import vis_source_model
 
 
 @pytest.fixture(scope="session")
-def gleam_cut_2013_sky(mwa_aee_beam_zenith_2013):
+def gleam_cut_2013_sky(mwa_aee_beam_zenith_2013, gleam_cut_path):
 
     _, psf, obs, _ = mwa_aee_beam_zenith_2013
-    catalog_path = fetch_data("gleam_rlb2019_cut")
 
-    sky = generate_source_cal_skymodel(obs=obs, psf=psf, catalog_path=catalog_path)
+    sky = generate_source_cal_skymodel(obs=obs, psf=psf, catalog_path=gleam_cut_path)
 
     yield sky
 
@@ -73,16 +72,14 @@ def split_source_as_extended(filein, name, fileout):
 
 
 @pytest.fixture(scope="session")
-def split_kept_source(tmp_path_factory):
-    catalog_path = fetch_data("gleam_rlb2019_cut")
-
+def split_kept_source(tmp_path_factory, gleam_cut_path):
     # make a copy but divide one source into two extended components
     # chosen as one that is selected
     name = "12082"
     ext_cat_name = (
         tmp_path_factory.mktemp("src_utils_split") / "gleam_rlb2019_cut_split_ext.skyh5"
     )
-    split_source_as_extended(filein=catalog_path, name=name, fileout=ext_cat_name)
+    split_source_as_extended(filein=gleam_cut_path, name=name, fileout=ext_cat_name)
 
     yield ext_cat_name
 
@@ -91,11 +88,9 @@ def split_kept_source(tmp_path_factory):
 @pytest.mark.filterwarnings("ignore:Some Stokes values are NaNs.")
 @pytest.mark.filterwarnings("ignore:Some Stokes I values are negative.")
 @pytest.mark.parametrize("refraction", [None, "astropy", "idl"])
-def test_gen_cal_sky(fixed_obs, zenith_psf_2013_cut, refraction):
+def test_gen_cal_sky(fixed_obs, gleam_cut_path, zenith_psf_2013_cut, refraction):
     psf = zenith_psf_2013_cut
     obs = fixed_obs
-
-    catalog_path = fetch_data("gleam_rlb2019_cut")
 
     fhd_cal_sources_file = fetch_data("2013_zenith_gleam_sources")
 
@@ -106,7 +101,7 @@ def test_gen_cal_sky(fixed_obs, zenith_psf_2013_cut, refraction):
     expected_sky.at_frequencies(np.atleast_1d(expected_sky.reference_frequency[0]))
 
     sky = generate_source_cal_skymodel(
-        obs=obs, psf=psf, catalog_path=catalog_path, refraction=refraction
+        obs=obs, psf=psf, catalog_path=gleam_cut_path, refraction=refraction
     )
 
     # sorting is slightly different because of different beam values
@@ -152,7 +147,9 @@ def test_gen_cal_sky(fixed_obs, zenith_psf_2013_cut, refraction):
 @pytest.mark.filterwarnings("ignore:Some Stokes values are NaNs.")
 @pytest.mark.filterwarnings("ignore:Some Stokes I values are negative.")
 @pytest.mark.parametrize("beam_thresh", [None, 0.02])
-def test_gen_cal_sky_sidelobes(fixed_obs, zenith_psf_2013_cut, beam_thresh):
+def test_gen_cal_sky_sidelobes(
+    fixed_obs, gleam_cut_path, zenith_psf_2013_cut, beam_thresh
+):
     """
     Check that passing the same catalog as the sidelobe catalog gives the same
     answer as not passing a separate sidelobe catalog.
@@ -160,12 +157,10 @@ def test_gen_cal_sky_sidelobes(fixed_obs, zenith_psf_2013_cut, beam_thresh):
     psf = zenith_psf_2013_cut
     obs = fixed_obs
 
-    catalog_path = fetch_data("gleam_rlb2019_cut")
-
     sky_single_cat = generate_source_cal_skymodel(
         obs=obs,
         psf=psf,
-        catalog_path=catalog_path,
+        catalog_path=gleam_cut_path,
         allow_sidelobe_sources=True,
         beam_threshold=beam_thresh,
     )
@@ -173,9 +168,9 @@ def test_gen_cal_sky_sidelobes(fixed_obs, zenith_psf_2013_cut, beam_thresh):
     sky_two_cat = generate_source_cal_skymodel(
         obs=obs,
         psf=psf,
-        catalog_path=catalog_path,
+        catalog_path=gleam_cut_path,
         allow_sidelobe_sources=True,
-        sidelobe_catalog_path=catalog_path,
+        sidelobe_catalog_path=gleam_cut_path,
         beam_threshold=beam_thresh,
     )
 
@@ -196,22 +191,20 @@ def test_gen_cal_sky_sidelobes(fixed_obs, zenith_psf_2013_cut, beam_thresh):
 @pytest.mark.github_actions
 @pytest.mark.filterwarnings("ignore:Some Stokes values are NaNs.")
 @pytest.mark.filterwarnings("ignore:Some Stokes I values are negative.")
-def test_gen_cal_sky_icrs(fixed_obs, zenith_psf_2013_cut, tmpdir):
+def test_gen_cal_sky_icrs(fixed_obs, gleam_cut_path, zenith_psf_2013_cut, tmpdir):
     """
     Check that skymodel frames get transformed properly
     """
     psf = zenith_psf_2013_cut
     obs = fixed_obs
 
-    catalog_path = fetch_data("gleam_rlb2019_cut")
-
     # make a copy but transform to icrs
-    new_sky = SkyModel.from_file(catalog_path)
+    new_sky = SkyModel.from_file(gleam_cut_path)
     new_sky.transform_to("icrs")
     new_cat_name = tmpdir / "gleam_rlb2019_cut_icrs.skyh5"
     new_sky.write_skyh5(new_cat_name)
 
-    sky1 = generate_source_cal_skymodel(obs=obs, psf=psf, catalog_path=catalog_path)
+    sky1 = generate_source_cal_skymodel(obs=obs, psf=psf, catalog_path=gleam_cut_path)
 
     sky2 = generate_source_cal_skymodel(obs=obs, psf=psf, catalog_path=new_cat_name)
 
@@ -224,25 +217,26 @@ def test_gen_cal_sky_icrs(fixed_obs, zenith_psf_2013_cut, tmpdir):
 @pytest.mark.github_actions
 @pytest.mark.filterwarnings("ignore:Some Stokes values are NaNs.")
 @pytest.mark.filterwarnings("ignore:Some Stokes I values are negative.")
-def test_gen_cal_sky_flux_thresh(fixed_obs, zenith_psf_2013_cut, tmpdir):
+def test_gen_cal_sky_flux_thresh(
+    fixed_obs, gleam_cut_path, zenith_psf_2013_cut, tmpdir
+):
     """
     Check that flux_thresholding is done correctly
     """
     psf = zenith_psf_2013_cut
     obs = fixed_obs
 
-    catalog_path = fetch_data("gleam_rlb2019_cut")
     flux_thresh = 1.0  # Jy
 
     # make a copy but set cut on flux
-    new_sky = SkyModel.from_file(catalog_path)
+    new_sky = SkyModel.from_file(gleam_cut_path)
     comp_inds = np.nonzero(new_sky.stokes[0, 0] > flux_thresh * units.Jy)
     new_sky.select(component_inds=comp_inds[0])
     new_cat_name = tmpdir / "gleam_rlb2019_cut_bright.skyh5"
     new_sky.write_skyh5(new_cat_name)
 
     sky1 = generate_source_cal_skymodel(
-        obs=obs, psf=psf, catalog_path=catalog_path, flux_threshold=flux_thresh
+        obs=obs, psf=psf, catalog_path=gleam_cut_path, flux_threshold=flux_thresh
     )
 
     sky2 = generate_source_cal_skymodel(obs=obs, psf=psf, catalog_path=new_cat_name)
@@ -258,7 +252,7 @@ def test_gen_cal_sky_flux_thresh(fixed_obs, zenith_psf_2013_cut, tmpdir):
 @pytest.mark.filterwarnings("ignore:Some Stokes I values are negative.")
 @pytest.mark.parametrize("extended", [False, True])
 def test_gen_cal_sky_max_src(
-    fixed_obs, zenith_psf_2013_cut, extended, split_kept_source
+    fixed_obs, gleam_cut_path, zenith_psf_2013_cut, extended, split_kept_source
 ):
     """
     Check that selecting a maximum number of sources works properly
@@ -269,7 +263,7 @@ def test_gen_cal_sky_max_src(
     if extended:
         catalog_path = split_kept_source
     else:
-        catalog_path = fetch_data("gleam_rlb2019_cut")
+        catalog_path = gleam_cut_path
     src_cap = 100
 
     sky1 = generate_source_cal_skymodel(
@@ -291,19 +285,17 @@ def test_gen_cal_sky_max_src(
 @pytest.mark.github_actions
 @pytest.mark.filterwarnings("ignore:Some Stokes values are NaNs.")
 @pytest.mark.filterwarnings("ignore:Some Stokes I values are negative.")
-def test_gen_cal_sky_extended(fixed_obs, zenith_psf_2013_cut, tmpdir):
+def test_gen_cal_sky_extended(fixed_obs, gleam_cut_path, zenith_psf_2013_cut, tmpdir):
     """
     Check that extended sources are handled properly
     """
     psf = zenith_psf_2013_cut
     obs = fixed_obs
 
-    catalog_path = fetch_data("gleam_rlb2019_cut")
-
     # make a copy but set some sources as extended
     # chosen as ones that are selected and fairly close together
     names = ["12082", "12771"]
-    ext_sky = SkyModel.from_file(catalog_path)
+    ext_sky = SkyModel.from_file(gleam_cut_path)
     ext_model = [""] * ext_sky.Ncomponents
     for name in names:
         ind = np.nonzero(ext_sky.name == name)[0][0]
@@ -313,7 +305,7 @@ def test_gen_cal_sky_extended(fixed_obs, zenith_psf_2013_cut, tmpdir):
     ext_cat_name = tmpdir / "gleam_rlb2019_cut_ext.skyh5"
     ext_sky.write_skyh5(ext_cat_name)
 
-    sky1 = generate_source_cal_skymodel(obs=obs, psf=psf, catalog_path=catalog_path)
+    sky1 = generate_source_cal_skymodel(obs=obs, psf=psf, catalog_path=gleam_cut_path)
 
     sky2 = generate_source_cal_skymodel(obs=obs, psf=psf, catalog_path=ext_cat_name)
     assert sky2.extended_model_group is not None
@@ -353,7 +345,7 @@ def test_gen_cal_sky_extended(fixed_obs, zenith_psf_2013_cut, tmpdir):
 @pytest.mark.filterwarnings("ignore:Some Stokes I values are negative.")
 @pytest.mark.parametrize("restrict_sources", [True, False])
 def test_gen_cal_sky_extend_collapse(
-    fixed_obs, zenith_psf_2013_cut, split_kept_source, restrict_sources
+    fixed_obs, gleam_cut_path, zenith_psf_2013_cut, split_kept_source, restrict_sources
 ):
     """
     Check that collapsing extended sources is handled properly
@@ -361,11 +353,10 @@ def test_gen_cal_sky_extend_collapse(
     psf = zenith_psf_2013_cut
     obs = fixed_obs
 
-    catalog_path = fetch_data("gleam_rlb2019_cut")
     ext_cat_path = split_kept_source
 
     sky1 = generate_source_cal_skymodel(
-        obs=obs, psf=psf, catalog_path=catalog_path, restrict_sources=restrict_sources
+        obs=obs, psf=psf, catalog_path=gleam_cut_path, restrict_sources=restrict_sources
     )
 
     sky2 = generate_source_cal_skymodel(
@@ -385,18 +376,17 @@ def test_gen_cal_sky_extend_collapse(
 @pytest.mark.github_actions
 @pytest.mark.filterwarnings("ignore:Some Stokes values are NaNs.")
 @pytest.mark.filterwarnings("ignore:Some Stokes I values are negative.")
-def test_gen_cal_sky_extend_cut(fixed_obs, zenith_psf_2013_cut, tmpdir):
+def test_gen_cal_sky_extend_cut(fixed_obs, gleam_cut_path, zenith_psf_2013_cut, tmpdir):
     """
     Check handling if all extended sources are cut.
     """
     psf = zenith_psf_2013_cut
     obs = fixed_obs
 
-    catalog_path = fetch_data("gleam_rlb2019_cut")
     outfile = tmpdir / "gleam_rlb2019_cut_ext_cut.skyh5"
-    split_source_as_extended(filein=catalog_path, name="100224", fileout=outfile)
+    split_source_as_extended(filein=gleam_cut_path, name="100224", fileout=outfile)
 
-    sky1 = generate_source_cal_skymodel(obs=obs, psf=psf, catalog_path=catalog_path)
+    sky1 = generate_source_cal_skymodel(obs=obs, psf=psf, catalog_path=gleam_cut_path)
 
     sky2 = generate_source_cal_skymodel(obs=obs, psf=psf, catalog_path=outfile)
     assert sky2.extended_model_group is None
@@ -436,18 +426,19 @@ def test_gen_cal_sky_extend_cut(fixed_obs, zenith_psf_2013_cut, tmpdir):
         (TypeError, "beam must be an array.", {"beam": "foo"}),
     ],
 )
-def test_gen_cal_sky_errors(fixed_obs, zenith_psf_2013_cut, err_type, message, kwargs):
+def test_gen_cal_sky_errors(
+    fixed_obs, gleam_cut_path, zenith_psf_2013_cut, err_type, message, kwargs
+):
     """
     Check that collapsing extended sources is handled properly
     """
     psf = zenith_psf_2013_cut
     obs = fixed_obs
-    catalog_path = fetch_data("gleam_rlb2019_cut")
 
-    kwargs_use = {"obs": obs, "psf": psf, "catalog_path": catalog_path}
+    kwargs_use = {"obs": obs, "psf": psf, "catalog_path": gleam_cut_path}
 
     if kwargs is None:
-        sky = SkyModel.from_file(catalog_path)
+        sky = SkyModel.from_file(gleam_cut_path)
         sky.at_frequencies(np.atleast_1d(obs["freq_center"]) * units.Hz)
         kwargs = {"skymodel": sky, "catalog_path": None}
 

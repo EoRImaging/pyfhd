@@ -13,6 +13,22 @@ from pyfhd.source_modeling.source_utils import source_dft
 
 
 @pytest.fixture(scope="session")
+def gleam_cut_path():
+
+    catalog_path = fetch_data("gleam_rlb2019_cut")
+
+    yield catalog_path
+
+
+@pytest.fixture(scope="session")
+def mwa_aee_beam_files():
+    mwa_aee_jfile = uvdata_fetch("mwa_jmatrix")
+    mwa_aee_zfile = uvdata_fetch("mwa_zmatrix")
+
+    yield {"uvbeam_file_path": mwa_aee_jfile, "uvbeam_zfile_path": mwa_aee_zfile}
+
+
+@pytest.fixture(scope="session")
 def zenith_obs_2013_main():
 
     obs_file = fetch_data("2013_zenith_obs_2times")
@@ -69,11 +85,10 @@ def zenith_psf_2013_cut():
 
 
 @pytest.fixture(scope="session")
-def mwa_aee_beam_zenith_2013(zenith_obs_2013_main, tmp_path_factory):
+def mwa_aee_beam_zenith_2013(
+    zenith_obs_2013_main, mwa_aee_beam_files, tmp_path_factory
+):
     obs = copy.deepcopy(zenith_obs_2013_main)
-
-    mwa_aee_jfile = uvdata_fetch("mwa_jmatrix")
-    mwa_aee_zfile = uvdata_fetch("mwa_zmatrix")
 
     # set obs freq_array to match uvbeam freq_array
     freqs = np.array([1.6512e08, 1.8048e08])
@@ -92,8 +107,6 @@ def mwa_aee_beam_zenith_2013(zenith_obs_2013_main, tmp_path_factory):
         "psf_dim": 14,
         "psf_resolution": 10,
         "beam_mask_threshold": 1e2,
-        "uvbeam_file_path": mwa_aee_jfile,
-        "uvbeam_zfile_path": mwa_aee_zfile,
         "interpolate_kernel": False,
         "beam_offset_time": None,
         "analytic_beam_yaml": None,
@@ -107,6 +120,8 @@ def mwa_aee_beam_zenith_2013(zenith_obs_2013_main, tmp_path_factory):
         "memory_threshold": 1e10,
         "save_beam": False,
     }
+
+    pyfhd_config.update(mwa_aee_beam_files)
 
     psf, antenna = create_psf(obs, pyfhd_config)
 

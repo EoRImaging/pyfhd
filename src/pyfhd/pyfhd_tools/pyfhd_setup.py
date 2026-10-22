@@ -12,7 +12,9 @@ from pathlib import Path
 
 import configargparse
 import importlib_resources
+import numpy as np
 import yaml
+from pyuvdata.analytic_beam import AnalyticBeam  # noqa
 
 from pyfhd.io.pyfhd_io import checkpoint_complete
 
@@ -450,7 +452,6 @@ def pyfhd_parser():
         "--instrument",
         type=str,
         default="mwa",
-        choices=["mwa", "ovro-lwa", "hera", "other"],
         help="Set the instrument used for the FHD run.",
     )
     instrument.add_argument(
@@ -1637,18 +1638,13 @@ def write_collated_yaml_config(
                         outfile.write(line)
                 else:
                     basic_write = False
-                    try:
-                        from pyuvdata.analytic_beam import AnalyticBeam
-
-                        if isinstance(pyfhd_config[key], AnalyticBeam):
-                            yaml_beam_repr = yaml.safe_dump(
-                                pyfhd_config[key], default_flow_style=False
-                            )
-                            yaml_beam_repr = "\n  ".join(yaml_beam_repr.split("\n"))
-                            outfile.write(f'{yaml_key} : "{yaml_beam_repr}"\n')
-                        else:
-                            basic_write = True
-                    except ImportError:
+                    if isinstance(pyfhd_config[key], AnalyticBeam):
+                        yaml_beam_repr = yaml.safe_dump(
+                            pyfhd_config[key], default_flow_style=False
+                        )
+                        yaml_beam_repr = "\n  ".join(yaml_beam_repr.split("\n"))
+                        outfile.write(f'{yaml_key} : "{yaml_beam_repr}"\n')
+                    else:
                         basic_write = True
 
                     if basic_write:
@@ -1824,7 +1820,7 @@ def recalculate_flow(pyfhd_config: dict) -> dict:
         if pyfhd_config["calibrate_visibilities"]:
             pyfhd_config["recalculate_cal"] = True
             if pyfhd_config["cal_model_file_path"] is None:
-                pyfhd_config["recalculate_cal_model_vis"]
+                pyfhd_config["recalculate_cal_model_vis"] = True
         if not pyfhd_config["cal_stop"]:
             pyfhd_config["recalculate_grid"] = True
             if pyfhd_config["snapshot_healpix_export"]:
@@ -1832,7 +1828,8 @@ def recalculate_flow(pyfhd_config: dict) -> dict:
         # add recalculate_mapfn logic & need_mapfn when deconvolution exists
 
     if (
-        pyfhd_config["recalculate_beam"]
+        not pyfhd_config["recalculate_cal_model_vis"]
+        and pyfhd_config["recalculate_beam"]
         and pyfhd_config["calibrate_visibilities"]
         and pyfhd_config["cal_model_file_path"] is None
     ):
@@ -1851,16 +1848,21 @@ def recalculate_flow(pyfhd_config: dict) -> dict:
         pyfhd_config["recalculate_cal_model_vis"] = True
 
     if (
-        pyfhd_config["recalculate_cal_model_vis"]
+        not pyfhd_config["recalculate_cal"]
+        and pyfhd_config["recalculate_cal_model_vis"]
         and pyfhd_config["calibrate_visibilities"]
     ):
         pyfhd_config["recalculate_cal"] = True
 
     if (
-        pyfhd_config["recalculate_beam"]
-        or pyfhd_config["recalculate_cal_model_vis"]
-        or pyfhd_config["recalculate_cal"]
-    ) and not pyfhd_config["cal_stop"]:
+        (
+            pyfhd_config["recalculate_beam"]
+            or pyfhd_config["recalculate_cal_model_vis"]
+            or pyfhd_config["recalculate_cal"]
+        )
+        and not pyfhd_config["recalculate_grid"]
+        and not pyfhd_config["cal_stop"]
+    ):
         pyfhd_config["recalculate_grid"] = True
 
         if pyfhd_config["snapshot_healpix_export"]:
@@ -2263,14 +2265,8 @@ def pyfhd_setup(pyfhd_config: dict, run_time: float, output_dir_exists: bool) ->
         temp = "\n".join(temp.split(" "))
         temp = temp.replace(":", ": ")
         temp = temp.replace("-", "- ")
-        try:
-            from pyuvdata.analytic_beam import AnalyticBeam  # noqa
 
-            pyfhd_config["analytic_beam_yaml"] = yaml.safe_load(temp)
-        except ImportError as ie:
-            raise ImportError(
-                "pyuvdata must be installed to use analytic beams"
-            ) from ie
+        pyfhd_config["analytic_beam_yaml"] = yaml.safe_load(temp)
 
     if (
         pyfhd_config["saved_beam_file_path"] is None
@@ -2322,7 +2318,7 @@ def pyfhd_setup(pyfhd_config: dict, run_time: float, output_dir_exists: bool) ->
         pyfhd_config["cal_reflection_hyperresolve"]
         and pyfhd_config["cal_reflection_mode_file"]
     ):
-        logging.warning(
+        warnings.warn(
             "cal_reflection_hyperresolve and cal_reflection_mode_file have both "
             "been turned on, cal_reflection_mode_file will be prioritised."
         )
@@ -2330,25 +2326,19 @@ def pyfhd_setup(pyfhd_config: dict, run_time: float, output_dir_exists: bool) ->
 
     # cal_reflection_mode_theory and cal_reflection_mode_delay cannot be on at
     # the same time, prioritise mode_theory (Warning)
-    logic_test = (
-        1
-        if pyfhd_config["cal_reflection_mode_file"]
-        else (
-            0 + 1
-            if pyfhd_config["cal_reflection_mode_delay"]
-            else 0 + 1
-            if pyfhd_config["cal_reflection_mode_theory"]
-            else 0
-        )
-    )
-    if logic_test > 1:
+    cal_mode_options = [
+        pyfhd_config["cal_reflection_mode_file"],
+        pyfhd_config["cal_reflection_mode_delay"],
+        bool(pyfhd_config["cal_reflection_mode_theory"]),
+    ]
+
+    if np.sum(cal_mode_options) > 1:
         warnings.warn(
             "More than one nominal mode-fitting procedure specified for "
             "calibration reflection fits, prioritising cal_reflection_mode_theory"
         )
         pyfhd_config["cal_reflection_mode_file"] = False
         pyfhd_config["cal_reflection_mode_delay"] = False
-        pyfhd_config["cal_reflection_mode_theory"] = True
 
     # cal_adaptive_calibration_gain impacts cal_base_gain if cal_base_gain isn't set
     if pyfhd_config["cal_base_gain"] is None:
