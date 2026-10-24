@@ -71,6 +71,29 @@ from pyfhd.pyfhd_tools.pyfhd_setup import (
                 "dirty_flag": False,
             },
         ),
+        (
+            "1.0.3.dev386+gf6e2026ac.dependabot.uv.virtualenv-21.14.13",
+            {
+                "tag": "1.0.3",
+                "commit": "f6e2026ac",
+                "commit_str": "f6e2026ac (branch: dependabot.uv.virtualenv-21.14.13)",
+                "branch": "dependabot.uv.virtualenv-21.14.13",
+                "dirty_flag": False,
+            },
+        ),
+        (
+            "1.0.3.dev386+gf6e2026ac.dependabot.uv.virtualenv-21.14.13.dirty",
+            {
+                "tag": "1.0.3",
+                "commit": "f6e2026ac",
+                "commit_str": (
+                    "f6e2026ac (branch: dependabot.uv.virtualenv-21.14.13) "
+                    "DIRTY (uncommitted changes)"
+                ),
+                "branch": "dependabot.uv.virtualenv-21.14.13",
+                "dirty_flag": True,
+            },
+        ),
     ],
 )
 def test_git_info(git_string, output_dict):

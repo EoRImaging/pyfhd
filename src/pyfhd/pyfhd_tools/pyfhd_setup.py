@@ -154,18 +154,14 @@ def git_info(version_str: str | None = None):
             commit_part = part_num
             commit = part.split("+g")[-1]
             break
-    branch_part = commit_part + 1
-    branch_flag = False
+
+    branch = None
     if not dirty_flag:
         if len(parts) > commit_part + 1:
-            branch_flag = True
+            branch = ".".join(parts[commit_part + 1 :])
     else:
         if len(parts) > commit_part + 2:
-            branch_flag = True
-    if branch_flag:
-        branch = parts[branch_part]
-    else:
-        branch = None
+            branch = ".".join(parts[commit_part + 1 : -1])
 
     commit_str = f"{commit}"
     if branch is not None:
