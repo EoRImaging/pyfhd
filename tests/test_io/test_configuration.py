@@ -1,3 +1,4 @@
+import logging
 import sys
 import time
 
@@ -168,6 +169,32 @@ def test_git_info(git_string, output_dict):
             [],
         ),
         (
+            ["--recalculate-all", "--cal-stop", "--no-snapshot-healpix-export"],
+            {
+                "recalculate_all": True,
+                "recalculate_beam": True,
+                "recalculate_cal": True,
+                "recalculate_grid": False,
+                "recalculate_healpix": False,
+                "snapshot_healpix_export": False,
+                "need_cal_vis": False,
+                "need_beam": False,
+                "need_raw_vis": True,
+                "model_exists": True,
+                "need_model_vis": True,
+            },
+            False,
+            ["The output dir"],
+            ["output_dir"],
+        ),
+        (
+            ["--description", "null"],
+            {"recalculate_all": True},
+            False,
+            ["The output dir"],
+            ["output_dir"],
+        ),
+        (
             ["--snapshot-healpix-export", "--no-save-visibilities"],
             {
                 "recalculate_all": True,
@@ -182,6 +209,8 @@ def test_git_info(git_string, output_dict):
             ],
             [],
         ),
+        (["--antenna-size", "3"], {"antenna_size": 3}, False, [], []),
+        (["--cal-base-gain", "0.5"], {"cal_base_gain": 0.5}, False, [], []),
         (
             ["--beam-offset-time", "-3"],
             {"beam_offset_time": 0},
@@ -241,6 +270,18 @@ def test_git_info(git_string, output_dict):
                 "Both uvbeam_file_path and analytic_beam_yaml are set. Using "
                 "uvbeam_file_path."
             ],
+            [],
+        ),
+        (
+            [
+                "--saved-beam-file-path",
+                "null",
+                "--uvbeam-file-path",
+                "mwa_aee_beam_files",
+            ],
+            {"saved_beam_file_path": None},
+            False,
+            [],
             [],
         ),
         (
@@ -557,11 +598,21 @@ def test_configuration(
     namespace = configargparser.parse_args()
     pyfhd_config = vars(namespace)
 
-    if (
-        "--cal-model-file-path" in options
-        and str(pyfhd_config["cal_model_file_path"]) == "null"
-    ):
-        pyfhd_config["cal_model_file_path"] = None
+    run_time = time.localtime()
+    config["log_time"] = time.strftime("%Y_%m_%d_%H_%M_%S", run_time)
+
+    null_options = ["cal_model_file_path", "saved_beam_file_path", "description"]
+    for key in null_options:
+        if str(pyfhd_config[key]) == "null":
+            pyfhd_config[key] = None
+
+    if pyfhd_config["description"] is None:
+        config["log_name"] = "pyfhd_" + config["log_time"]
+        config["output_dir"] = tmp_path / ("pyfhd_" + config["log_time"])
+    else:
+        config["output_dir"] = tmp_path / (
+            "pyfhd_" + pyfhd_config["description"].replace(" ", "_")
+        )
 
     if (
         "--calibration-catalog-file-path" in options
@@ -570,17 +621,15 @@ def test_configuration(
         pyfhd_config["calibration_catalog_file_path"] = gleam_cut_path
 
     if (
-        "--saved-beam-file-path" in options
-        and str(pyfhd_config["saved_beam_file_path"]) == "null"
-    ):
-        pyfhd_config["saved_beam_file_path"] = None
-    if (
         "--uvbeam-file-path" in options
         and str(pyfhd_config["uvbeam_file_path"]) == "mwa_aee_beam_files"
     ):
         pyfhd_config.update(mwa_aee_beam_files)
 
-    run_time = time.localtime()
+    if "output_dir" in make_files:
+        setup_directory(pyfhd_config, run_time)
+        make_files.remove("output_dir")
+
     pyfhd_config, output_dir_exists = setup_directory(pyfhd_config, run_time)
 
     for file in make_files:
@@ -616,3 +665,112 @@ def test_configuration(
 
     for key, value in config.items():
         assert pyfhd_config[key] == value
+
+
+@pytest.mark.github_actions
+@pytest.mark.parametrize(
+    ("options", "err_msgs"),
+    [
+        (
+            ["--saved-beam-file-path", "null", "--uvbeam-file-path", "foo"],
+            [
+                "uvbeam_file_path has been enabled with a path that doesn't exist, "
+                "check the path."
+            ],
+        ),
+        (["--psf-dim", "13"], ["If set, psf-dim must be a multiple of 2."]),
+        (
+            ["--input-path", "foo"],
+            [
+                "foo doesn't exist, please check your input path",
+                "1088285600.uvfits doesn't exist, please check your input path",
+                "1088285600.metafits doesn't exist, please check your input path",
+            ],
+        ),
+        (
+            ["--saved-beam-file-path", "null", "--uvbeam-zfile-path", "foo"],
+            [
+                "uvbeam_zfile_path is set but uvbeam_file_path is not. Please "
+                "specify a uvbeam_file_path.",
+                "UVBeam z file foo does not exist, please check your input path",
+                "No beam file, uvbeam file or analytic beam was set.",
+            ],
+        ),
+        (
+            ["--cal-model-file-path", "null"],
+            [
+                "If calibrating, one of model_file_path, calibration_catalog_file_path "
+                "or transfer_calibration must be set."
+            ],
+        ),
+        (
+            ["--transfer-calibration", "foo"],
+            [
+                "transfer_calibration has been enabled with a path that doesn't "
+                "exist, check the path.",
+                "transfer_calibration is not yet implemented.",
+            ],
+        ),
+        (
+            ["--healpix-inds", "foo"],
+            [
+                "healpix_inds has been enabled with a path that doesn't exist, "
+                "check the path."
+            ],
+        ),
+        (
+            ["--cal-model-file-type", "sav"],
+            [
+                "You selected the model-file-path and sav, but pyfhd can't find "
+                "the sav file for the model params",
+                "You are missing some required files to read in the model "
+                "visibilities from sav files",
+            ],
+        ),
+    ],
+)
+def test_config_errors(tmp_path, caplog, mwa_aee_beam_files, options, err_msgs):
+    sys.argv = [
+        "pyfhd",
+        "--config",
+        str(
+            importlib_resources.files("pyfhd").joinpath(
+                "resources/1088285600_example/1088285600_example.yaml"
+            )
+        ),
+        "--silent",
+        "--no-log-file",
+        "1088285600",
+        "--output-path",
+        str(tmp_path),
+        "--recalculate-all",
+    ] + options
+
+    # Initialize the configuration parser
+    configargparser = pyfhd_parser()
+    namespace = configargparser.parse_args()
+    pyfhd_config = vars(namespace)
+
+    run_time = time.localtime()
+    pyfhd_config, output_dir_exists = setup_directory(pyfhd_config, run_time)
+
+    null_options = ["cal_model_file_path", "saved_beam_file_path", "description"]
+    for key in null_options:
+        if str(pyfhd_config[key]) == "null":
+            pyfhd_config[key] = None
+
+    if (
+        "--uvbeam-file-path" in options
+        and str(pyfhd_config["uvbeam_file_path"]) == "mwa_aee_beam_files"
+    ):
+        pyfhd_config.update(mwa_aee_beam_files)
+
+    with caplog.at_level(logging.ERROR) and pytest.raises(SystemExit):
+        pyfhd_config = pyfhd_setup(pyfhd_config, run_time, output_dir_exists)
+    for msg in err_msgs:
+        assert msg in caplog.text
+    exit_err_msg = (
+        f"{len(err_msgs)} errors detected, check the log above to see the errors, "
+        "stopping pyfhd now"
+    )
+    assert exit_err_msg in caplog.text

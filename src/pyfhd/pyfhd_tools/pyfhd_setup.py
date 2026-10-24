@@ -2270,6 +2270,7 @@ def pyfhd_setup(pyfhd_config: dict, run_time: float, output_dir_exists: bool) ->
         and pyfhd_config["analytic_beam_yaml"] is None
     ):
         logger.error("No beam file, uvbeam file or analytic beam was set.")
+        n_errors += 1
 
     # cal_bp_transfer when enabled should point to a file with a saved bandpass (Error)
     n_errors += _check_file_exists(pyfhd_config, "cal_bp_transfer")
@@ -2397,7 +2398,7 @@ def pyfhd_setup(pyfhd_config: dict, run_time: float, output_dir_exists: bool) ->
                 file_path for file_path in files_in_model_path if regex.match(file_path)
             ]
             if len(matching_files) <= 2:
-                n_errors + 1
+                n_errors += 1
                 logger.error(
                     "You are missing some required files to read in the model "
                     "visibilities from sav files, here is the list of found sav files: "
