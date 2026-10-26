@@ -173,3 +173,63 @@ def test_vis_degrid_zenith_2013(
     assert abs_diff.max() < 0.5
     assert rel_diff[mean_nonzero].mean() < 0.1
     assert rel_diff.max() < 2
+
+
+@pytest.mark.github_actions
+@pytest.mark.parametrize("pol_i", [0, 1])
+def test_vis_degrid_ones(mwa_aee_beam_zenith_2013, zenith_params_2013, pol_i):
+    """Test that degridding a uv plane of all ones gives visibilities close to 1."""
+    _, psf, obs, pyfhd_config = mwa_aee_beam_zenith_2013
+    params = zenith_params_2013
+
+    pyfhd_config_use = copy.deepcopy(pyfhd_config)
+    pyfhd_config_use["conserve_memory"] = True
+    pyfhd_config_use["memory_threshold"] = 1e10
+    vis_ones = visibility_degrid(
+        image_uv=np.ones((obs["dimension"], obs["elements"]), dtype=complex),
+        vis_weights=None,
+        obs=obs,
+        psf=psf,
+        params=params,
+        pyfhd_config=pyfhd_config_use,
+        polarization=pol_i,
+        fill_model_visibilities=True,
+    )
+
+    # There are some long baseline visibilities which end up as zeros
+    wh_nonzero = np.nonzero(vis_ones)
+
+    # np.min(np.abs(vis_ones[wh_nonzero])): np.float64(0.9936304519463216)
+    # np.max(np.abs(vis_ones[wh_nonzero])): np.float64(1.003107355148317)
+    # np.min(np.abs(vis_ones[wh_nonzero] - 1)): np.float64(0.0007558655791102952)
+    # np.max(np.abs(vis_ones[wh_nonzero] -1 )): np.float64(0.006411859080975993)
+
+    # Running the same thing in FHD results in:
+    # minmax abs(vis_ones): 0.99631601572369954       1.0022820234298810
+    # minmax abs(vis_ones - 1): 2.5749374514175653e-05    0.0036839853799395107
+
+    # I believe the deviation from 1 is due to the discretization and grid
+    # offsets. The discrepancy is of a similar magnitude to what is seen in FHD.
+    # The normalization is done on the highly overresolved beam in uv space. The
+    # kernels are extracted from this highly overresolved uv beam as a set of
+    # points spaced on the uv pixel spacing with various sub-uv pixel offsets
+    # from the center of the beam. These kernels are saved as a lookup table
+    # (the "beam_ptr" in the psf dictionary). These kernels are not individually
+    # renormalized so the sum over the kernels is not precisely 1, which I believe
+    # leads to the difference from one after degridding. I think this is likely
+    # deliberate because renormalizing each kernel independently could lead to
+    # jitter in the response of a baseline to a portion of the uv plane as the
+    # baseline moves smoothly in frequency or time, but this tradeoff could be
+    # investigated further in future.
+
+    npt.assert_allclose(vis_ones[wh_nonzero], 1.0, atol=7e-3, rtol=0)
+    npt.assert_allclose(np.abs(vis_ones[wh_nonzero]), 1.0, atol=7e-3, rtol=0)
+
+    fhd_vis_ones_file = fetch_data("2013_zenith_ones_model_vis_2freq")
+    fhd_vis_ones_dict = get_savs(fhd_vis_ones_file, "")
+    fhd_vis_ones = (fhd_vis_ones_dict["vis_ones"].T)[pol_i]
+
+    # fhd & pyfhd are slighly closer to each other than to exactly one, but they
+    # are using somewhat different kernels here, so this level of difference
+    # isn't too surprising.
+    npt.assert_allclose(vis_ones, fhd_vis_ones, atol=5e-3, rtol=0)
