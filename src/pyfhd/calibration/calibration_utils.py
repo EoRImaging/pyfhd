@@ -571,7 +571,8 @@ def transfer_bandpass(obs: dict, cal: dict, pyfhd_config: dict) -> tuple[dict, d
                 }
                 obs_pointing = None
                 for pointing, pattern in delay_patterns.items():
-                    if np.array_equal(obs["delays"], pattern):
+                    # delays are stored per feed, all feeds share the pattern
+                    if np.all(np.asarray(obs["delays"]) == np.asarray(pattern)):
                         obs_pointing = pointing
                 if obs_pointing is None:
                     raise RuntimeWarning(
