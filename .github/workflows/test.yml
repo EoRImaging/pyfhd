@@ -105,13 +105,13 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Download unit test report
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: unit-test-report
           path: reports
 
       - name: Download coverage HTML report
-        uses: actions/download-artifact@v7
+        uses: actions/download-artifact@v8
         with:
           name: coverage-html-report
           path: reports/coverage_html_report
