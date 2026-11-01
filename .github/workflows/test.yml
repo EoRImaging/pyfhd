@@ -41,7 +41,7 @@ jobs:
 
       - name: Cache test data
         id: cache-test-data
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: src/pyfhd/resources/test_data/pyfhd_test_data.zip
           key: test-data-${{ hashFiles('**/pyfhd_test_data.zip') }}
