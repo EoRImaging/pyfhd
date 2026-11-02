@@ -84,14 +84,14 @@ jobs:
 
       - name: Upload Unit Test HTML Report
         if: (matrix.os == 'ubuntu-latest' && matrix.python-version == '3.13' && matrix.uv-options == '--frozen')
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: unit-test-report
           path: pyfhd_report.html
 
       - name: Upload Coverage HTML Report Directory
         if: (matrix.os == 'ubuntu-latest' && matrix.python-version == '3.13' && matrix.uv-options == '--frozen')
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-html-report
           path: coverage_html_report/
