@@ -12,8 +12,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.12", "3.13"]
-        os: [ubuntu-latest, macos-latest] #, windows-latest] add back after healpy replaced
+        python-version: ["3.11", "3.12", "3.13", "3.14"]
+        os: [ubuntu-latest, macos-latest, windows-latest]
         uv-options: ["--frozen"]
         include:
           - uv-options: "--upgrade"
@@ -50,8 +50,7 @@ jobs:
       - name: Download the test data from Zenodo
         if: steps.cache-test-data.outputs.cache-hit != 'true'
         run: |
-          wget -O src/pyfhd/resources/test_data/pyfhd_test_data.zip https://zenodo.org/records/15687722/files/pyfhd_test_data.zip?download=1
-
+          curl https://zenodo.org/records/15687722/files/pyfhd_test_data.zip?download=1 -o src/pyfhd/resources/test_data/pyfhd_test_data.zip
       - name: Unzip the test data
         run: |
           unzip src/pyfhd/resources/test_data/pyfhd_test_data.zip -d src/pyfhd/resources/test_data
