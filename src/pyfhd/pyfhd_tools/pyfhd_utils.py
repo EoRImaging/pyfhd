@@ -1724,7 +1724,10 @@ def spectral_window(
         Length of window function.
     window_type : str
         Window function type. One of: Hann, Hamming, Blackman, Nutall, Blackman-Nutall,
-        Blackman-Harris, Blackman-Harris^2, Kaiser3, Tukey.
+        Blackman-Harris, Blackman-Harris^2, Blackman-Harris 7-term, Kaiser3, Tukey.
+        Blackman-Harris 7-term is the 7-term minimum sidelobe cosine-sum window from
+        Albrecht (2001), "Tailoring of minimum sidelobe cosine-sum windows for
+        high-resolution measurements".
     fractional_size : float
 
     Returns
@@ -1742,6 +1745,7 @@ def spectral_window(
         "Blackman-Nutall",
         "Blackman-Harris",
         "Blackman-Harris^2",
+        "Blackman-Harris 7-term",
         "Kaiser3",
         "Tukey",
     ]
@@ -1798,7 +1802,25 @@ def spectral_window(
                 - 0.48829 * cos_term1
                 + 0.14128 * cos_term2
                 - 0.01168 * cos_term3
-            ) ^ 2.0
+            ) ** 2.0
+        case "Blackman-Harris 7-term":
+            coefficients = np.array(
+                [
+                    0.27105140069342,
+                    0.43329793923448,
+                    0.21812299954311,
+                    0.06592544638803,
+                    0.01081174209837,
+                    0.00077658482522,
+                    0.00001388721735,
+                ]
+            )
+            k = np.arange(coefficients.size)
+            # (n_terms, n_use) cosine terms with alternating signs
+            cos_terms = (-1.0) ** k[:, np.newaxis] * np.cos(
+                2.0 * np.pi * k[:, np.newaxis] * np.arange(n_use) / (n_use - 1)
+            )
+            window = coefficients @ cos_terms
         case "Kaiser3":
             window = special.iv(
                 0,
