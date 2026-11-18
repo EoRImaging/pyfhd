@@ -275,6 +275,33 @@ def create_obs(
     return obs
 
 
+def metafits_delays(delays: str, n_feeds: int = 2) -> np.ndarray:
+    """
+    Convert the DELAYS keyword from a metafits header into a per-feed delay array.
+
+    The metafits file stores a single set of beamformer delays (one per dipole)
+    which applies to both feeds (X and Y) of each MWA tile. The delays are
+    repeated per feed (not per instrumental polarization, as the cross
+    polarizations do not have their own dipoles), giving the (n_feeds, n_dipoles)
+    shape expected by pyuvdata's MWA beam.
+
+    Parameters
+    ----------
+    delays : str
+        The comma separated DELAYS value from the metafits header.
+    n_feeds : int, optional
+        The number of feeds per tile, by default 2.
+
+    Returns
+    -------
+    np.ndarray
+        Integer delays with shape (n_feeds, n_dipoles), with every row equal to
+        the metafits delays.
+    """
+    delays = np.asarray(delays.split(","), dtype=np.int64)
+    return np.tile(delays, (n_feeds, 1))
+
+
 def read_metafits(
     obs: dict, pyfhd_header: dict, params: dict, pyfhd_config: dict, layout: dict
 ) -> dict:
@@ -339,13 +366,7 @@ def read_metafits(
         meta["phasera"] = hdr["RAPHASE"]
         meta["phasedec"] = hdr["DECPHASE"]
         meta["time_res"] = hdr["INTTIME"]
-        delays = hdr["DELAYS"].split(",")
-        # TODO: fix for n_pol > 2. See https://github.com/EoRImaging/pyfhd/issues/173
-        meta["delays"] = (
-            np.asarray(delays, np.int64)
-            .repeat(obs["n_pol"])
-            .reshape((obs["n_pol"], len(delays)))
-        )
+        meta["delays"] = metafits_delays(hdr["DELAYS"])
     else:
         logger.warning(
             "METAFITS file has not been found, Calculating obs meta settings "

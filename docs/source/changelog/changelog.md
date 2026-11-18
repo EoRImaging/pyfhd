@@ -60,6 +60,9 @@ the new `analytic-beam-yaml` option to configure them.
 * Added handling for `~` in paths in config yamls.
 
 ### Bug Fixes
+* Fixed the shape and ordering of the metafits delays in `obs["delays"]`. They
+are now repeated per feed (shape `(2, 16)`) instead of per polarization, which
+broke for `n_pol=4` and also interleaved the delays for non-zenith pointings.
 * Fixed a bug where the uv weights FITS files had all the polarizations saved
 in all the files rather than just the named polarization in each file.
 * Fixed a bug in `filter_uv_uniform` that caused errors if the optional vis_count
