@@ -58,8 +58,12 @@ in pyuvdata.UVBeam and just called directly.
 * Analytic beams (subclassed from pyuvdata.AnalyticBeam) are now supported. Use
 the new `analytic-beam-yaml` option to configure them.
 * Added handling for `~` in paths in config yamls.
+* Added a 7-term Blackman-Harris window (`Blackman-Harris 7-term`) to
+`pyfhd_tools.pyfhd_utils.spectral_window`.
 
 ### Bug Fixes
+* Fixed a bug in `spectral_window` where the `Blackman-Harris^2` window raised
+a TypeError because it used `^` (bitwise XOR) instead of `**`.
 * Fixed a bug where the uv weights FITS files had all the polarizations saved
 in all the files rather than just the named polarization in each file.
 * Fixed a bug in `filter_uv_uniform` that caused errors if the optional vis_count
