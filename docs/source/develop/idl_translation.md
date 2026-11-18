@@ -50,9 +50,10 @@ that is possible. `coyote` does much of the graphical heavy lifting in `FHD`, fo
 any plots inside of `pyfhd`, the plotting/imaging libraries `matplotlib`,
 `seaborn`, `plotly`, `Pillow` and `OpenCV` should get you what you need to make
 almost any visualization you wish to make (`plotly` is excellent when you need
-interactivity). For `HEALPix` you have the `healpy` library maintained by the
-same organization, so functions should have similar names and similar purposes
-without any translation needed.
+interactivity). For `HEALPix` you have the `astropy_healpix` library. We use this
+rather than `healpy` which is the python library that is most equivalent to the
+IDL `HEALPIX` library because the `healpy` license is incompatible with our `MIT`
+license.
 
 ## The Right Tools for the Right Job
 
